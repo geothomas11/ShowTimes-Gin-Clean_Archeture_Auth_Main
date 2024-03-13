@@ -1,8 +1,13 @@
 package di
 
 import (
+	http "ShowTimes/pkg/api"
+	"ShowTimes/pkg/api/handler"
 	"ShowTimes/pkg/config"
-	"net/http"
+	"ShowTimes/pkg/db"
+	"ShowTimes/pkg/helper"
+	"ShowTimes/pkg/repository"
+	"ShowTimes/pkg/usecase"
 
 	"github.com/google/wire"
 )
@@ -10,7 +15,7 @@ import (
 func InitializeAPI(cfg config.Config) (*http.ServerHTTP, error) {
 	wire.Build(
 
-		db.ConnectDatabase,
+		db.ConectDatabse,
 
 		repository.NewUserRepository,
 		repository.NewAdminRepository,
