@@ -40,7 +40,7 @@ func (ad *AdminHandler) LoginHandler(c *gin.Context) {
 	c.Set("Access", admin.AccessToken)
 	c.Set("Refresh", admin.RefreshToken)
 
-	succesResp := response.ClientResponse(http.StatusOK, "login Successfully", admin, err.Error())
+	succesResp := response.ClientResponse(http.StatusOK, "login Successfully", admin, nil)
 	c.JSON(http.StatusOK, succesResp)
 }
 func (ad *AdminHandler) ValidateRefreshTokenAndCreateNewAccess(c *gin.Context) {
@@ -66,7 +66,7 @@ func (ad *AdminHandler) ValidateRefreshTokenAndCreateNewAccess(c *gin.Context) {
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
 	newAccessToken, err := token.SignedString([]byte("accesssecret"))
 	if err != nil {
-		c.AbortWithError(500, errors.New("Error in creating New Access Token"))
+		c.AbortWithError(500, errors.New("error in creating new access token"))
 	}
 	c.JSON(200, newAccessToken)
 }

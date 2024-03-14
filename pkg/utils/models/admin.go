@@ -2,7 +2,7 @@ package models
 
 type AdminLogin struct {
 	Email    string `json:"email,omitempty" validateP:"required"`
-	Password string `json:"password" validate"min=8,max=20"`
+	Password string `json:"password" validate:"min=8,max=20"`
 }
 
 type AdminDetailsResponse struct {

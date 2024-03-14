@@ -9,7 +9,7 @@ import (
 
 func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler) {
 	engine.POST("/signup", userHandler.UserSignUp)
-	engine.POST("/login", userHandler.UserSignUp)
+	engine.POST("/login", userHandler.LoginHandler)
 
 	engine.Use(middleware.UserAuthMiddleware)
 	{

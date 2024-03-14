@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 )
 
 type UserHandler struct {
@@ -46,14 +46,17 @@ func (u *UserHandler) UserSignUp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
+
 	//USING BUSINESS LOGINC INSIDE THIS FUNCTION
 	userCreated, err := u.userUseCase.UserSignUp(user)
 	if err != nil {
 		errResp := response.ClientResponse(http.StatusBadRequest, "user could not signed up", nil, err.Error())
-		c.JSON(http.StatusCreated, errResp)
+		c.JSON(http.StatusBadRequest, errResp)
+		return
 	}
-	successResp := response.ClientResponse(http.StatusCreated, "User signed Up successfully", userCreated, nil)
-	c.JSON(http.StatusBadRequest, successResp)
+
+	successResp := response.ClientResponse(http.StatusOK, "User signed Up successfully", userCreated, nil)
+	c.JSON(http.StatusOK, successResp)
 }
 
 func (u *UserHandler) LoginHandler(c *gin.Context) {
@@ -70,7 +73,13 @@ func (u *UserHandler) LoginHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
-	successResp := response.ClientResponse(http.StatusOK, "user signed successfully", nil, err.Error())
+	user_details, err := u.userUseCase.LoginHandler(user)
+	if err != nil {
+		errResp := response.ClientResponse(http.StatusBadRequest, "user could not be logged in", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errResp)
+		return
+	}
+	successResp := response.ClientResponse(http.StatusOK, "user signed successfully", user_details, nil)
 	c.JSON(http.StatusOK, successResp)
 
 }

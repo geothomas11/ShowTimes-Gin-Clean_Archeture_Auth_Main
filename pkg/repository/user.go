@@ -45,7 +45,7 @@ and
 blocked =false`, user.Email).Scan(&user_details).Error
 
 	if err != nil {
-		return models.UserSignInResponse{}, errors.New("Error checking user details")
+		return models.UserSignInResponse{}, errors.New("error checking user details")
 
 	}
 	return user_details, nil
@@ -53,7 +53,7 @@ blocked =false`, user.Email).Scan(&user_details).Error
 
 func (cr *userDatabase) UserBlockStatus(email string) (bool, error) {
 	var isBlocked bool
-	err := cr.DB.Raw("select blocked from users email = ?", email).Scan(&isBlocked).Error
+	err := cr.DB.Raw("select blocked from users where email = ?", email).Scan(&isBlocked).Error
 	if err != nil {
 		return false, err
 	}

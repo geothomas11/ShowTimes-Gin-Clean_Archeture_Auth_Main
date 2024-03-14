@@ -28,13 +28,15 @@ var InternalError = "Internal Server Error"
 var ErrorHashingPassword = "Error In hashiing Password"
 
 func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, error) {
+
 	userExist := u.userRepo.CheckUserAvialiablity(user.Email)
 	if userExist {
-		return models.TokenUsers{}, errors.New("password does not match")
+		return models.TokenUsers{}, errors.New("user already exist, sign in")
 	}
 	if user.Password != user.ConfirmPassword {
 		return models.TokenUsers{}, errors.New("password does not match")
 	}
+
 	hashedPassword, err := u.helper.PasswordHashing(user.Password)
 	if err != nil {
 		return models.TokenUsers{}, errors.New("error hashing password")
@@ -42,7 +44,7 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 	user.Password = hashedPassword
 	userData, err := u.userRepo.UserSignup(user)
 	if err != nil {
-		return models.TokenUsers{}, errors.New("could not create tokens")
+		return models.TokenUsers{}, err
 	}
 	tokenString, err := u.helper.GenerateTokenClents(userData)
 	if err != nil {
@@ -54,10 +56,11 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 	}, nil
 
 }
+
 func (u *userUseCase) LoginHandler(user models.UserLogin) (models.TokenUsers, error) {
 	ok := u.userRepo.CheckUserAvialiablity(user.Email)
 	if !ok {
-		return models.TokenUsers{}, errors.New("the user dos not exist")
+		return models.TokenUsers{}, errors.New("the user do not exist")
 	}
 
 	isBlocked, err := u.userRepo.UserBlockStatus(user.Email)
@@ -69,8 +72,14 @@ func (u *userUseCase) LoginHandler(user models.UserLogin) (models.TokenUsers, er
 	}
 	user_details, err := u.userRepo.FindUserByEmail(user)
 	if err != nil {
-		return models.TokenUsers{}, errors.New("Password is not correct")
+		return models.TokenUsers{}, errors.New("password is not correct")
 	}
+	err = u.helper.CompareHashAndPassword(user_details.Password, user.Password)
+
+	if err != nil {
+		return models.TokenUsers{}, errors.New("password incorrect")
+	}
+
 	var userDetails models.UserDetailsResponse
 
 	userDetails.Id = int(user_details.Id)
