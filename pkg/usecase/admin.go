@@ -5,6 +5,7 @@ import (
 	interfaces_helper "ShowTimes/pkg/helper/interface"
 	interfaces_repo "ShowTimes/pkg/repository/interfaces"
 	interfaces "ShowTimes/pkg/usecase/interface"
+	"errors"
 
 	"ShowTimes/pkg/utils/models"
 
@@ -49,5 +50,58 @@ func (ad *adminUseCase) LoginHandler(adminDetails models.AdminLogin) (domain.Tok
 		AccessToken:  access,
 		RefreshToken: refresh,
 	}, nil
+
+}
+func (ad *adminUseCase) BlockUser(id string) error {
+
+	user, err := ad.adminRepository.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+
+	if user.Blocked {
+		return errors.New("already blocked")
+	} else {
+		user.Blocked = true
+	}
+
+	err = ad.adminRepository.UpdateBlockUserByID(user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (ad *adminUseCase) UnBlockUser(id string) error {
+
+	user, err := ad.adminRepository.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+
+	if user.Blocked {
+		user.Blocked = false
+	} else {
+		return errors.New("already unblocked")
+	}
+
+	err = ad.adminRepository.UpdateBlockUserByID(user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+func (ad *adminUseCase) GetUsers(page int) ([]models.UserDetailsAtAdmin, error) {
+
+	userDetails, err := ad.adminRepository.GetUsers(page)
+	if err != nil {
+		return []models.UserDetailsAtAdmin{}, err
+	}
+
+	return userDetails, nil
 
 }

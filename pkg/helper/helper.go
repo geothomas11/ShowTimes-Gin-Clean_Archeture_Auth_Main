@@ -5,10 +5,13 @@ import (
 	interfaces "ShowTimes/pkg/helper/interface"
 	"ShowTimes/pkg/utils/models"
 	"errors"
+
 	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/jinzhu/copier"
+	"github.com/twilio/twilio-go"
+	twilioApi "github.com/twilio/twilio-go/rest/verify/v2"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -104,4 +107,48 @@ func (h *helper) Copy(udr *models.UserDetailsResponse, usr *models.UserSignInRes
 		return models.UserDetailsResponse{}, err
 	}
 	return *udr, nil
+}
+
+//Setting up Twilio
+
+var client *twilio.RestClient
+
+func (h *helper) TwilioSetup(username string, password string) {
+	client = twilio.NewRestClientWithParams(twilio.ClientParams{
+		Username: username,
+		Password: password,
+	})
+}
+
+func (h *helper) TwilioSendOTP(phone string, serviceID string) (string, error) {
+	to := "+91" + phone
+	params := &twilioApi.CreateVerificationParams{}
+	params.SetTo(to)
+	params.SetChannel("sms")
+
+	resp, err := client.VerifyV2.CreateVerification(serviceID, params)
+	if err != nil {
+		return "", err
+	}
+	return *resp.Sid, nil
+
+}
+
+func (h *helper) TwilioVerifyOTP(serviceID string, code string, phone string) error {
+	to := "+91" + phone
+
+	params := &twilioApi.CreateVerificationCheckParams{}
+	params.SetTo(to)
+	params.SetCode(code)
+
+	resp, err := client.VerifyV2.CreateVerificationCheck(serviceID, params)
+
+	if err != nil {
+
+		return err
+	}
+	if *resp.Status == "approved" {
+		return nil
+	}
+	return errors.New("failed to validate OTP")
 }
