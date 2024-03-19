@@ -61,9 +61,20 @@ func (ad *adminUseCase) LoginHandler(adminDetails models.AdminLogin) (domain.Tok
 }
 func (ad *adminUseCase) BlockUser(id string) error {
 	ID, _ := strconv.Atoi(id)
+	userExist, err := ad.adminRepository.IsUserExist(ID)
+	if err != nil {
+		return err
+	}
+	if !userExist {
+		return errors.New("user not exist")
+	}
+
 	user, err := ad.adminRepository.GetUserByID(ID)
 	if err != nil {
 		return err
+	}
+	if user.IsAdmin {
+		return errors.New("admin's id cannot be blocked")
 	}
 	fmt.Println("id:", ID)
 	fmt.Println("user:", user)

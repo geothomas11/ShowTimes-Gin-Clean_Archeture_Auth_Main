@@ -59,3 +59,13 @@ func (ad *adminRepository) UpdateBlockUserByID(user models.UpdateBlock) error {
 	return nil
 
 }
+func (ad *adminRepository) IsUserExist(id int) (bool, error) {
+
+	var count int
+	err := ad.DB.Raw("select count(*) from users where id = ?", id).Scan(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+
+}
