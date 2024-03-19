@@ -46,7 +46,7 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 	if err != nil {
 		return models.TokenUsers{}, err
 	}
-	tokenString, err := u.helper.GenerateTokenClents(userData)
+	tokenString, err := u.helper.GenerateTokenClients(userData)
 	if err != nil {
 		return models.TokenUsers{}, errors.New("could not create token")
 	}
@@ -87,7 +87,7 @@ func (u *userUseCase) LoginHandler(user models.UserLogin) (models.TokenUsers, er
 	userDetails.Email = user_details.Email
 	userDetails.Phone = user_details.Phone
 
-	tokenString, err := u.helper.GenerateTokenClents(userDetails)
+	tokenString, err := u.helper.GenerateTokenClients(userDetails)
 	if err != nil {
 		return models.TokenUsers{}, errors.New("could not create token")
 	}

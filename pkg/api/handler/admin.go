@@ -34,12 +34,12 @@ func (ad *AdminHandler) LoginHandler(c *gin.Context) {
 	}
 	admin, err := ad.adminUseCase.LoginHandler(adminDetails)
 	if err != nil {
-		errResp := response.ClientResponse(http.StatusBadRequest, "Cannot authenticate user", nil, err.Error())
+		errResp := response.ClientResponse(http.StatusBadRequest, "Cannot authenticate Admin", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
 	c.Set("Access", admin.AccessToken)
-	c.Set("Refresh", admin.RefreshToken)
+	// c.Set("Refresh", admin.RefreshToken)
 
 	succesResp := response.ClientResponse(http.StatusOK, "login Successfully", admin, nil)
 	c.JSON(http.StatusOK, succesResp)

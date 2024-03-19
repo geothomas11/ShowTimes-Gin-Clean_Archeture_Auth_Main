@@ -56,7 +56,7 @@ func (ot *otpUseCase) VerifyOTP(code models.VerifyData) (models.TokenUsers, erro
 	if err != nil {
 		return models.TokenUsers{}, err
 	}
-	tokenString, err := ot.helper.GenerateTokenClents(userDetails)
+	tokenString, err := ot.helper.GenerateTokenClients(userDetails)
 	if err != nil {
 		return models.TokenUsers{}, err
 	}

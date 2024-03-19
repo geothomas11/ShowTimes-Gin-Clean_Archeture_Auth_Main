@@ -17,27 +17,31 @@ func ConectDatabse(cfg config.Config) (*gorm.DB, error) {
 	if err := db.AutoMigrate(&domain.Users{}); err != nil {
 		return db, err
 	}
-	if err := db.AutoMigrate(&domain.Admin{}); err != nil {
-		return db, err
-	}
+	// if err := db.AutoMigrate(&domain.Admin{}); err != nil {
+	// 	return db, err
+	// }
 	CheckAndCreateAdmin(db)
 	return db, dbErr
 }
 
 func CheckAndCreateAdmin(db *gorm.DB) {
 	var count int64
-	db.Model(&domain.Admin{}).Count(&count)
+	db.Model(&domain.Users{}).Count(&count)
 	if count == 0 {
-		password := "12345"
+		password := "admin@123"
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		fmt.Println(hashedPassword)
 		if err != nil {
 			return
 		}
-		admin := domain.Admin{
+		admin := domain.Users{
 			ID:       1,
 			Name:     "Showtimes",
-			Username: "showtimes@showtimes.com",
+			Email:    "showtimes@showtimes.com",
 			Password: string(hashedPassword),
+			Phone:    "7736202090",
+			Blocked:  false,
+			IsAdmin:  true,
 		}
 		db.Create(&admin)
 	}

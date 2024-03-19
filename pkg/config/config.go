@@ -1,8 +1,12 @@
 package config
 
 import (
+	"os"
+
 	"github.com/go-playground/validator"
 	"github.com/spf13/viper"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 type Config struct {
@@ -14,11 +18,23 @@ type Config struct {
 	AUTHTOKEN  string `mapstructure:"DB_AUTHTOKEN"`
 	ACCOUNTSID string `mapstructure:"DB_ACCOUNTSID"`
 	SERVICESID string `mapstructure:"DB_SERVICESID"`
+
+	Admin_AccessKey  string `mapstructure:"AdminAccessKey"`
+	Admin_RefreshKey string `mapstructure:"AdminRefreshKey"`
+
+	User_AccessKey  string `mapstructure:"UserAccessKey"`
+	User_RefreshKey string `mapstructure:"UserRefreshKey"`
 }
 
 var envs = []string{
 	"DB_HOST", "DB_NAME", "DB_USER", "DB_PORT", "DB_PASSWORD",
 }
+
+type ConfigAuth struct {
+	GoogleLoginConfig oauth2.Config
+}
+
+var AppConfig ConfigAuth
 
 func LoadConfig() (Config, error) {
 	var config Config
@@ -40,7 +56,20 @@ func LoadConfig() (Config, error) {
 	if err := validator.New().Struct(&config); err != nil {
 		return config, err
 	}
-
+	GoogleConfig()
 	return config, nil
 
+}
+
+func GoogleConfig() oauth2.Config {
+	AppConfig.GoogleLoginConfig = oauth2.Config{
+		ClientID:     os.Getenv("Auth2ClientID"),
+		ClientSecret: os.Getenv("Auth2ClientSecret"),
+		RedirectURL:  "http://localhost:7000/user/google_callback",
+		Scopes: []string{"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile"},
+		Endpoint: google.Endpoint,
+	}
+
+	return AppConfig.GoogleLoginConfig
 }

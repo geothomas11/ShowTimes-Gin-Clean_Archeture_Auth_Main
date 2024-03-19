@@ -8,6 +8,9 @@ import (
 )
 
 func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otphandler *handler.OtpHandler) {
+	engine.GET("/google_callback", userHandler.GoogleCallback)
+	engine.GET("/google_login", userHandler.Authv2)
+
 	engine.POST("/signup", userHandler.UserSignUp)
 	engine.POST("/login", userHandler.LoginHandler)
 

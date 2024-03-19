@@ -6,6 +6,8 @@ import (
 	interfaces_repo "ShowTimes/pkg/repository/interfaces"
 	interfaces "ShowTimes/pkg/usecase/interface"
 	"errors"
+	"fmt"
+	"strconv"
 
 	"ShowTimes/pkg/utils/models"
 
@@ -29,43 +31,52 @@ func NewAdminUseCase(repo interfaces_repo.AdminRepository, h interfaces_helper.H
 func (ad *adminUseCase) LoginHandler(adminDetails models.AdminLogin) (domain.TokenAdmin, error) {
 	adminCompareDetails, err := ad.adminRepository.LoginHandler(adminDetails)
 	if err != nil {
+		fmt.Println("1")
 		return domain.TokenAdmin{}, err
+
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(adminCompareDetails.Password), []byte(adminDetails.Password))
 
 	if err != nil {
+		fmt.Println("2")
 		return domain.TokenAdmin{}, err
 	}
 	var AdminDetailsResponse models.AdminDetailsResponse
 	err = copier.Copy(&AdminDetailsResponse, &adminCompareDetails)
 	if err != nil {
+		fmt.Println("3")
 		return domain.TokenAdmin{}, err
 	}
-	access, refresh, err := ad.helper.GenerateTokenAdmin(AdminDetailsResponse)
+	access, _, err := ad.helper.GenerateTokenAdmin(AdminDetailsResponse)
 	if err != nil {
+		fmt.Println("4")
 		return domain.TokenAdmin{}, err
 	}
 	return domain.TokenAdmin{
-		Admin:        AdminDetailsResponse,
-		AccessToken:  access,
-		RefreshToken: refresh,
+		Admin:       AdminDetailsResponse,
+		AccessToken: access,
+		// RefreshToken: refresh,
 	}, nil
 
 }
 func (ad *adminUseCase) BlockUser(id string) error {
-
-	user, err := ad.adminRepository.GetUserByID(id)
+	ID, _ := strconv.Atoi(id)
+	user, err := ad.adminRepository.GetUserByID(ID)
 	if err != nil {
 		return err
 	}
+	fmt.Println("id:", ID)
+	fmt.Println("user:", user)
+	var user_Blocked models.UpdateBlock
 
 	if user.Blocked {
 		return errors.New("already blocked")
 	} else {
-		user.Blocked = true
+		user_Blocked.Blocked = true
 	}
+	user_Blocked.ID = int(user.ID)
 
-	err = ad.adminRepository.UpdateBlockUserByID(user)
+	err = ad.adminRepository.UpdateBlockUserByID(user_Blocked)
 	if err != nil {
 		return err
 	}
@@ -75,19 +86,19 @@ func (ad *adminUseCase) BlockUser(id string) error {
 }
 
 func (ad *adminUseCase) UnBlockUser(id string) error {
-
-	user, err := ad.adminRepository.GetUserByID(id)
+	ID, _ := strconv.Atoi(id)
+	user, err := ad.adminRepository.GetUserByID(ID)
 	if err != nil {
 		return err
 	}
-
+	var user_Unblock models.UpdateBlock
 	if user.Blocked {
-		user.Blocked = false
+		user_Unblock.Blocked = false
 	} else {
 		return errors.New("already unblocked")
 	}
-
-	err = ad.adminRepository.UpdateBlockUserByID(user)
+	user_Unblock.ID = int(user.ID)
+	err = ad.adminRepository.UpdateBlockUserByID(user_Unblock)
 	if err != nil {
 		return err
 	}

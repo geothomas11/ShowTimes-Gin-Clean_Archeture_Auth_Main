@@ -17,15 +17,15 @@ func NewAdminRepository(DB *gorm.DB) interfaces.AdminRepository {
 		DB: DB,
 	}
 }
-func (ad *adminRepository) LoginHandler(adminDetails models.AdminLogin) (domain.Admin, error) {
-	var adminCompareDetails domain.Admin
-	if err := ad.DB.Raw("select * from admins where username=?", adminDetails.Email).Scan(&adminCompareDetails).Error; err != nil {
-		return domain.Admin{}, err
+func (ad *adminRepository) LoginHandler(adminDetails models.AdminLogin) (domain.Users, error) {
+	var adminCompareDetails domain.Users
+	if err := ad.DB.Raw("select * from users where email=?", adminDetails.Email).Scan(&adminCompareDetails).Error; err != nil {
+		return domain.Users{}, err
 	}
 	return adminCompareDetails, nil
 
 }
-func (ad *adminRepository) GetUserByID(id string) (domain.Users, error) {
+func (ad *adminRepository) GetUserByID(id int) (domain.Users, error) {
 	var users domain.Users
 	if err := ad.DB.Raw("select * from users where id=?", id).Scan(&users).Error; err != nil {
 		return domain.Users{}, err
@@ -50,7 +50,7 @@ func (ad *adminRepository) GetUsers(page int) ([]models.UserDetailsAtAdmin, erro
 	return Get_Users, nil
 
 }
-func (ad *adminRepository) UpdateBlockUserByID(user domain.Users) error {
+func (ad *adminRepository) UpdateBlockUserByID(user models.UpdateBlock) error {
 
 	err := ad.DB.Exec("update users set blocked = ? where id = ?", user.Blocked, user.ID).Error
 	if err != nil {

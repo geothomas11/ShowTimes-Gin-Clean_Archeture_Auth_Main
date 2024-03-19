@@ -2,9 +2,14 @@ package handler
 
 import (
 	// "ShowTimes/pkg/helper/interfaces"
+	"ShowTimes/pkg/config"
 	interfaces "ShowTimes/pkg/usecase/interface"
 	"ShowTimes/pkg/utils/models"
 	"ShowTimes/pkg/utils/response"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -82,4 +87,59 @@ func (u *UserHandler) LoginHandler(c *gin.Context) {
 	successResp := response.ClientResponse(http.StatusOK, "user signed successfully", user_details, nil)
 	c.JSON(http.StatusOK, successResp)
 
+}
+
+// google outh
+
+func (h *UserHandler) Authv2(c *gin.Context) {
+	url := config.AppConfig.GoogleLoginConfig.AuthCodeURL("randomstate")
+
+	c.Redirect(http.StatusSeeOther, url)
+}
+
+func (h *UserHandler) GoogleCallback(c *gin.Context) {
+	fmt.Println("call back work well ")
+	state := c.Query("state")
+	if state != "randomstate" {
+		c.JSON(http.StatusBadRequest, "state is not matching")
+		return
+	}
+
+	code := c.Query("code")
+
+	googlecon := config.GoogleConfig()
+
+	token, err := googlecon.Exchange(context.Background(), code)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "make code excahnge lead to error")
+		return
+	}
+
+	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "get some access token follow to error")
+		return
+	}
+
+	userData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "fetch user data followt ot error")
+
+		return
+	}
+
+	// fmt.Println("userdata", userData)
+
+	// userDetails := models.UserDetailsGoogleAuth{}
+
+	var userdata models.UserDetails
+
+	json.Unmarshal(userData, &userdata)
+	fmt.Println("userdata", userdata)
+
+	userResponse, err := h.userUseCase.UserSignUp(userdata)
+	if err != nil {
+		c.JSON(400, err)
+	}
+	c.JSON(http.StatusOK, userResponse)
 }

@@ -6,8 +6,8 @@ import (
 )
 
 type AdminRepository interface {
-	LoginHandler(adminDetails models.AdminLogin) (domain.Admin, error)
-	GetUserByID(id string) (domain.Users, error)
-	UpdateBlockUserByID(user domain.Users) error
+	LoginHandler(adminDetails models.AdminLogin) (domain.Users, error)
+	GetUserByID(id int) (domain.Users, error)
+	UpdateBlockUserByID(user models.UpdateBlock) error
 	GetUsers(page int) ([]models.UserDetailsAtAdmin, error)
 }

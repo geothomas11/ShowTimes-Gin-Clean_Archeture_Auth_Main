@@ -52,14 +52,15 @@ func (helper *helper) GenerateTokenAdmin(admin models.AdminDetailsResponse) (str
 			IssuedAt:  time.Now().Unix(),
 		},
 	}
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodPS256, accessTokenClaims)
-	accessTokenString, err := accessToken.SignedString([]byte("accesssecret"))
+	cfg, _ := config.LoadConfig()
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
+	accessTokenString, err := accessToken.SignedString([]byte(cfg.Admin_AccessKey))
 
 	if err != nil {
 		return "", "", err
 	}
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodES256, refreshTokenClaims)
-	refreshTokenString, err := refreshToken.SignedString([]byte("refreshsecret"))
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
+	refreshTokenString, err := refreshToken.SignedString([]byte(cfg.Admin_RefreshKey))
 	if err != nil {
 		return "", "", err
 	}
@@ -67,7 +68,7 @@ func (helper *helper) GenerateTokenAdmin(admin models.AdminDetailsResponse) (str
 	return accessTokenString, refreshTokenString, nil
 }
 
-func (h *helper) GenerateTokenClents(user models.UserDetailsResponse) (string, error) {
+func (h *helper) GenerateTokenClients(user models.UserDetailsResponse) (string, error) {
 	claims := &AuthCoustumClaims{
 		Id:    user.Id,
 		Email: user.Email,
@@ -77,8 +78,9 @@ func (h *helper) GenerateTokenClents(user models.UserDetailsResponse) (string, e
 			IssuedAt:  time.Now().Unix(),
 		},
 	}
+	cfg, _ := config.LoadConfig()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte("showtimes@123"))
+	tokenString, err := token.SignedString([]byte(cfg.User_AccessKey))
 	if err != nil {
 		return "", err
 	}
