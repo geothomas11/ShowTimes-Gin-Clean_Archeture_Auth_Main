@@ -17,6 +17,9 @@ func ConectDatabse(cfg config.Config) (*gorm.DB, error) {
 	if err := db.AutoMigrate(&domain.Users{}); err != nil {
 		return db, err
 	}
+	if err := db.AutoMigrate(&domain.Category{}); err != nil {
+		return db, err
+	}
 	// if err := db.AutoMigrate(&domain.Admin{}); err != nil {
 	// 	return db, err
 	// }

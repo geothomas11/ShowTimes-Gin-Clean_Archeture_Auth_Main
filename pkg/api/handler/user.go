@@ -89,7 +89,7 @@ func (u *UserHandler) LoginHandler(c *gin.Context) {
 
 }
 
-// google outh
+//Google Authentication
 
 func (h *UserHandler) Authv2(c *gin.Context) {
 	url := config.AppConfig.GoogleLoginConfig.AuthCodeURL("randomstate")
