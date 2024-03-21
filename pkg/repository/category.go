@@ -68,10 +68,12 @@ func (cr *categoryRepository) DeleteCategory(categoryID int) error {
 	result := cr.db.Exec("DELETE FROM categories where id=?", categoryID)
 
 	if result.RowsAffected < 1 {
-		return errors.New("now rows with that id exists")
+		return errors.New("no rows with that id exists")
 	}
 	return nil
 }
+
+// CHECKING AND ERROR HANDLING
 func (cr *categoryRepository) IsCategoryExist(category string) (bool, error) {
 	var count int
 	if err := cr.db.Raw("SELECT COUNT(*) FROM categories where category=?", category).Scan(&count).Error; err != nil {
