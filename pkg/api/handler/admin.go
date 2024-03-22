@@ -80,7 +80,7 @@ func (ad *AdminHandler) BlockUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-	successResp := response.ClientResponse(http.StatusOK, "Successfully blocked", nil, nil)
+	successResp := response.ClientResponse(http.StatusOK, "User blocked Successfully ", nil, nil)
 	c.JSON(http.StatusOK, successResp)
 
 }
@@ -94,7 +94,7 @@ func (ad *AdminHandler) UnBlockUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-	successResp := response.ClientResponse(http.StatusOK, "User Blocked Successfully", nil, nil)
+	successResp := response.ClientResponse(http.StatusOK, "User UnBlocked Successfully", nil, nil)
 	c.JSON(http.StatusOK, successResp)
 
 }
