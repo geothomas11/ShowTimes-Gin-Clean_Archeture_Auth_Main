@@ -64,7 +64,7 @@ func (cat *categoryUseCase) UpdateCategory(current string, new string) (domain.C
 func (cat *categoryUseCase) DeleteCategory(categoryID string) error {
 	id, err := strconv.Atoi(categoryID)
 	if err != nil {
-		return errors.New("string conversion invalid")
+		return errors.New("string  conversion invalid")
 	}
 	err = cat.repository.DeleteCategory(id)
 	if err != nil {
