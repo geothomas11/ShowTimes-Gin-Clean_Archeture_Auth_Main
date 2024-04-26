@@ -16,7 +16,7 @@ type InventoryUpdate struct {
 
 type Inventory struct {
 	ID          uint   `json:"id"`
-	CategoryID  int    `json:"catefory_id"`
+	CategoryID  int    `json:"catetory_id"`
 	ProductName string `json:"productname"`
 	Color       string `json:"color"`
 	Stock       int    `json:"stock"`
