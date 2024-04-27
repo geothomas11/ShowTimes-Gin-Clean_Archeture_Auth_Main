@@ -7,7 +7,7 @@ type InventoryUpdate struct {
 
 type Inventory struct {
 	ID          uint     `json:"id" gorm:"primaryKey"`
-	CategoryID  int      `json:"categoy_id"`
+	CategoryID  int      `json:"category_id"`
 	Category    Category `json:"category" gorm:"foreignKey:CategoryID;constraint:OnDelete:CASCADE"`
 	ProductName string   `json:"product_name"`
 	Color       string   `json:"color" gorm:"color:5;default:'Black';Check:color IN ('Black', 'Blue', 'Red', 'Green','RoseGold');"`

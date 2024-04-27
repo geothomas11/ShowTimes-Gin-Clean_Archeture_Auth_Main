@@ -5,6 +5,7 @@ import (
 	interfaces "ShowTimes/pkg/usecase/interface"
 	"ShowTimes/pkg/utils/models"
 	"ShowTimes/pkg/utils/response"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -28,6 +29,7 @@ func (i *InventoryHandler) AddInventory(c *gin.Context) {
 	if err := c.ShouldBindJSON(&inventory); err != nil {
 		errResp := response.ClientResponse(http.StatusBadRequest, "form file error", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
+		fmt.Println("error", err)
 		return
 	}
 	InventoryResponse, err := i.InventoryUseCase.AddInventory(inventory)
@@ -61,7 +63,7 @@ func (i *InventoryHandler) ListProducts(c *gin.Context) {
 		errResp := response.ClientResponse(http.StatusBadRequest, "Product cannot be displayed...", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
 	}
-	message := "Prduct list"
+	message := "Product list"
 
 	successResp := response.ClientResponse(http.StatusOK, message, product_list, nil)
 	c.JSON(http.StatusOK, successResp)

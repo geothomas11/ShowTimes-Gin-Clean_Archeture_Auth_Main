@@ -1,9 +1,9 @@
 package models
 
 type InventoryResponse struct {
-	ProductID   int    `json:"id"`
+	ID          int    `json:"id"`
 	CategoryID  int    `json:"category_id"`
-	ProductName string `json:"productname"`
+	ProductName string `json:"product_name"`
 	Color       string `json:"color"`
 	Stock       int    `json:"stock"`
 	Price       int    `json:"price"`
@@ -21,10 +21,11 @@ type Inventory struct {
 	Color       string `json:"color"`
 	Stock       int    `json:"stock"`
 	Price       int    `json:"price"`
+	
 }
 
 type AddInventories struct {
-	ID          uint    `json:"id"`
+	ID          int     `json:"id"`
 	CategoryID  int     `json:"category_id"`
 	ProductName string  `json:"product_name"`
 	Color       string  `json:"color"`

@@ -30,21 +30,25 @@ func (i *inventoryRepository) AddInventory(inventory models.AddInventories) (mod
 		return models.InventoryResponse{}, errors.New("stock and price cannot be negetive")
 	}
 	query := `
-	INSERT INTO inventories (category_id, product_name,color,stock,price)
-	VALUES(?,?,?,?)
+	INSERT INTO inventories (category_id,product_name,color,stock,price)
+	VALUES(?,?,?,?,?)
 	`
 	err := i.DB.Exec(query, inventory.CategoryID, inventory.ProductName, inventory.Color, inventory.Stock, inventory.Price).Error
 	if err != nil {
 		return models.InventoryResponse{}, err
 	}
 	var inventoryRepository models.InventoryResponse
+	err = i.DB.Raw("SELECT * FROM inventories WHERE category_id =? AND product_name =?", inventory.CategoryID, inventory.ProductName).Scan(&inventoryRepository).Error
+	if err != nil {
+		return models.InventoryResponse{}, err
+	}
 	return inventoryRepository, nil
 }
 
 func (prod *inventoryRepository) ListProducts(pageList, offset int) ([]models.InventoryUserResponse, error) {
 	var product_list []models.InventoryUserResponse
 
-	query := "SELECT i.id,i.category_id,c.category,i.product_name,i.color,i.price FROM i INNER JOIN categories c ON i.category_id = c.id LIMIT $1 OFFSET $2"
+	query := "SELECT i.id,i.category_id,c.category,i.product_name,i.color,i.price FROM inventories AS i INNER JOIN categories c ON i.category_id = c.id LIMIT $1 OFFSET $2"
 	err := prod.DB.Raw(query, pageList, offset).Scan(&product_list).Error
 
 	if err != nil {
@@ -57,7 +61,7 @@ func (prod *inventoryRepository) ListProducts(pageList, offset int) ([]models.In
 func (db *inventoryRepository) EditInventory(inventory domain.Inventory, id int) (domain.Inventory, error) {
 	var modInventory domain.Inventory
 
-	query := "UPDATE inventories SET categories_id =?,product_name = ?, color = ?, stock = ?, price = ? WHERE id = ?"
+	query := "UPDATE inventories SET category_id =?,product_name = ?, color = ?, stock = ?, price = ? WHERE id = ?"
 
 	if err := db.DB.Exec(query, inventory.CategoryID, inventory.ProductName, inventory.Color, inventory.Stock, inventory.Price, id).Error; err != nil {
 		return domain.Inventory{}, err
@@ -73,15 +77,19 @@ func (i *inventoryRepository) DeleteInventory(inventoryID string) error {
 	if err != nil {
 		return errors.New("converting into interger is not happened")
 	}
-	result := i.DB.Raw("DELETE FROM inventories WHERE id=?", id)
+	result := i.DB.Exec("DELETE FROM inventories WHERE id=?", id)
+	// fmt.Println("ID fr repo", id)
+	// fmt.Println("result error", result.Error)
+	// fmt.Println("rows affected", result.RowsAffected)
 	if result.RowsAffected < 1 {
 		return errors.New("no records with that ID exist")
+
 	}
 	return nil
 }
 func (i *inventoryRepository) CheckInventory(pid int) (bool, error) {
 	var k int
-	err := i.DB.Raw("SELECTV COUNT(*) FROM inventories WHERE id=?", pid).Scan(&k).Error
+	err := i.DB.Raw("SELECT COUNT(*) FROM inventories WHERE id=?", pid).Scan(&k).Error
 	if err != nil {
 		return false, err
 	}
@@ -94,22 +102,23 @@ func (i *inventoryRepository) CheckInventory(pid int) (bool, error) {
 func (i *inventoryRepository) UpdateInventory(pid int, stock int) (models.InventoryResponse, error) {
 	//Check the Database Connection
 	if i.DB == nil {
-		return models.InventoryResponse{}, errors.New("Database connection is nil")
+		return models.InventoryResponse{}, errors.New("database connection is nil")
 	}
 
 	//Update the stock
-	if err := i.DB.Exec("UPDATE inventories SET stock +$1 WHERE id= $2", stock, pid).Error; err != nil {
+	if err := i.DB.Exec("UPDATE inventories SET stock=$1 WHERE id= $2", stock, pid).Error; err != nil {
 		return models.InventoryResponse{}, err
 
 	}
 
 	//Retrive the update
 	var newDetails models.InventoryResponse
-	var newStock int
-	if err := i.DB.Raw("SELECT stock FROM inventories WHERE id =? ", pid).Scan(&newStock).Error; err != nil {
+	// var newStock int
+	if err := i.DB.Raw("SELECT * FROM inventories WHERE id =? ", pid).Scan(&newDetails).Error; err != nil {
 		return models.InventoryResponse{}, err
 	}
-	newDetails.ProductID = pid
-	newDetails.Stock = newStock
+	// newDetails.ID = pid
+	// newDetails.Stock = newStock
 	return newDetails, nil
+
 }

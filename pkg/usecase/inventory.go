@@ -3,6 +3,7 @@ package usecase
 import (
 	"ShowTimes/pkg/domain"
 	helper "ShowTimes/pkg/helper/interface"
+	"fmt"
 
 	repo "ShowTimes/pkg/repository/interfaces"
 	"ShowTimes/pkg/utils/models"
@@ -19,7 +20,7 @@ type inventoryUseCase struct {
 func NewInventoryUseCase(rep repo.InventoryRepository, h helper.Helper) usecase.InventoryUseCase {
 	return &inventoryUseCase{
 		repository: rep,
-		helper: h,
+		helper:     h,
 	}
 
 }
@@ -33,7 +34,7 @@ func (i *inventoryUseCase) AddInventory(inventory models.AddInventories) (models
 	return InventoryResponse, nil
 
 }
-func (i *inventoryUseCase) ListProducts(pageNo,pageList int) ([]models.InventoryUserResponse, error) {
+func (i *inventoryUseCase) ListProducts(pageNo, pageList int) ([]models.InventoryUserResponse, error) {
 
 	offSet := (pageNo - 1) * pageList
 	productList, err := i.repository.ListProducts(pageList, offSet)
@@ -56,6 +57,7 @@ func (usecase *inventoryUseCase) DeleteInventory(inventoryID string) error {
 
 	err := usecase.repository.DeleteInventory(inventoryID)
 	if err != nil {
+		fmt.Println("usecase errr", err)
 		return err
 	}
 	return nil
