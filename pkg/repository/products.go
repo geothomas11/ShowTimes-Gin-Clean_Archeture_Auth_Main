@@ -10,74 +10,74 @@ import (
 	"gorm.io/gorm"
 )
 
-type inventoryRepository struct {
+type ProductRepository struct {
 	DB *gorm.DB
 }
 
-func NewInventoryRepository(db *gorm.DB) interfaces.InventoryRepository {
-	return &inventoryRepository{
+func NewInventoryRepository(db *gorm.DB) interfaces.ProductRepository {
+	return &ProductRepository{
 		DB: db,
 	}
 
 }
-func (i *inventoryRepository) AddInventory(inventory models.AddInventories) (models.InventoryResponse, error) {
+func (i *ProductRepository) AddProducts(Product models.AddProducts) (models.ProductResponse, error) {
 	var count int64
-	i.DB.Model(&models.Inventory{}).Where("product_name=? AND category_id =?", inventory.ProductName, inventory.CategoryID).Count(&count)
+	i.DB.Model(&models.Product{}).Where("product_name=? AND category_id =?", Product.ProductName, Product.CategoryID).Count(&count)
 	if count > 0 {
-		return models.InventoryResponse{}, errors.New("product already exist in the database")
+		return models.ProductResponse{}, errors.New("product already exist in the database")
 	}
-	if inventory.Stock < 0 || inventory.Price < 0 {
-		return models.InventoryResponse{}, errors.New("stock and price cannot be negetive")
+	if Product.Stock < 0 || Product.Price < 0 {
+		return models.ProductResponse{}, errors.New("stock and price cannot be negetive")
 	}
 	query := `
-	INSERT INTO inventories (category_id,product_name,color,stock,price)
+	INSERT INTO products (category_id,product_name,color,stock,price)
 	VALUES(?,?,?,?,?)
 	`
-	err := i.DB.Exec(query, inventory.CategoryID, inventory.ProductName, inventory.Color, inventory.Stock, inventory.Price).Error
+	err := i.DB.Exec(query, Product.CategoryID, Product.ProductName, Product.Color, Product.Stock, Product.Price).Error
 	if err != nil {
-		return models.InventoryResponse{}, err
+		return models.ProductResponse{}, err
 	}
-	var inventoryRepository models.InventoryResponse
-	err = i.DB.Raw("SELECT * FROM inventories WHERE category_id =? AND product_name =?", inventory.CategoryID, inventory.ProductName).Scan(&inventoryRepository).Error
+	var inventoryRepository models.ProductResponse
+	err = i.DB.Raw("SELECT * FROM products WHERE category_id =? AND product_name =?", Product.CategoryID, Product.ProductName).Scan(&inventoryRepository).Error
 	if err != nil {
-		return models.InventoryResponse{}, err
+		return models.ProductResponse{}, err
 	}
 	return inventoryRepository, nil
 }
 
-func (prod *inventoryRepository) ListProducts(pageList, offset int) ([]models.InventoryUserResponse, error) {
-	var product_list []models.InventoryUserResponse
+func (prod *ProductRepository) ListProducts(pageList, offset int) ([]models.ProductUserResponse, error) {
+	var product_list []models.ProductUserResponse
 
-	query := "SELECT i.id,i.category_id,c.category,i.product_name,i.color,i.price FROM inventories AS i INNER JOIN categories c ON i.category_id = c.id LIMIT $1 OFFSET $2"
+	query := "SELECT i.id,i.category_id,c.category,i.product_name,i.color,i.price FROM products AS i INNER JOIN categories c ON i.category_id = c.id LIMIT $1 OFFSET $2"
 	err := prod.DB.Raw(query, pageList, offset).Scan(&product_list).Error
 
 	if err != nil {
-		return []models.InventoryUserResponse{}, errors.New("error checking the product details")
+		return []models.ProductUserResponse{}, errors.New("error checking the product details")
 	}
 	return product_list, nil
 
 }
 
-func (db *inventoryRepository) EditInventory(inventory domain.Inventory, id int) (domain.Inventory, error) {
-	var modInventory domain.Inventory
+func (db *ProductRepository) EditProducts(inventory domain.Product, id int) (domain.Product, error) {
+	var modInventory domain.Product
 
-	query := "UPDATE inventories SET category_id =?,product_name = ?, color = ?, stock = ?, price = ? WHERE id = ?"
+	query := "UPDATE products SET category_id =?,product_name = ?, color = ?, stock = ?, price = ? WHERE id = ?"
 
 	if err := db.DB.Exec(query, inventory.CategoryID, inventory.ProductName, inventory.Color, inventory.Stock, inventory.Price, id).Error; err != nil {
-		return domain.Inventory{}, err
+		return domain.Product{}, err
 	}
 	if err := db.DB.First(&modInventory, id).Error; err != nil {
-		return domain.Inventory{}, err
+		return domain.Product{}, err
 	}
 	return modInventory, nil
 }
 
-func (i *inventoryRepository) DeleteInventory(inventoryID string) error {
+func (i *ProductRepository) DeleteProducts(inventoryID string) error {
 	id, err := strconv.Atoi(inventoryID)
 	if err != nil {
 		return errors.New("converting into interger is not happened")
 	}
-	result := i.DB.Exec("DELETE FROM inventories WHERE id=?", id)
+	result := i.DB.Exec("DELETE FROM products WHERE id=?", id)
 	// fmt.Println("ID fr repo", id)
 	// fmt.Println("result error", result.Error)
 	// fmt.Println("rows affected", result.RowsAffected)
@@ -87,9 +87,9 @@ func (i *inventoryRepository) DeleteInventory(inventoryID string) error {
 	}
 	return nil
 }
-func (i *inventoryRepository) CheckInventory(pid int) (bool, error) {
+func (i *ProductRepository) CheckProducts(pid int) (bool, error) {
 	var k int
-	err := i.DB.Raw("SELECT COUNT(*) FROM inventories WHERE id=?", pid).Scan(&k).Error
+	err := i.DB.Raw("SELECT COUNT(*) FROM products WHERE id=?", pid).Scan(&k).Error
 	if err != nil {
 		return false, err
 	}
@@ -99,23 +99,23 @@ func (i *inventoryRepository) CheckInventory(pid int) (bool, error) {
 	return true, err
 }
 
-func (i *inventoryRepository) UpdateInventory(pid int, stock int) (models.InventoryResponse, error) {
+func (i *ProductRepository) UpdateProducts(pid int, stock int) (models.ProductResponse, error) {
 	//Check the Database Connection
 	if i.DB == nil {
-		return models.InventoryResponse{}, errors.New("database connection is nil")
+		return models.ProductResponse{}, errors.New("database connection is nil")
 	}
 
 	//Update the stock
-	if err := i.DB.Exec("UPDATE inventories SET stock=$1 WHERE id= $2", stock, pid).Error; err != nil {
-		return models.InventoryResponse{}, err
+	if err := i.DB.Exec("UPDATE products SET stock=$1 WHERE id= $2", stock, pid).Error; err != nil {
+		return models.ProductResponse{}, err
 
 	}
 
 	//Retrive the update
-	var newDetails models.InventoryResponse
+	var newDetails models.ProductResponse
 	// var newStock int
-	if err := i.DB.Raw("SELECT * FROM inventories WHERE id =? ", pid).Scan(&newDetails).Error; err != nil {
-		return models.InventoryResponse{}, err
+	if err := i.DB.Raw("SELECT * FROM products WHERE id =? ", pid).Scan(&newDetails).Error; err != nil {
+		return models.ProductResponse{}, err
 	}
 	// newDetails.ID = pid
 	// newDetails.Stock = newStock

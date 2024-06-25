@@ -12,50 +12,50 @@ import (
 	usecase "ShowTimes/pkg/usecase/interface"
 )
 
-type inventoryUseCase struct {
-	repository repo.InventoryRepository
+type productUseCase struct {
+	repository repo.ProductRepository
 	helper     helper.Helper
 }
 
-func NewInventoryUseCase(rep repo.InventoryRepository, h helper.Helper) usecase.InventoryUseCase {
-	return &inventoryUseCase{
+func NewInventoryUseCase(rep repo.ProductRepository, h helper.Helper) usecase.ProductUseCase {
+	return &productUseCase{
 		repository: rep,
 		helper:     h,
 	}
 
 }
 
-func (i *inventoryUseCase) AddInventory(inventory models.AddInventories) (models.InventoryResponse, error) {
+func (i *productUseCase) AddProducts(inventory models.AddProducts) (models.ProductResponse, error) {
 
-	InventoryResponse, err := i.repository.AddInventory(inventory)
+	InventoryResponse, err := i.repository.AddProducts(inventory)
 	if err != nil {
-		return models.InventoryResponse{}, err
+		return models.ProductResponse{}, err
 	}
 	return InventoryResponse, nil
 
 }
-func (i *inventoryUseCase) ListProducts(pageNo, pageList int) ([]models.InventoryUserResponse, error) {
+func (i *productUseCase) ListProducts(pageNo, pageList int) ([]models.ProductUserResponse, error) {
 
 	offSet := (pageNo - 1) * pageList
 	productList, err := i.repository.ListProducts(pageList, offSet)
 	if err != nil {
-		return []models.InventoryUserResponse{}, nil
+		return []models.ProductUserResponse{}, nil
 	}
 	return productList, nil
 
 }
 
-func (usecase *inventoryUseCase) EditInventory(inventory domain.Inventory, id int) (domain.Inventory, error) {
-	modInventory, err := usecase.repository.EditInventory(inventory, id)
+func (usecase *productUseCase) EditProducts(inventory domain.Product, id int) (domain.Product, error) {
+	modInventory, err := usecase.repository.EditProducts(inventory, id)
 	if err != nil {
-		return domain.Inventory{}, err
+		return domain.Product{}, err
 	}
 	return modInventory, nil
 }
 
-func (usecase *inventoryUseCase) DeleteInventory(inventoryID string) error {
+func (usecase *productUseCase) DeleteProducts(inventoryID string) error {
 
-	err := usecase.repository.DeleteInventory(inventoryID)
+	err := usecase.repository.DeleteProducts(inventoryID)
 	if err != nil {
 		fmt.Println("usecase errr", err)
 		return err
@@ -63,18 +63,18 @@ func (usecase *inventoryUseCase) DeleteInventory(inventoryID string) error {
 	return nil
 
 }
-func (i inventoryUseCase) UpdateInventory(pid int, stock int) (models.InventoryResponse, error) {
+func (i productUseCase) UpdateProducts(pid int, stock int) (models.ProductResponse, error) {
 
-	result, err := i.repository.CheckInventory(pid)
+	result, err := i.repository.CheckProducts(pid)
 	if err != nil {
-		return models.InventoryResponse{}, err
+		return models.ProductResponse{}, err
 	}
 	if !result {
-		return models.InventoryResponse{}, errors.New("there is no inventory as you mentioned")
+		return models.ProductResponse{}, errors.New("there is no inventory as you mentioned")
 	}
-	newCat, err := i.repository.UpdateInventory(pid, stock)
+	newCat, err := i.repository.UpdateProducts(pid, stock)
 	if err != nil {
-		return models.InventoryResponse{}, err
+		return models.ProductResponse{}, err
 	}
 	return newCat, err
 }

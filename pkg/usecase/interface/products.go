@@ -5,10 +5,10 @@ import (
 	"ShowTimes/pkg/utils/models"
 )
 
-type InventoryUseCase interface {
-	AddInventory(inventory models.AddInventories) (models.InventoryResponse, error)
-	ListProducts(int, int) ([]models.InventoryUserResponse, error)
-	EditInventory(domain.Inventory, int) (domain.Inventory, error)
-	DeleteInventory(id string) error
-	UpdateInventory(poductID int, stock int) (models.InventoryResponse, error)
+type ProductUseCase interface {
+	AddProducts(inventory models.AddProducts) (models.ProductResponse, error)
+	ListProducts(int, int) ([]models.ProductUserResponse, error)
+	EditProducts(domain.Product, int) (domain.Product, error)
+	DeleteProducts(id string) error
+	UpdateProducts(poductID int, stock int) (models.ProductResponse, error)
 }

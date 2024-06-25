@@ -36,7 +36,7 @@ func InitializeAPI(cfg config.Config) (*http.ServerHTTP, error) {
 		handler.NewAdminHandler,
 		handler.NewOtpHandler,
 		handler.NewCategoryHandler,
-		handler.NewInventoryHandler,
+		handler.NewProductHandler,
 
 		helper.NewHelper,
 

@@ -5,11 +5,11 @@ import (
 	"ShowTimes/pkg/utils/models"
 )
 
-type InventoryRepository interface {
-	AddInventory(inventory models.AddInventories) (models.InventoryResponse, error)
-	ListProducts(int, int) ([]models.InventoryUserResponse, error)
-	EditInventory(domain.Inventory, int) (domain.Inventory, error)
-	DeleteInventory(id string) error
-	CheckInventory(p_id int) (bool, error)
-	UpdateInventory(p_id int, stock int) (models.InventoryResponse, error)
+type ProductRepository interface {
+	AddProducts(inventory models.AddProducts) (models.ProductResponse, error)
+	ListProducts(int, int) ([]models.ProductUserResponse, error)
+	EditProducts(domain.Product, int) (domain.Product, error)
+	DeleteProducts(id string) error
+	CheckProducts(p_id int) (bool, error)
+	UpdateProducts(p_id int, stock int) (models.ProductResponse, error)
 }
