@@ -16,7 +16,7 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, Ca
 		{
 			userManagement.PUT("/block", adminHandler.BlockUser)
 			userManagement.PUT("/unblock", adminHandler.UnBlockUser)
-			userManagement.GET("", adminHandler.GetUsers)
+			userManagement.GET("/getusers", adminHandler.GetUsers)
 
 		}
 		categorymanagement := engine.Group("/category")
