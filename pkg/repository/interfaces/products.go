@@ -6,7 +6,7 @@ import (
 )
 
 type ProductRepository interface {
-	AddProducts(inventory models.AddProducts) (models.ProductResponse, error)
+	AddProducts(inventory models.AddProducts, url string) (models.ProductResponse, error)
 	ListProducts(int, int) ([]models.ProductUserResponse, error)
 	EditProducts(domain.Product, int) (domain.Product, error)
 	DeleteProducts(id string) error

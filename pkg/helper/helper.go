@@ -5,9 +5,15 @@ import (
 	interfaces "ShowTimes/pkg/helper/interface"
 	"ShowTimes/pkg/utils/models"
 	"errors"
+	"fmt"
+	"mime/multipart"
 
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/golang-jwt/jwt"
 	"github.com/jinzhu/copier"
 	"github.com/twilio/twilio-go"
@@ -153,4 +159,36 @@ func (h *helper) TwilioVerifyOTP(serviceID string, code string, phone string) er
 		return nil
 	}
 	return errors.New("failed to validate OTP")
+}
+
+func (h *helper) AddImageToAwsS3(file *multipart.FileHeader) (string, error) {
+	f, openErr := file.Open()
+	if openErr != nil {
+		return "", openErr
+	}
+	defer f.Close()
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(h.cfg.AWSRegion),
+		Credentials: credentials.NewStaticCredentials(
+			h.cfg.AWSAccesskeyID,
+			h.cfg.AWSSecretaccesskey,
+			"",
+		),
+	})
+	if err != nil {
+		return "", err
+	}
+	uploader := s3manager.NewUploader(sess)
+	bucketName := "Show-times"
+
+	_, err = uploader.Upload(&s3manager.UploadInput{
+		Body: f,
+	})
+
+	if err != nil {
+		return "", err
+	}
+	url := fmt.Sprintf("https://%s.s3.amazonaws.com/%s", bucketName, file.Filename)
+	return url, nil
+
 }

@@ -10,6 +10,7 @@ import (
 )
 
 type Config struct {
+	//Database info
 	DBHost     string `mapstructure:"DB_HOST"`
 	DBName     string `mapstructure:"DB_NAME"`
 	DBUser     string `mapstructure:"DB_USER"`
@@ -24,10 +25,18 @@ type Config struct {
 
 	User_AccessKey  string `mapstructure:"UserAccessKey"`
 	User_RefreshKey string `mapstructure:"UserRefreshKey"`
+	//AWS S3 bucket
+	AWSRegion          string `mapstructure:"AWSRegion"`
+	AWSAccesskeyID     string `mapstructure:"AWSAccesskeyID"`
+	AWSSecretaccesskey string `mapstructure:"AWSSecretaccesskey"`
 }
 
 var envs = []string{
 	"DB_HOST", "DB_NAME", "DB_USER", "DB_PORT", "DB_PASSWORD",
+	"DB_AUTHTOKEN", "DB_ACCOUNTSID", "DB_SERVICESID",
+	"AdminAccessKey", "AdminRefreshKey",
+	"UserAccessKey", "UserRefreshKey",
+	"AWSRegion", "AWSAccesskeyID", "AWSSecretaccesskey",
 }
 
 type ConfigAuth struct {
@@ -60,6 +69,8 @@ func LoadConfig() (Config, error) {
 	return config, nil
 
 }
+
+//Google loggin config
 
 func GoogleConfig() oauth2.Config {
 	AppConfig.GoogleLoginConfig = oauth2.Config{

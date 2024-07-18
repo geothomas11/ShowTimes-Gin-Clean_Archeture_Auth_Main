@@ -20,7 +20,7 @@ func NewInventoryRepository(db *gorm.DB) interfaces.ProductRepository {
 	}
 
 }
-func (i *ProductRepository) AddProducts(Product models.AddProducts) (models.ProductResponse, error) {
+func (i *ProductRepository) AddProducts(Product models.AddProducts,url string) (models.ProductResponse, error) {
 	var count int64
 	i.DB.Model(&models.Product{}).Where("product_name=? AND category_id =?", Product.ProductName, Product.CategoryID).Count(&count)
 	if count > 0 {

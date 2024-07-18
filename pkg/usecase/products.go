@@ -4,6 +4,7 @@ import (
 	"ShowTimes/pkg/domain"
 	helper "ShowTimes/pkg/helper/interface"
 	"fmt"
+	"mime/multipart"
 
 	repo "ShowTimes/pkg/repository/interfaces"
 	"ShowTimes/pkg/utils/models"
@@ -25,9 +26,9 @@ func NewInventoryUseCase(rep repo.ProductRepository, h helper.Helper) usecase.Pr
 
 }
 
-func (i *productUseCase) AddProducts(inventory models.AddProducts) (models.ProductResponse, error) {
+func (i *productUseCase) AddProducts(inventory models.AddProducts, file *multipart.FileHeader) (models.ProductResponse, error) {
 
-	InventoryResponse, err := i.repository.AddProducts(inventory)
+	InventoryResponse, err := i.repository.AddProducts(inventory, "")
 	if err != nil {
 		return models.ProductResponse{}, err
 	}

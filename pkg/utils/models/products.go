@@ -30,6 +30,7 @@ type AddProducts struct {
 	Color       string  `json:"color"`
 	Stock       int     `json:"stock"`
 	Price       float64 `json:"price"`
+	Image       string  `json:"file"`
 }
 
 type EditProductDetials struct {

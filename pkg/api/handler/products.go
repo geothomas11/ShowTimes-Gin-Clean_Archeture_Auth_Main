@@ -13,34 +13,54 @@ import (
 )
 
 type ProductHandler struct {
-	InventoryUseCase interfaces.ProductUseCase
+	ProductUseCase interfaces.ProductUseCase
 }
 
 func NewProductHandler(usecase interfaces.ProductUseCase) *ProductHandler {
 	return &ProductHandler{
-		InventoryUseCase: usecase,
+		ProductUseCase: usecase,
 	}
 
 }
 
 func (i *ProductHandler) AddProducts(c *gin.Context) {
-	var inventory models.AddProducts
+	var products models.AddProducts
 
-	if err := c.ShouldBindJSON(&inventory); err != nil {
+	if err := c.ShouldBindJSON(&products); err != nil {
 		errResp := response.ClientResponse(http.StatusBadRequest, "form file error", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
 		fmt.Println("error", err)
 		return
 	}
-	InventoryResponse, err := i.InventoryUseCase.AddProducts(inventory)
+	// InventoryResponse, err := i.InventoryUseCase.AddProducts(inventory)
+	// if err != nil {
+	// 	errResp := response.ClientResponse(http.StatusBadRequest, "could not add the inventory", nil, err.Error())
+	// 	c.JSON(http.StatusBadRequest, errResp)
+	// 	return
+	// }
+	// successResp := response.ClientResponse(http.StatusOK, "Successfilly invetory added ", InventoryResponse, nil)
+	// c.JSON(http.StatusOK, successResp)
+	cat := c.PostForm("category_id")
+	products.CategoryID, _ = strconv.Atoi(cat)
+	products.ProductName = c.PostForm("product_name")
+	products.Color = c.PostForm("color")
+	products.Stock, _ = strconv.Atoi(c.PostForm("stock"))
+	products.Price, _ = strconv.ParseFloat(c.PostForm("price"), 64)
+
+	file, err := c.FormFile("image")
 	if err != nil {
-		errResp := response.ClientResponse(http.StatusBadRequest, "could not add the inventory", nil, err.Error())
+		errorResp := response.ClientResponse(http.StatusBadRequest, "retrieving image from the Form error", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorResp)
+		return
+	}
+	ProductResponse, err := i.ProductUseCase.AddProducts(products, file)
+	if err != nil {
+		errResp := response.ClientResponse(http.StatusBadRequest, "couldnot add the ", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
-	successResp := response.ClientResponse(http.StatusOK, "Successfilly invetory added ", InventoryResponse, nil)
+	successResp := response.ClientResponse(http.StatusOK, "Successfully added the product", ProductResponse, nil)
 	c.JSON(http.StatusOK, successResp)
-
 }
 
 func (i *ProductHandler) ListProducts(c *gin.Context) {
@@ -57,7 +77,7 @@ func (i *ProductHandler) ListProducts(c *gin.Context) {
 		errResp := response.ClientResponse(http.StatusBadRequest, "Product cannot be displayed..", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
 	}
-	product_list, err := i.InventoryUseCase.ListProducts(pageNoInt, pageListInt)
+	product_list, err := i.ProductUseCase.ListProducts(pageNoInt, pageListInt)
 
 	if err != nil {
 		errResp := response.ClientResponse(http.StatusBadRequest, "Product cannot be displayed...", nil, err.Error())
@@ -86,7 +106,7 @@ func (u *ProductHandler) EditProducts(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
-	modInventory, err := u.InventoryUseCase.EditProducts(inventory, idInt)
+	modInventory, err := u.ProductUseCase.EditProducts(inventory, idInt)
 	if err != nil {
 		errResp := response.ClientResponse(http.StatusBadRequest, "couldnot edit the product", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
@@ -99,7 +119,7 @@ func (u *ProductHandler) EditProducts(c *gin.Context) {
 func (u *ProductHandler) DeleteProducts(c *gin.Context) {
 	inventoryID := c.Query("id")
 
-	err := u.InventoryUseCase.DeleteProducts(inventoryID)
+	err := u.ProductUseCase.DeleteProducts(inventoryID)
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "fields provided in wrong format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
@@ -118,7 +138,7 @@ func (i *ProductHandler) UpdateProducts(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
-	a, err := i.InventoryUseCase.UpdateProducts(p.Productid, p.Stock)
+	a, err := i.ProductUseCase.UpdateProducts(p.Productid, p.Stock)
 	if err != nil {
 		errResp := response.ClientResponse(http.StatusBadRequest, "Coud not update the inventory stock", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
