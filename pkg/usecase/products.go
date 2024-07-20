@@ -26,9 +26,19 @@ func NewInventoryUseCase(rep repo.ProductRepository, h helper.Helper) usecase.Pr
 
 }
 
-func (i *productUseCase) AddProducts(inventory models.AddProducts, file *multipart.FileHeader) (models.ProductResponse, error) {
+func (i *productUseCase) AddProducts(product models.AddProducts, file *multipart.FileHeader) (models.ProductResponse, error) {
 
-	InventoryResponse, err := i.repository.AddProducts(inventory, "")
+	if product.CategoryID < 0 || product.Price < 0 || product.Stock < 0 {
+		err := errors.New("enter valid values")
+		return models.ProductResponse{}, err
+	}
+
+	url, err := i.helper.AddImageToAwsS3(file)
+	if err != nil {
+		return models.ProductResponse{}, err
+	}
+
+	InventoryResponse, err := i.repository.AddProducts(product, url)
 	if err != nil {
 		return models.ProductResponse{}, err
 	}

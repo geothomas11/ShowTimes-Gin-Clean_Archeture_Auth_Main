@@ -36,7 +36,7 @@ var envs = []string{
 	"DB_AUTHTOKEN", "DB_ACCOUNTSID", "DB_SERVICESID",
 	"AdminAccessKey", "AdminRefreshKey",
 	"UserAccessKey", "UserRefreshKey",
-	"AWSRegion", "AWSAccesskeyID", "AWSSecretaccesskey",
+	"AWSRegion", "AWSAccesskeyID", "AWSSecretaccesskey", "BucketName",
 }
 
 type ConfigAuth struct {

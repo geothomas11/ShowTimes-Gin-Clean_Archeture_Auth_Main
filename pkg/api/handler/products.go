@@ -5,7 +5,7 @@ import (
 	interfaces "ShowTimes/pkg/usecase/interface"
 	"ShowTimes/pkg/utils/models"
 	"ShowTimes/pkg/utils/response"
-	"fmt"
+	
 	"net/http"
 	"strconv"
 
@@ -26,12 +26,12 @@ func NewProductHandler(usecase interfaces.ProductUseCase) *ProductHandler {
 func (i *ProductHandler) AddProducts(c *gin.Context) {
 	var products models.AddProducts
 
-	if err := c.ShouldBindJSON(&products); err != nil {
-		errResp := response.ClientResponse(http.StatusBadRequest, "form file error", nil, err.Error())
-		c.JSON(http.StatusBadRequest, errResp)
-		fmt.Println("error", err)
-		return
-	}
+	// if err := c.ShouldBindJSON(&products); err != nil {
+	// 	errResp := response.ClientResponse(http.StatusBadRequest, "form file error", nil, err.Error())
+	// 	c.JSON(http.StatusBadRequest, errResp)
+	// 	fmt.Println("error", err)
+	// 	return
+	// }
 	// InventoryResponse, err := i.InventoryUseCase.AddProducts(inventory)
 	// if err != nil {
 	// 	errResp := response.ClientResponse(http.StatusBadRequest, "could not add the inventory", nil, err.Error())
@@ -71,6 +71,7 @@ func (i *ProductHandler) ListProducts(c *gin.Context) {
 		errResp := response.ClientResponse(http.StatusBadRequest, "Product Cannot be displayed.", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
 		return
+
 	}
 	pageListInt, err := strconv.Atoi(pageList)
 	if err != nil {
