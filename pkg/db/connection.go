@@ -5,7 +5,7 @@ import (
 	"ShowTimes/pkg/domain"
 	"fmt"
 
-	"golang.org/x/crypto/bcrypt"
+	// "golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -26,30 +26,30 @@ func ConectDatabse(cfg config.Config) (*gorm.DB, error) {
 	// if err := db.AutoMigrate(&domain.Admin{}); err != nil {
 	// 	return db, err
 	// }
-	CheckAndCreateAdmin(db)
+	// CheckAndCreateAdmin(db)
 	return db, dbErr
 }
 
-func CheckAndCreateAdmin(db *gorm.DB) {
-	var count int64
-	db.Model(&domain.Users{}).Count(&count)
-	if count == 0 {
-		password := "admin@123"
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		fmt.Println(hashedPassword)
-		if err != nil {
-			return
-		}
-		admin := domain.Users{
-			ID:       1,
-			Name:     "Showtimes",
-			Email:    "showtimes@showtimes.com",
-			Password: string(hashedPassword),
-			Phone:    "1234567890",
-			Blocked:  false,
-			IsAdmin:  true,
-		}
-		db.Create(&admin)
-	}
+// func CheckAndCreateAdmin(db *gorm.DB) {
+// 	var count int64
+// 	db.Model(&domain.Users{}).Count(&count)
+// 	if count == 0 {
+// 		password := "admin@123"
+// 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+// 		fmt.Println(hashedPassword)
+// 		if err != nil {
+// 			return
+// 		}
+// 		admin := domain.Users{
+// 			ID:       1,
+// 			Name:     "Showtimes",
+// 			Email:    "showtimes@showtimes.com",
+// 			Password: string(hashedPassword),
+// 			Phone:    "1234567890",
+// 			Blocked:  false,
+// 			IsAdmin:  true,
+// 		}
+// 		db.Create(&admin)
+// 	}
 
-}
+// }

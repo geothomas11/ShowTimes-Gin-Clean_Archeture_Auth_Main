@@ -20,7 +20,7 @@ func NewInventoryRepository(db *gorm.DB) interfaces.ProductRepository {
 	}
 
 }
-func (i *ProductRepository) AddProducts(Product models.AddProducts,url string) (models.ProductResponse, error) {
+func (i *ProductRepository) AddProducts(Product models.AddProducts, url string) (models.ProductResponse, error) {
 	var count int64
 	i.DB.Model(&models.Product{}).Where("product_name=? AND category_id =?", Product.ProductName, Product.CategoryID).Count(&count)
 	if count > 0 {
@@ -113,12 +113,10 @@ func (i *ProductRepository) UpdateProducts(pid int, stock int) (models.ProductRe
 
 	//Retrive the update
 	var newDetails models.ProductResponse
-	// var newStock int
 	if err := i.DB.Raw("SELECT * FROM products WHERE id =? ", pid).Scan(&newDetails).Error; err != nil {
 		return models.ProductResponse{}, err
 	}
-	// newDetails.ID = pid
-	// newDetails.Stock = newStock
+
 	return newDetails, nil
 
 }

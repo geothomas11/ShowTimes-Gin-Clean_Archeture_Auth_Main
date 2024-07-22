@@ -5,7 +5,7 @@ import (
 	interfaces "ShowTimes/pkg/usecase/interface"
 	"ShowTimes/pkg/utils/models"
 	"ShowTimes/pkg/utils/response"
-	
+
 	"net/http"
 	"strconv"
 
@@ -25,21 +25,6 @@ func NewProductHandler(usecase interfaces.ProductUseCase) *ProductHandler {
 
 func (i *ProductHandler) AddProducts(c *gin.Context) {
 	var products models.AddProducts
-
-	// if err := c.ShouldBindJSON(&products); err != nil {
-	// 	errResp := response.ClientResponse(http.StatusBadRequest, "form file error", nil, err.Error())
-	// 	c.JSON(http.StatusBadRequest, errResp)
-	// 	fmt.Println("error", err)
-	// 	return
-	// }
-	// InventoryResponse, err := i.InventoryUseCase.AddProducts(inventory)
-	// if err != nil {
-	// 	errResp := response.ClientResponse(http.StatusBadRequest, "could not add the inventory", nil, err.Error())
-	// 	c.JSON(http.StatusBadRequest, errResp)
-	// 	return
-	// }
-	// successResp := response.ClientResponse(http.StatusOK, "Successfilly invetory added ", InventoryResponse, nil)
-	// c.JSON(http.StatusOK, successResp)
 	cat := c.PostForm("category_id")
 	products.CategoryID, _ = strconv.Atoi(cat)
 	products.ProductName = c.PostForm("product_name")

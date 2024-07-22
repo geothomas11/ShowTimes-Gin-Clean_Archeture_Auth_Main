@@ -97,3 +97,54 @@ func (u *userUseCase) LoginHandler(user models.UserLogin) (models.TokenUsers, er
 	}, nil
 
 }
+
+func (u *userUseCase) AddAddress(userID int, address models.AddressInfoResponse) (models.AddressInfoResponse, error) {
+
+	phone := u.helper.ValidatePhoneNumber(address.Phone)
+	if !phone {
+		return models.AddressInfoResponse{}, errors.New("invalid phone number")
+	}
+	pin := u.helper.ValidatePin(address.Pin)
+	if !pin {
+		return models.AddressInfoResponse{}, errors.New("invalid pin number")
+	}
+
+	if userID <= 0 {
+		return models.AddressInfoResponse{}, errors.New("invalid user_id")
+	}
+
+	err := u.userRepo.CheckUserById(userID)
+	if !err {
+		return models.AddressInfoResponse{}, errors.New("user does not exist")
+	}
+
+	adrs, errResp := u.userRepo.AddAddress(userID, address)
+	if errResp != nil {
+		return models.AddressInfoResponse{}, errResp
+	}
+	return adrs, nil
+
+}
+
+func (u *userUseCase) ShowUserDetails(userID int) (models.UsersProfileDetails, error) {
+	// if userID <= 0 {
+	// 	return models.UsersProfileDetails{},errors.New("invalid userid error usecase")
+	// }
+	// err := u.userRepo.CheckUserById(userID)
+	// if !err {
+	// 	return models.UsersProfileDetails{},errors.New("user does not exist")
+	// }
+	profile, err := u.userRepo.ShowUserDetails(userID)
+	if err != nil {
+		return models.UsersProfileDetails{}, err
+	}
+	return profile, nil
+}
+
+func (u *userUseCase) GetAllAddress(userID int) ([]models.AddressInfoResponse, error) {
+	address, err := u.userRepo.GetAllAddress(userID)
+	if err != nil {
+		return []models.AddressInfoResponse{}, err
+	}
+	return address, nil
+}

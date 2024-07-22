@@ -60,3 +60,30 @@ type UserDetailsGoogleAuth struct {
 	Password        string `json:"password,omitempty"       validate:"min=4"`
 	ConfirmPassword string `json:"confirmpassword,omitempty" validate:"eqfield=Password"`
 }
+
+
+type AddressInfoResponse struct {
+	Id        uint   `json:"id" gorm:"unique;not null"`
+	Name      string `json:"name" validate:"required"`
+	HouseName string `json:"house_name" validate:"required"`
+	Street    string `json:"street"`
+	City      string `json:"city"`
+	State     string `json:"state" validate:"required"`
+	Phone     string `json:"phone" gorm:"phone,unique"`
+	Pin       string `json:"pin" validate:"required"`
+}
+type AddressInfo struct {
+	Name      string `json:"name" validate:"required"`
+	HouseName string `json:"house_name" validate:"required"`
+	Street    string `json:"street"`
+	City      string `json:"city"`
+	State     string `json:"state" validate:"required"`
+	Pin       string `json:"pin" validate:"required"`
+}
+type UsersProfileDetails struct {
+	ID    uint   `json:"id" gorm:"unique;not null"`
+	Name  string `json:"name" `
+	Email string `json:"email" `
+	Phone string `json:"phone" `
+	// ReferralCode string `json:"referral_code"`
+}

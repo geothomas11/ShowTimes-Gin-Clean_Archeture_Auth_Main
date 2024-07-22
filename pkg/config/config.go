@@ -11,21 +11,18 @@ import (
 
 type Config struct {
 	//Database info
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBName     string `mapstructure:"DB_NAME"`
-	DBUser     string `mapstructure:"DB_USER"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
-	AUTHTOKEN  string `mapstructure:"DB_AUTHTOKEN"`
-	ACCOUNTSID string `mapstructure:"DB_ACCOUNTSID"`
-	SERVICESID string `mapstructure:"DB_SERVICESID"`
-
-	Admin_AccessKey  string `mapstructure:"AdminAccessKey"`
-	Admin_RefreshKey string `mapstructure:"AdminRefreshKey"`
-
-	User_AccessKey  string `mapstructure:"UserAccessKey"`
-	User_RefreshKey string `mapstructure:"UserRefreshKey"`
-	//AWS S3 bucket
+	DBHost             string `mapstructure:"DB_HOST"`
+	DBName             string `mapstructure:"DB_NAME"`
+	DBUser             string `mapstructure:"DB_USER"`
+	DBPort             string `mapstructure:"DB_PORT"`
+	DBPassword         string `mapstructure:"DB_PASSWORD"`
+	AUTHTOKEN          string `mapstructure:"DB_AUTHTOKEN"`
+	ACCOUNTSID         string `mapstructure:"DB_ACCOUNTSID"`
+	SERVICESID         string `mapstructure:"DB_SERVICESID"`
+	Admin_AccessKey    string `mapstructure:"AdminAccessKey"`
+	Admin_RefreshKey   string `mapstructure:"AdminRefreshKey"`
+	User_AccessKey     string `mapstructure:"UserAccessKey"`
+	User_RefreshKey    string `mapstructure:"UserRefreshKey"`
 	AWSRegion          string `mapstructure:"AWSRegion"`
 	AWSAccesskeyID     string `mapstructure:"AWSAccesskeyID"`
 	AWSSecretaccesskey string `mapstructure:"AWSSecretaccesskey"`
@@ -36,7 +33,7 @@ var envs = []string{
 	"DB_AUTHTOKEN", "DB_ACCOUNTSID", "DB_SERVICESID",
 	"AdminAccessKey", "AdminRefreshKey",
 	"UserAccessKey", "UserRefreshKey",
-	"AWSRegion", "AWSAccesskeyID", "AWSSecretaccesskey", "BucketName",
+	"AWSRegion", "AWSAccesskeyID", "AWSSecretaccesskey",
 }
 
 type ConfigAuth struct {

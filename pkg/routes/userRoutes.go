@@ -19,6 +19,12 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpha
 
 	engine.Use(middleware.UserAuthMiddleware)
 	{
+		profile := engine.Group("/profile")
+		{
+			profile.POST("/address", userHandler.AddAddress)
+			profile.GET("", userHandler.ShowUserDetails)
+			profile.GET("/alladdress", userHandler.GetAllAddress)
+		}
 
 	}
 }

@@ -17,4 +17,7 @@ type Helper interface {
 	TwilioVerifyOTP(serviceID string, code string, phone string) error
 
 	AddImageToAwsS3(file *multipart.FileHeader) (string, error)
+
+	ValidatePhoneNumber(phone string) bool
+	ValidatePin(pin string) bool
 }

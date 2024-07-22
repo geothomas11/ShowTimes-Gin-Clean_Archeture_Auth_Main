@@ -3,7 +3,7 @@ package usecase
 import (
 	"ShowTimes/pkg/domain"
 	helper "ShowTimes/pkg/helper/interface"
-	"fmt"
+
 	"mime/multipart"
 
 	repo "ShowTimes/pkg/repository/interfaces"
@@ -68,7 +68,6 @@ func (usecase *productUseCase) DeleteProducts(inventoryID string) error {
 
 	err := usecase.repository.DeleteProducts(inventoryID)
 	if err != nil {
-		fmt.Println("usecase errr", err)
 		return err
 	}
 	return nil

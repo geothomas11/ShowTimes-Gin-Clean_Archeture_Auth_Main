@@ -59,3 +59,53 @@ func (cr *userDatabase) UserBlockStatus(email string) (bool, error) {
 	}
 	return isBlocked, nil
 }
+func (db *userDatabase) CheckIfUserAddress(userID int) bool {
+	var count int
+	qurry := "select count(*) from addresses where user_id = $1"
+	if err := db.DB.Raw(qurry, userID).Scan(&count).Error; err != nil {
+		return false
+	}
+	return true
+
+}
+func (db *userDatabase) CheckUserById(userID int) bool {
+	var count int
+	qurry := "select count(*) from users where id = $1"
+	if err := db.DB.Raw(qurry, userID).Scan(&count).Error; err != nil {
+		return false
+	}
+	return true
+}
+
+func (db *userDatabase) AddAddress(userID int, address models.AddressInfoResponse) (models.AddressInfoResponse, error) {
+
+	querry := "INSERT INTO addresses(user_id,name,house_name,street,city,state,phone,pin) VALUES (?,?,?,?,?,?,?,?)"
+	err := db.DB.Exec(querry, userID, address.Name, address.HouseName, address.Street, address.City, address.State, address.Phone, address.Pin).Error
+	if err != nil {
+		return models.AddressInfoResponse{}, errors.New("could not add address, db error")
+	}
+	return models.AddressInfoResponse{}, nil
+
+}
+
+func (db *userDatabase) ShowUserDetails(userID int) (models.UsersProfileDetails, error) {
+	var userDetails models.UsersProfileDetails
+	query := "SELECT id,name,email,phone from users where id = ?"
+
+	result := db.DB.Raw(query, userID).Scan(&userDetails)
+	if result.Error != nil {
+		return models.UsersProfileDetails{}, result.Error
+	}
+	return userDetails, nil
+
+}
+
+func (db *userDatabase) GetAllAddress(userID int) ([]models.AddressInfoResponse, error) {
+	qurey := "SELECT * from addresses where user_id = ?"
+	var address []models.AddressInfoResponse
+	result := db.DB.Raw(qurey, userID).Scan(&address)
+	if result.Error != nil {
+		return []models.AddressInfoResponse{}, result.Error
+	}
+	return address, nil
+}
