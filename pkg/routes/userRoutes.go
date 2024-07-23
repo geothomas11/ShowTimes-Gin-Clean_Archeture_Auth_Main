@@ -22,7 +22,7 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpha
 		profile := engine.Group("/profile")
 		{
 			profile.POST("/address", userHandler.AddAddress)
-			profile.GET("", userHandler.ShowUserDetails)
+			profile.GET("/showuserdetails", userHandler.ShowUserDetails)
 			profile.GET("/alladdress", userHandler.GetAllAddress)
 		}
 
