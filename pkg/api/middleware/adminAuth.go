@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"ShowTimes/pkg/config"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -15,7 +14,6 @@ func AdminAuthMiddleware(c *gin.Context) {
 	accessToken := c.Request.Header.Get("Authorization")
 
 	accessToken = strings.TrimPrefix(accessToken, "Bearer ")
-	fmt.Println("access token", accessToken)
 	cfg, _ := config.LoadConfig()
 	_, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		return []byte(cfg.Admin_AccessKey), nil

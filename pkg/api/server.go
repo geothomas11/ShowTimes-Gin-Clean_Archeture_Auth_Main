@@ -27,6 +27,6 @@ func NewServerHTTP(adminHandler *handler.AdminHandler, userHandler *handler.User
 func (sh *ServerHTTP) Start() {
 	err := sh.Engine.Run(":7000")
 	if err != nil {
-		log.Fatal("gin engine coud't start")
+		log.Fatal("gin engine coudn't start")
 	}
 }

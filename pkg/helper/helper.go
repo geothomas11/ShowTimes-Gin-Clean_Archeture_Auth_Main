@@ -166,9 +166,11 @@ func (h *helper) TwilioVerifyOTP(serviceID string, code string, phone string) er
 func (h *helper) AddImageToAwsS3(file *multipart.FileHeader) (string, error) {
 	f, openErr := file.Open()
 	if openErr != nil {
+		fmt.Println("Error1", openErr)
 		return "", openErr
 	}
 	defer f.Close()
+
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(h.cfg.AWSRegion),
 		Credentials: credentials.NewStaticCredentials(
@@ -178,21 +180,31 @@ func (h *helper) AddImageToAwsS3(file *multipart.FileHeader) (string, error) {
 		),
 	})
 	if err != nil {
+		fmt.Println("Error 2", err)
 		return "", err
 	}
+
+	fmt.Println("config", h.cfg.AWSRegion)
+	fmt.Println("config", h.cfg.AWSAccesskeyID)
+	fmt.Println("config", h.cfg.AWSSecretaccesskey)
+
 	uploader := s3manager.NewUploader(sess)
-	bucketName := "Show-times"
+	bucketName := "myshowtimes"
+	key := file.Filename // You might want to add a path or unique identifier here
 
 	_, err = uploader.Upload(&s3manager.UploadInput{
-		Body: f,
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(key),
+		Body:   f,
 	})
 
 	if err != nil {
+		fmt.Println("Error3", err)
 		return "", err
 	}
-	url := fmt.Sprintf("https://%s.s3.amazonaws.com/%s", bucketName, file.Filename)
-	return url, nil
 
+	url := fmt.Sprintf("https://%s.s3.amazonaws.com/%s", bucketName, key)
+	return url, nil
 }
 
 func (h *helper) ValidatePhoneNumber(phone string) bool {

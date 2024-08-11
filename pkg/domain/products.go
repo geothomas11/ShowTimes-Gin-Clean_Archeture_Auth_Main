@@ -13,4 +13,5 @@ type Product struct {
 	Color       string   `json:"color" gorm:"color:5;default:'Black';Check:color IN ('Black', 'Blue', 'Red', 'Green','RoseGold','White');"`
 	Stock       int      `json:"stock"`
 	Price       float64  `json:"price"`
+	Url         string   `json:"url"`
 }

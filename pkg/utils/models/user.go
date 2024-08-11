@@ -61,7 +61,6 @@ type UserDetailsGoogleAuth struct {
 	ConfirmPassword string `json:"confirmpassword,omitempty" validate:"eqfield=Password"`
 }
 
-
 type AddressInfoResponse struct {
 	Id        uint   `json:"id" gorm:"unique;not null"`
 	Name      string `json:"name" validate:"required"`

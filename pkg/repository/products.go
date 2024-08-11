@@ -30,10 +30,10 @@ func (i *ProductRepository) AddProducts(Product models.AddProducts, url string) 
 		return models.ProductResponse{}, errors.New("stock and price cannot be negetive")
 	}
 	query := `
-	INSERT INTO products (category_id,product_name,color,stock,price)
-	VALUES(?,?,?,?,?)
+	INSERT INTO products (category_id,product_name,color,stock,price,url)
+	VALUES(?,?,?,?,?,?)
 	`
-	err := i.DB.Exec(query, Product.CategoryID, Product.ProductName, Product.Color, Product.Stock, Product.Price).Error
+	err := i.DB.Exec(query, Product.CategoryID, Product.ProductName, Product.Color, Product.Stock, Product.Price,url).Error
 	if err != nil {
 		return models.ProductResponse{}, err
 	}
@@ -48,7 +48,7 @@ func (i *ProductRepository) AddProducts(Product models.AddProducts, url string) 
 func (prod *ProductRepository) ListProducts(pageList, offset int) ([]models.ProductUserResponse, error) {
 	var product_list []models.ProductUserResponse
 
-	query := "SELECT i.id,i.category_id,c.category,i.product_name,i.color,i.price FROM products AS i INNER JOIN categories c ON i.category_id = c.id LIMIT $1 OFFSET $2"
+	query := "SELECT i.id,i.category_id,c.category,i.product_name,i.color,i.price,i.url FROM products AS i INNER JOIN categories c ON i.category_id = c.id LIMIT $1 OFFSET $2"
 	err := prod.DB.Raw(query, pageList, offset).Scan(&product_list).Error
 
 	if err != nil {

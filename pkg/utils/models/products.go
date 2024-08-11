@@ -7,6 +7,7 @@ type ProductResponse struct {
 	Color       string `json:"color"`
 	Stock       int    `json:"stock"`
 	Price       int    `json:"price"`
+	Url         string `json:"url"`
 }
 
 type ProductUpdate struct {
@@ -47,4 +48,5 @@ type ProductUserResponse struct {
 	ProductName string `json:"productname"`
 	Color       string `json:"color"`
 	Price       int    `json:"price"`
+	Url         string `json:"url"`
 }
