@@ -101,7 +101,7 @@ func (db *userDatabase) ShowUserDetails(userID int) (models.UsersProfileDetails,
 }
 
 func (db *userDatabase) GetAllAddress(userID int) ([]models.AddressInfoResponse, error) {
-	qurey := "SELECT * from addresses where user_id = ?"
+	qurey := "SELECT * from addresses WHERE user_id = ?"
 	var address []models.AddressInfoResponse
 	result := db.DB.Raw(qurey, userID).Scan(&address)
 	if result.Error != nil {
@@ -110,7 +110,7 @@ func (db *userDatabase) GetAllAddress(userID int) ([]models.AddressInfoResponse,
 	return address, nil
 }
 func (db *userDatabase) EditProfile(user models.UsersProfileDetails) (models.UsersProfileDetails, error) {
-	querry := "UPDATE users SET name=?,email=?,phone=?,WHERE id=?"
+	querry := "UPDATE users SET name=?,email=?,phone=? WHERE id=?"
 	err := db.DB.Exec(querry, user.Name, user.Email, user.Phone, user.ID).Error
 	if err != nil {
 		return models.UsersProfileDetails{}, err
@@ -118,3 +118,7 @@ func (db *userDatabase) EditProfile(user models.UsersProfileDetails) (models.Use
 	return user, nil
 
 }
+
+// func (db *userDatabase) ChangePassword(user models.UsersProfileDetails)(models.UsersProfileDetails,error) {
+
+// }

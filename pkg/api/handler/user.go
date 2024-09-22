@@ -235,7 +235,7 @@ func (u *UserHandler) EditProfile(c *gin.Context) {
 		return
 	}
 	if err := c.BindJSON(&details); err != nil {
-		errResp := response.ClientResponse(http.StatusBadRequest, "fields provide in weong format", nil, err)
+		errResp := response.ClientResponse(http.StatusBadRequest, "fields provide in weong format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
@@ -243,11 +243,12 @@ func (u *UserHandler) EditProfile(c *gin.Context) {
 
 	userResp, err := u.userUseCase.EditProfile(details)
 	if err != nil {
-		errResp := response.ClientResponse(http.StatusBadRequest, "cannot update profile", nil, err)
+		fmt.Println("errore", err)
+		errResp := response.ClientResponse(http.StatusBadRequest, "cannot update profile", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
-	successResp := response.ClientResponse(http.StatusOK, "Successfully updated profile", userResp, err)
+	successResp := response.ClientResponse(http.StatusOK, "Successfully updated profile", userResp, nil)
 	c.JSON(http.StatusOK, successResp)
 
 }
