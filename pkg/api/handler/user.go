@@ -144,6 +144,8 @@ func (h *UserHandler) GoogleCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, userResponse)
 }
 
+//Profile Updates
+
 func (u *UserHandler) AddAddress(c *gin.Context) {
 	var address models.AddressInfoResponse
 
@@ -214,4 +216,38 @@ func (u *UserHandler) GetAllAddress(c *gin.Context) {
 	}
 	successResp := response.ClientResponse(http.StatusOK, "Successfully Got All Addresses", userRep, nil)
 	c.JSON(http.StatusOK, successResp)
+}
+
+func (u *UserHandler) EditProfile(c *gin.Context) {
+	var details models.UsersProfileDetails
+
+	userString, er := c.Get("id")
+	if !er {
+		errResp := response.ClientResponse(http.StatusBadRequest, "Failed to get user id", nil, er)
+		c.JSON(http.StatusBadRequest, errResp)
+		return
+
+	}
+	userid, ers := userString.(int)
+	if !ers {
+		errResp := response.ClientResponse(http.StatusBadRequest, "conversion error", nil, ers)
+		c.JSON(http.StatusBadRequest, errResp)
+		return
+	}
+	if err := c.BindJSON(&details); err != nil {
+		errResp := response.ClientResponse(http.StatusBadRequest, "fields provide in weong format", nil, err)
+		c.JSON(http.StatusBadRequest, errResp)
+		return
+	}
+	details.ID = uint(userid)
+
+	userResp, err := u.userUseCase.EditProfile(details)
+	if err != nil {
+		errResp := response.ClientResponse(http.StatusBadRequest, "cannot update profile", nil, err)
+		c.JSON(http.StatusBadRequest, errResp)
+		return
+	}
+	successResp := response.ClientResponse(http.StatusOK, "Successfully updated profile", userResp, err)
+	c.JSON(http.StatusOK, successResp)
+
 }
