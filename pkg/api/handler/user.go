@@ -252,3 +252,35 @@ func (u *UserHandler) EditProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, successResp)
 
 }
+
+func (u *UserHandler) ChangePassword(c *gin.Context) {
+	var change models.ChangePassword
+	userString, er := c.Get("id")
+	if !er {
+		erresp := response.ClientResponse(http.StatusBadRequest, "Failed yo get user id", nil, er)
+		c.JSON(http.StatusBadRequest, erresp)
+		return
+	}
+	userid, ers := userString.(int)
+	if !ers {
+		errResp := response.ClientResponse(http.StatusBadRequest, "conversion error", nil, ers)
+		c.JSON(http.StatusBadRequest, errResp)
+
+	}
+	if err := c.BindJSON(&change); err != nil {
+		errResp := response.ClientResponse(http.StatusBadRequest, "fields provide in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errResp)
+		return
+	}
+	change.UserID = uint(userid)
+
+	err := u.userUseCase.ChangePassword(change)
+	if err != nil {
+		errResp := response.ClientResponse(http.StatusBadRequest, "cannot change password", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errResp)
+		return
+	}
+	successResp := response.ClientResponse(http.StatusOK, "Password changed successfully", nil, nil)
+	c.JSON(http.StatusOK, successResp)
+
+}

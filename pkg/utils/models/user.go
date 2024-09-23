@@ -86,3 +86,9 @@ type UsersProfileDetails struct {
 	Phone string `json:"phone" `
 	// ReferralCode string `json:"referral_code"`
 }
+type ChangePassword struct {
+	UserID          uint   `json:"id"`
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
+	ConfirmPassword string `json:"confirm_password"`
+}

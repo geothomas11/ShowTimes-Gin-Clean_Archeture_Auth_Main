@@ -26,6 +26,7 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpha
 			profile.GET("/showuserdetails", userHandler.ShowUserDetails)
 			profile.GET("/alladdress", userHandler.GetAllAddress)
 			profile.PUT("/editprofile", userHandler.EditProfile)
+			profile.PATCH("/changepassword",userHandler.ChangePassword)
 		}
 
 	}

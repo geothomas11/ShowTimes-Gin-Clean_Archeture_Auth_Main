@@ -10,8 +10,9 @@ type UserRepository interface {
 	AddAddress(userID int, address models.AddressInfoResponse) (models.AddressInfoResponse, error)
 	CheckIfUserAddress(userID int) bool
 	CheckUserById(userID int) bool
-	ShowUserDetails(userID int)(models.UsersProfileDetails,error)
-	GetAllAddress(userID int) ([]models.AddressInfoResponse,error)
+	ShowUserDetails(userID int) (models.UsersProfileDetails, error)
+	GetAllAddress(userID int) ([]models.AddressInfoResponse, error)
 	EditProfile(user models.UsersProfileDetails) (models.UsersProfileDetails, error)
-
+	ChangePassword(userID, Password string) error
+	FindUserById(id string) (models.UserSignInResponse, error)
 }

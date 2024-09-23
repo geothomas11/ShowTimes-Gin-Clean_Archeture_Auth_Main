@@ -38,11 +38,11 @@ func (c *userDatabase) UserSignup(user models.UserDetails) (models.UserDetailsRe
 func (c *userDatabase) FindUserByEmail(user models.UserLogin) (models.UserSignInResponse, error) {
 	var user_details models.UserSignInResponse
 
-	err := c.DB.Raw(`select * from 
+	err := c.DB.Raw(` SELECT * FROM 
 users
-where email=?
+WHERE email = ?
 and
-blocked =false`, user.Email).Scan(&user_details).Error
+blocked = false`, user.Email).Scan(&user_details).Error
 
 	if err != nil {
 		return models.UserSignInResponse{}, errors.New("error checking user details")
@@ -50,6 +50,7 @@ blocked =false`, user.Email).Scan(&user_details).Error
 	}
 	return user_details, nil
 }
+
 
 func (cr *userDatabase) UserBlockStatus(email string) (bool, error) {
 	var isBlocked bool
@@ -75,6 +76,16 @@ func (db *userDatabase) CheckUserById(userID int) bool {
 		return false
 	}
 	return true
+}
+
+func (c *userDatabase) FindUserById(id string) (models.UserSignInResponse, error) {
+	var user_details models.UserSignInResponse
+	err := c.DB.Raw("SELECT * FROM users  WHERE id = ?", id).Scan(&user_details).Error
+	if err != nil {
+		return models.UserSignInResponse{}, errors.New("error in chechking user details")
+	}
+	return user_details, nil
+
 }
 
 func (db *userDatabase) AddAddress(userID int, address models.AddressInfoResponse) (models.AddressInfoResponse, error) {
@@ -119,6 +130,12 @@ func (db *userDatabase) EditProfile(user models.UsersProfileDetails) (models.Use
 
 }
 
-// func (db *userDatabase) ChangePassword(user models.UsersProfileDetails)(models.UsersProfileDetails,error) {
+func (db *userDatabase) ChangePassword(userID, password string) error {
+	query := "UPDATE users SET password = ? where id = ?"
+	err := db.DB.Exec(query, password, userID).Error
+	if err != nil {
+		return err
+	}
+	return nil
 
-// }
+}
