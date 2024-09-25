@@ -33,7 +33,7 @@ func (i *ProductRepository) AddProducts(Product models.AddProducts, url string) 
 	INSERT INTO products (category_id,product_name,color,stock,price,url)
 	VALUES(?,?,?,?,?,?)
 	`
-	err := i.DB.Exec(query, Product.CategoryID, Product.ProductName, Product.Color, Product.Stock, Product.Price,url).Error
+	err := i.DB.Exec(query, Product.CategoryID, Product.ProductName, Product.Color, Product.Stock, Product.Price, url).Error
 	if err != nil {
 		return models.ProductResponse{}, err
 	}
@@ -118,5 +118,29 @@ func (i *ProductRepository) UpdateProducts(pid int, stock int) (models.ProductRe
 	}
 
 	return newDetails, nil
+
+}
+func (cr *ProductRepository) CheckProductAvailable(product_id int) (bool, error) {
+	var count int
+	querry := "SELECT COUNT(*) FROM products where id=?"
+	err := cr.DB.Raw(querry, product_id).Scan(&count).Error
+	if err != nil {
+		return false, errors.New("product does not exist")
+	}
+	if count < 1 {
+		return false, errors.New("product doesnot exist")
+	}
+	return true, nil
+}
+
+func (cr *ProductRepository) GetPriceOfProduct(product_id int) (float64, error) {
+	querry := "SELECT price FROM products where id=?"
+	var price float64
+	err := cr.DB.Raw(querry, product_id).Scan(&price).Error
+
+	if err != nil {
+		return 0, errors.New("error in getting price")
+	}
+	return price, nil
 
 }

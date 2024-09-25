@@ -12,4 +12,6 @@ type ProductRepository interface {
 	DeleteProducts(id string) error
 	CheckProducts(p_id int) (bool, error)
 	UpdateProducts(p_id int, stock int) (models.ProductResponse, error)
+	CheckProductAvailable(product_id int) (bool, error)
+	GetPriceOfProduct(product_id int) (float64, error)
 }
