@@ -21,6 +21,7 @@ func NewCartUseCase(repoc interfaces_repo.CartRepository, repop interfaces_repo.
 }
 
 func (cu *cartUseCase) AddToCart(cart models.AddCart) (models.CartResponse, error) {
+	
 	if cart.ProductID < 1 || cart.UserID < 1 {
 		return models.CartResponse{}, errors.New("invalid product id or user id")
 	}
