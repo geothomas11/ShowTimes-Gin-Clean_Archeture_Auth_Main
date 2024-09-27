@@ -135,3 +135,14 @@ func (cr *CartRepository) GetTotalPrice(userID int) (models.CartTotal, error) {
 	return cartTotal, nil
 
 }
+
+func (cr *CartRepository) UpdateProductQuantityCart(cart models.AddCart) error {
+	query := `UPDATE carts SET quantity =$1,total_price=$1*(selectprice from products where id=$3)`
+
+	err := cr.db.Exec(query, cart.Quantity, cart.UserID, cart.ProductID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+
+}

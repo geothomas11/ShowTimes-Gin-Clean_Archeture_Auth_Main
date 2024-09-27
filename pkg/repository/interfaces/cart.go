@@ -10,5 +10,5 @@ type CartRepository interface {
 	TotalPriceForProductInCart(userID, productID int) (float64, error)
 	DisplayCart(userID int) ([]models.Cart, error)
 	GetTotalPrice(userID int) (models.CartTotal, error)
-	
+	UpdateProductQuantityCart(cart models.AddCart) error
 }
