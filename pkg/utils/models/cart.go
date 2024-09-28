@@ -37,7 +37,11 @@ type GetCart struct {
 }
 
 type AddCart struct {
-	UserID    int     `json:"id"`
-	ProductID int     `json:"product_id"`
-	Quantity  float64 `json:"quantity "`
+	UserID    int `json:"id"`
+	ProductID int `json:"product_id"`
+	Quantity  int `json:"quantity"`
+}
+type RemoveFromCart struct {
+	UserID    int `json:"id"`
+	ProductID int `json:"product_id"`
 }

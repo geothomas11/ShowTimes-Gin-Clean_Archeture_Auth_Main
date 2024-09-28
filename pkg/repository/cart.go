@@ -20,7 +20,7 @@ func NewCartRepository(DB *gorm.DB) interfaces.CartRepository {
 }
 func (cr *CartRepository) AddToCart(userID int, productId int, Quantity int, productprice float64) error {
 
-	query := "INSERT INTO carts (user_id,quantity,total_price) VALUES(?,?,?,?)"
+	query := "INSERT INTO carts (user_id,product_id,quantity,total_price) VALUES(?,?,?,?)"
 
 	if err := cr.db.Exec(query, userID, productId, Quantity, productprice).Error; err != nil {
 		return err
@@ -137,12 +137,35 @@ func (cr *CartRepository) GetTotalPrice(userID int) (models.CartTotal, error) {
 }
 
 func (cr *CartRepository) UpdateProductQuantityCart(cart models.AddCart) error {
-	query := `UPDATE carts SET quantity =$1,total_price=$1*(selectprice from products where id=$3)`
-
+	query := `UPDATE carts
+	 SET quantity = $1, total_price = $1 * (select price from products where id = $3)
+	 WHERE user_id= $2 AND product_id= $3 `
 	err := cr.db.Exec(query, cart.Quantity, cart.UserID, cart.ProductID).Error
 	if err != nil {
 		return err
 	}
 	return nil
 
+}
+
+func (cr *CartRepository) RemoveFromCart(cart models.RemoveFromCart) error {
+	query := `DELETE FROM carts WHERE product_id = ? AND user_id = ?`
+	err := cr.db.Exec(query, cart.ProductID, cart.UserID).Error
+	if err != nil {
+		return errors.New("error at database")
+	}
+	return nil
+
+}
+func (cr *CartRepository) CheckCart(userID int) (bool, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM carts WHERE user_id=?`
+	err := cr.db.Raw(query, userID).Scan(&count).Error
+	if err != nil {
+		return false, errors.New("no cart found")
+	}
+	if count < 0 {
+		return false, errors.New("no cart found")
+	}
+	return true, nil
 }

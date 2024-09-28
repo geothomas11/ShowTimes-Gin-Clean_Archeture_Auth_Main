@@ -113,6 +113,9 @@ func (cu *cartUseCase) ListCartItems(userID int) (models.CartResponse, error) {
 }
 
 func (cu *cartUseCase) UpdateProductQuantityCart(cart models.AddCart) (models.CartResponse, error) {
+	fmt.Println("cart P.id ", cart.ProductID)
+	fmt.Println("cart quant", cart.Quantity)
+	fmt.Println("cart userid", cart.UserID)
 	if cart.Quantity < 1 || cart.ProductID < 1 {
 		return models.CartResponse{}, errors.New("invalid product id or quantity")
 	}
@@ -156,4 +159,35 @@ func (cu *cartUseCase) UpdateProductQuantityCart(cart models.AddCart) (models.Ca
 		TotalPrice: cartTotal.TotalPrice,
 		Cart:       cartDetails,
 	}, nil
+}
+
+func (cu *cartUseCase) RemoveFromCart(cart models.RemoveFromCart) (models.CartResponse, error) {
+
+	if cart.ProductID < 1 {
+		fmt.Println("RFC usr id", cart.UserID)
+		fmt.Println("RFC usc", cart.ProductID)
+		return models.CartResponse{}, errors.New("product id cannot be empty")
+	}
+	err := cu.CartRepository.RemoveFromCart(cart)
+	if err != nil {
+		return models.CartResponse{}, err
+	}
+	is_avialibale, err := cu.CartRepository.CheckCart(cart.UserID)
+	if !is_avialibale {
+		return models.CartResponse{}, err
+	}
+	cartDetails, err := cu.CartRepository.DisplayCart(cart.UserID)
+	if err != nil {
+		return models.CartResponse{}, err
+	}
+	cartTotal, err := cu.CartRepository.GetTotalPrice(cart.UserID)
+	if err != nil {
+		return models.CartResponse{}, err
+	}
+	return models.CartResponse{
+		UserName:   cartTotal.UserName,
+		TotalPrice: cartTotal.TotalPrice,
+		Cart:       cartDetails,
+	}, nil
+
 }

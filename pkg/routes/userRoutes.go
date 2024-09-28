@@ -33,6 +33,7 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpha
 			cart.POST("/addtocart", cartHandler.AddToCart)
 			cart.GET("/listcartitems", cartHandler.ListCartItems)
 			cart.PATCH("/updateproductquantity", cartHandler.UpdateProductQuantityCart)
+			cart.PUT("/removefromcart", cartHandler.RemoveFromCart)
 
 		}
 

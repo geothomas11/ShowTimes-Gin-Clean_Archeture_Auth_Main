@@ -32,6 +32,8 @@ func (ch *CartHandler) AddToCart(c *gin.Context) {
 	}
 
 	if err := c.BindJSON(&cart); err != nil {
+		fmt.Println("json", cart)
+
 		errRes := response.ClientResponse(http.StatusBadRequest, "fields provide in wrong format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
 		return
@@ -43,6 +45,7 @@ func (ch *CartHandler) AddToCart(c *gin.Context) {
 		fmt.Println("err4handler", err)
 		erResp := response.ClientResponse(http.StatusBadRequest, "item cannot added to cart", nil, err.Error())
 		c.JSON(http.StatusBadRequest, erResp)
+	
 		return
 	}
 	successResp := response.ClientResponse(http.StatusOK, "Item successfully added to cart", cartResp, nil)
@@ -83,13 +86,37 @@ func (ch *CartHandler) UpdateProductQuantityCart(c *gin.Context) {
 	}
 	Cart.UserID = userId.(int)
 
-	cartResp,err:=ch.cartUseCase.UpdateProductQuantityCart(Cart)
-	if err!=nil{
-		errRes:=response.ClientResponse(http.StatusBadRequest,"Updation faied",nil,err.Error())
-		c.JSON(http.StatusBadRequest,errRes)
+	cartResp, err := ch.cartUseCase.UpdateProductQuantityCart(Cart)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "Updation faied", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
-	successRes:=response.ClientResponse(http.StatusOK,"Successfully updated",cartResp,nil)
-	c.JSON(http.StatusOK,successRes)
+	successRes := response.ClientResponse(http.StatusOK, "Successfully updated", cartResp, nil)
+	c.JSON(http.StatusOK, successRes)
 
+}
+func (ch *CartHandler) RemoveFromCart(c *gin.Context) {
+	var cart models.RemoveFromCart
+
+	userID, errs := c.Get("id")
+	if !errs {
+		errResp := response.ClientResponse(http.StatusBadRequest, "Cannot update quantity", nil, errors.New("error in getting user id"))
+		c.JSON(http.StatusBadRequest, errResp)
+		return
+	}
+	if err := c.BindJSON(&cart); err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "fields provided in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	cart.UserID = userID.(int)
+	cartResp, err := ch.cartUseCase.RemoveFromCart(cart)
+	if err != nil {
+		errResp := response.ClientResponse(http.StatusBadRequest, "Removing from cart failed", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errResp)
+		return
+	}
+	successResp := response.ClientResponse(http.StatusOK, "Successfully Removed", cartResp, nil)
+	c.JSON(http.StatusOK, successResp)
 }
