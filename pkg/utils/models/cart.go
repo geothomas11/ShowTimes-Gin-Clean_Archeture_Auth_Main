@@ -28,7 +28,7 @@ type GetCartResponse struct {
 	Data []GetCart
 }
 type GetCart struct {
-	ID          int     `json:"id"gorm:"primary;not null"`
+	ID          int     `json:"id" gorm:"primary;not null"`
 	ProductId   int     `json:"product_id"`
 	ProductName string  `json:"product_name"`
 	Product     Product `json:"-" gorm:"foriegenkey:ProductId"`
