@@ -4,6 +4,9 @@ import (
 	repo_interface "ShowTimes/pkg/repository/interfaces"
 	interfaces "ShowTimes/pkg/usecase/interface"
 	"ShowTimes/pkg/utils/models"
+	"errors"
+
+	"github.com/jinzhu/copier"
 )
 
 type orderUseCase struct {
@@ -46,5 +49,54 @@ func (ou *orderUseCase) Checkout(userID int) (models.CheckoutDetails, error) {
 		Cart:                cartItems,
 		Total_Price:         grandTotal.FinalPrice,
 	}, nil
+
+}
+
+func (ou *orderUseCase) OrderItemsFromCart(orderFromCart models.OrderFromCart, userID int) (models.OrderSuccessResponse, error) {
+	var orderBody models.OrderIncoming
+	err := copier.Copy(&orderBody, &orderFromCart)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+	orderBody.UserID = userID
+
+	cartExist, err := ou.cartRepository.CheckCart(userID)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+	if !cartExist {
+		return models.OrderSuccessResponse{}, errors.New("cart empty can't order")
+	}
+
+	addressExist, err := ou.userRepository.AddressExist(orderBody)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+	if !addressExist {
+		return models.OrderSuccessResponse{}, errors.New("address does not exist")
+	}
+	paymentExist, err := ou.paymentRepository.paymentExist(orderBody)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+	if !paymentExist {
+		return models.OrderSuccessResponse{}, errors.New("payment method doesnot exist")
+	}
+	cartItems, err := ou.cartRepository.DisplayCart(orderBody.UserID)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+	total, err := ou.cartRepository.TotalAmountInCart(orderBody.UserID)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+	order_id, err := ou.orderRepository.OrderItems(orderBody, total)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+	if err:=ou.orderRepository.OrderItems(order_id,cartItems);err!=nil{
+		return models.OrderSuccessResponse{},err
+	}
+	orderSuccessResponse,err:=ou.orderRepository.GetBriefOrderDetails()
 
 }

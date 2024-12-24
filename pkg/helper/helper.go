@@ -164,6 +164,7 @@ func (h *helper) TwilioVerifyOTP(serviceID string, code string, phone string) er
 }
 
 // Added AWS S3 bucket
+
 func (h *helper) AddImageToAwsS3(file *multipart.FileHeader) (string, error) {
 	f, openErr := file.Open()
 	if openErr != nil {
@@ -208,6 +209,7 @@ func (h *helper) AddImageToAwsS3(file *multipart.FileHeader) (string, error) {
 	return url, nil
 }
 
+// Vaidation of phoneNumber
 func (h *helper) ValidatePhoneNumber(phone string) bool {
 	phoneNumber := phone
 	pattern := `^\d{10}$`

@@ -13,4 +13,6 @@ type CartRepository interface {
 	UpdateProductQuantityCart(cart models.AddCart) error
 	RemoveFromCart(cart models.RemoveFromCart) error
 	CheckCart(userID int) (bool, error)
+	TotalAmountInCart(userID int) (float64, error)
+	UpdateCartAfterOrder(userID, productID int, quantity float64) error
 }

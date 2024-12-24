@@ -51,7 +51,6 @@ blocked = false`, user.Email).Scan(&user_details).Error
 	return user_details, nil
 }
 
-
 func (cr *userDatabase) UserBlockStatus(email string) (bool, error) {
 	var isBlocked bool
 	err := cr.DB.Raw("select blocked from users where email = ?", email).Scan(&isBlocked).Error
@@ -138,4 +137,12 @@ func (db *userDatabase) ChangePassword(userID, password string) error {
 	}
 	return nil
 
+}
+func (or *userDatabase) AddressExist(orderBody models.OrderIncoming) (bool, error) {
+
+	var count int
+	if err := or.DB.Raw("SELECT COUNT(*) FROM addresses WHERE user_id=? AND id =?", orderBody.UserID, orderBody.AddressID).Scan(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }
