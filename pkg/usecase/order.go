@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"ShowTimes/pkg/domain"
 	repo_interface "ShowTimes/pkg/repository/interfaces"
 	interfaces "ShowTimes/pkg/usecase/interface"
 	"ShowTimes/pkg/utils/models"
@@ -94,9 +95,36 @@ func (ou *orderUseCase) OrderItemsFromCart(orderFromCart models.OrderFromCart, u
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
-	if err:=ou.orderRepository.OrderItems(order_id,cartItems);err!=nil{
-		return models.OrderSuccessResponse{},err
-	}
-	orderSuccessResponse,err:=ou.orderRepository.GetBriefOrderDetails()
 
+	if err := ou.orderRepository.AddOrderProducts(order_id, cartItems); err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+
+	orderSuccessResponse, err := ou.orderRepository.GetBriefOrderDetails(order_id)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+	var orderItemDetails domain.OrderItem
+	for _, c := range cartItems {
+		orderItemDetails.ProductID = c.ProductID
+		orderItemDetails.Quantity = c.Quantity
+		err:=ou.cartRepository.UpdateCartAfterOrder(userID, int(orderItemDetails.ProductID),orderItemDetails.Quantity)
+		if err!=nil{
+			return models.OrderSuccessResponse{},err
+		}
+		
+
+	}
+	return orderSuccessResponse,nil
+
+}
+
+func (ou*orderUseCase)ExecutePurchaseCOD(orderID int)error  {
+	err:=ou.orderRepository.OrderExist(orderID)
+	if err!=nil{
+		return err
+	}
+	shipmentStatus,err:=ou.orderRepository.GetShipmentStatus(orderID)
+	if
+	
 }

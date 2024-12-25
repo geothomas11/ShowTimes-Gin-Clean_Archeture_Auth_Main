@@ -158,3 +158,34 @@ func (or *orderRepository) GetBriefOrderDetails(orderID int) (models.OrderSucces
 	return OrderSuccessResponse, nil
 
 }
+func (or *orderRepository) OrderItems(ob models.OrderIncoming, price float64) (int, error) {
+	var id int
+	query := `
+	INSERT INTO orders  (created_at,user_id,address_id,payment_method_id,final_price) VALUES (NOW(),?,?,?,?) RETURNING id`
+	or.db.Raw(query, ob.UserID, ob.AddressID, ob.PaymentID, price).Scan(&id)
+	return id, nil
+}
+func (or *orderRepository) GetOrderDetails(userId int, page int, count int) ([]models.FullOrderDetails, error) {
+	if page == 0 {
+		page = 1
+	}
+	offset := (page - 1) * count
+	var OrderDetails []models.OrderDetails
+	err := or.db.Raw("SELECT id as order_id,final_price,shipment_status,payment_status FROM orders WHERE user_id = ?LIMIT ? OFFSET ?", userId, count, offset).Scan(&OrderDetails).Error
+
+	if err != nil {
+		return []models.FullOrderDetails{}, err
+
+	}
+
+	var fullOrderDetails []models.FullOrderDetails
+	for _, od := range OrderDetails {
+		var orderProductDetails []models.OrderProductDetails
+		err := or.db.Raw(`SELECT order_items.product_id,products.product_name AS product_name,order_items.quantity,order_items.total_price FROM order_items INNER JOIN products ON order_items.product_id= products.id WHERE order_items.order_id = $1`, od.OrderId).Scan(&orderProductDetails).Error
+		if err != nil {
+			return []models.FullOrderDetails{}, err
+		}
+		fullOrderDetails = append(fullOrderDetails, models.FullOrderDetails{OrderDetails: od, OrderProductDetails: orderProductDetails})
+	}
+	return fullOrderDetails, nil
+}
