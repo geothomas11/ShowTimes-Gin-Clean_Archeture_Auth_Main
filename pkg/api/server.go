@@ -20,7 +20,7 @@ func NewServerHTTP(adminHandler *handler.AdminHandler, userHandler *handler.User
 	engine.GET("/validate_token", adminHandler.ValidateRefreshTokenAndCreateNewAccess)
 
 	routes.UserRoutes(engine.Group("/user"), userHandler, otpHandler, cartHandler, orderHandler)
-	routes.AdminRoutes(engine.Group("/admin"), adminHandler, Categoryhandler, producthandler)
+	routes.AdminRoutes(engine.Group("/admin"), adminHandler, Categoryhandler, producthandler,paymentHandler)
 
 	return &ServerHTTP{Engine: engine}
 }

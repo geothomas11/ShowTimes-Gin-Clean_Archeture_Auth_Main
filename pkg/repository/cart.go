@@ -164,7 +164,7 @@ func (cr *CartRepository) CheckCart(userID int) (bool, error) {
 	if err != nil {
 		return false, errors.New("no cart found")
 	}
-	if count < 0 {
+	if count < 1 {
 		return false, errors.New("no cart found")
 	}
 	return true, nil
