@@ -44,7 +44,7 @@ func (ad *adminRepository) GetUsers(page int) ([]models.UserDetailsAtAdmin, erro
 
 	offset := (page - 1) * 2
 	var Get_Users []models.UserDetailsAtAdmin
-	if err := ad.DB.Raw("select id,name,email,phone,blocked from users limit ? offset ?", 2, offset).Scan(&Get_Users).Error; err != nil {
+	if err := ad.DB.Raw("SELECT id,name,email,phone,blocked FROM users limit ? offset ?", 3, offset).Scan(&Get_Users).Error; err != nil {
 		return []models.UserDetailsAtAdmin{}, err
 	}
 	return Get_Users, nil
