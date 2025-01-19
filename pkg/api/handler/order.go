@@ -72,7 +72,7 @@ func (oh *OrderHandler) OrderItemsFromCart(c *gin.Context) {
 
 }
 
-func (oh *OrderHandler) PlaceOrderCODD(c *gin.Context) {
+func (oh *OrderHandler) PlaceOrderCOD(c *gin.Context) {
 	order_id, err := strconv.Atoi(c.Query("order_id"))
 	if err != nil {
 		errr := response.ClientResponse(http.StatusInternalServerError, "error from orderID", nil, err.Error())
@@ -102,5 +102,39 @@ func (oh *OrderHandler) PlaceOrderCODD(c *gin.Context) {
 		c.JSON(http.StatusOK, successRes)
 
 	}
+
+}
+func (oh *OrderHandler) GetOrderDetails(c *gin.Context) {
+	pagestr := c.DefaultQuery("page", "1")
+	page, err := strconv.Atoi(pagestr)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "Page is not in correct format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	pageSize, err := strconv.Atoi(c.DefaultQuery("count", "10"))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, "page count is not in correct format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	id, errs := c.Get("id")
+	if !errs {
+		if err != nil {
+			err := errors.New("couldn't get id")
+			erorrRes := response.ClientResponse(http.StatusInternalServerError, "Error in getting id", nil, err.Error())
+			c.JSON(http.StatusInternalServerError, erorrRes)
+			return
+		}
+	}
+	UserID := id.(int)
+	OrderDetails, err := oh.orderUseCase.GetOrderDetails(UserID, page, pageSize)
+	if err != nil {
+		erorRes := response.ClientResponse(http.StatusInternalServerError, "could not place the order", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, erorRes)
+		return
+	}
+	successResp := response.ClientResponse(http.StatusOK, "Full order details", OrderDetails, nil)
+	c.JSON(http.StatusOK, successResp)
 
 }
