@@ -40,9 +40,9 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpha
 		Checkout := engine.Group("/orders")
 		{
 			Checkout.GET("/checkout", orderHandler.Checkout)
-			Checkout.POST("Orderitemsfromcart", orderHandler.OrderItemsFromCart)
-			Checkout.POST("/placeorder", orderHandler.PlaceOrderCOD)
-			Checkout.GET("orderdetails", orderHandler.GetOrderDetails)
+			Checkout.POST("/Orderitemsfromcart", orderHandler.OrderItemsFromCart)
+			Checkout.POST("/placeorderincod", orderHandler.PlaceOrderCOD)
+			Checkout.GET("/orderdetails", orderHandler.GetOrderDetails)
 		}
 
 	}
