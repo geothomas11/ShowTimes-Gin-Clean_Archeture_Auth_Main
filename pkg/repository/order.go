@@ -171,7 +171,7 @@ func (or *orderRepository) GetOrderDetails(userId int, page int, count int) ([]m
 	}
 	offset := (page - 1) * count
 	var OrderDetails []models.OrderDetails
-	err := or.db.Raw("SELECT id as order_id,final_price,shipment_status,payment_status FROM orders WHERE user_id = ?LIMIT ? OFFSET ?", userId, count, offset).Scan(&OrderDetails).Error
+	err := or.db.Raw("SELECT id as order_id,final_price,shipment_status,payment_status FROM orders WHERE user_id = ?LIMIT ? OFFSET ? ", userId, count, offset).Scan(&OrderDetails).Error
 
 	if err != nil {
 		return []models.FullOrderDetails{}, err
@@ -188,4 +188,124 @@ func (or *orderRepository) GetOrderDetails(userId int, page int, count int) ([]m
 		fullOrderDetails = append(fullOrderDetails, models.FullOrderDetails{OrderDetails: od, OrderProductDetails: orderProductDetails})
 	}
 	return fullOrderDetails, nil
+}
+func (or *orderRepository) UserOrderRelationship(orderID int, userID int) (int, error) {
+
+	var testUserID int
+	err := or.db.Raw("select user_id from orders where id = ?", orderID).Scan(&testUserID).Error
+	if err != nil {
+		return -1, err
+	}
+	return testUserID, nil
+}
+
+func (or *orderRepository) GetProductDetailsFromOrders(orderID int) ([]models.OrderProducts, error) {
+	var OrderProductDetails []models.OrderProducts
+	if err := or.db.Raw("SELECT product_id,quantity as stock as FROM order_items WHERE order_id = ? ", orderID).Scan(&OrderProductDetails).Error; err != nil {
+		return []models.OrderProducts{}, err
+	}
+	return OrderProductDetails, nil
+}
+
+func (or *orderRepository) CancelOrders(orderID int) error {
+	status := "cancelled"
+	err := or.db.Exec("UPDATE orders SET shipment_status = ?,approval='false' WHERE id = ?", status, orderID).Error
+	if err != nil {
+		return err
+	}
+	var paymentMethod int
+	err = or.db.Raw("SELECT payment_method_id FROM orders WHERE id =?", status, orderID).Error
+	if err != nil {
+		return err
+	}
+	if paymentMethod == 3 || paymentMethod == 2 {
+		err = or.db.Exec("UPDATE orders SET payment_status ='refunded' WHERE id = ?", orderID).Error
+		if err != nil {
+			return err
+		}
+	}
+	if paymentMethod == 1 {
+		err = or.db.Exec("UPDATE orders SET payment_status='cod cancelled' WHERE id =?", orderID).Error
+		if err != nil {
+			return nil
+		}
+	}
+	return nil
+
+}
+
+func (or *orderRepository) ReturnOrderCod(orderID int) error {
+
+	shipStatus := "returned"
+	payStatus := "processing"
+	err := or.db.Exec("UPATE orders SET shipment_status = ?, approval ='false',payment_status = ? WHERE id = ? ", shipStatus, payStatus, orderID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (or *orderRepository) UpdateQuantityOfProduct(orderProducts []models.OrderProducts) error {
+	for _, od := range orderProducts {
+		var quantity int
+		if err := or.db.Raw("SELECT stock FROM products WHERE id = ?", od.ProductId).Scan(&quantity).Error; err != nil {
+			return err
+		}
+		od.Stock += quantity
+		if err := or.db.Exec("UPDATE products SET stock = ? WHERE id = ?", od.Stock, od.ProductId).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+
+}
+func (or *orderRepository) GetAllOrdersAdmin(offset, count int) ([]models.CombinedOrderDetails, error) {
+	var orderDetails []models.CombinedOrderDetails
+	query := `SELECT orders.id as order_id,orders.final_price,orders.shipment_status,orders.payment_status,users.name,users.email,users.phone,addresses.house_name,addresses.street,addresses.city,addresses.state,addresses.pin FROM orders INNER JOIN users ON orders.user_id = users.id INNER JOIN addresses ON orders.address_id = addresses.id limit ? offset ?`
+
+	err := or.db.Raw(query, count, offset).Scan(&orderDetails).Error
+	if err != nil {
+		return []models.CombinedOrderDetails{}, nil
+	}
+	return orderDetails, nil
+
+}
+func (or *orderRepository) ApproveOrder(orderID int) error {
+	err := or.db.Exec("UPDATE orders SET shipment_status = 'shipped',approval = 'true' WHERE  id ? ", orderID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (or *orderRepository) ApproveCodPaid(orderID int) error {
+	err := or.db.Exec("UPDATE orders SET shipment_status='deliverd', approval = 'true',payment_status  WHERE id =? ", orderID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (or *orderRepository) ApproveCodReturn(orderID int) error {
+	err := or.db.Exec("UPDATE orders SET shipment_status = 'delivered',approval = 'true' WHRTR id = ?", orderID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (or *orderRepository) UpdateStockOfProduct(orderproducts []models.OrderProducts) error {
+	for _, ok := range orderproducts {
+		var quantity int
+		if err := or.db.Raw("SELECT stocks FROM products WHERE id = ?", ok.ProductId).Scan(&quantity).Error; err != nil {
+			return err
+		}
+		ok.Stock += quantity
+		if err := or.db.Exec("UPDATE products SET stock = ? WHERE id = ?", ok.ProductId, ok.Stock).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+
 }

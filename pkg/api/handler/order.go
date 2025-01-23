@@ -138,3 +138,15 @@ func (oh *OrderHandler) GetOrderDetails(c *gin.Context) {
 	c.JSON(http.StatusOK, successResp)
 
 }
+
+func (oh*OrderHandler) CanelOrder(c*gin.Context)  {
+	orderID,err:=strconv.Atoi(c.Query("id"))
+	if err!=nil{
+		errRes:=response.ClientResponse(http.StatusBadRequest,"error from orderID",nil,err.Error())
+		c.JSON(http.StatusBadRequest,errRes)
+		return
+	}
+	UserID:=id.(int)
+	err=oh.orderUseCase.CancelOrders
+	
+}
