@@ -156,3 +156,56 @@ func (or *orderUseCase) GetOrderDetails(userId int, page int, count int) ([]mode
 	return fullOrderDetails, nil
 
 }
+
+// func (ou *orderUseCase) GetOrderDetails(userID int, page int, count int) ([]models.FullOrderDetails, error) {
+// 	fullOrderDetails, err := ou.orderRepository.GetOrderDetails(userID, page, count)
+// 	if err != nil {
+// 		return []models.FullOrderDetails{}, err
+
+// 	}
+// 	return fullOrderDetails, nil
+
+// }
+func (ou *orderUseCase) CancelOrders(orderId int, userId int) error {
+	userTest, err := ou.orderRepository.UserOrderRelationship(orderId, userId)
+	if err != nil {
+		return err
+	}
+	if userTest != userId {
+		return errors.New("the order is done by its user")
+	}
+	orderProductDetails, err := ou.orderRepository.GetProductDetailsFromOrders(orderId)
+	if err != nil {
+		return err
+	}
+	shipmentStatus, err := ou.orderRepository.GetShipmentStatus(orderId)
+	if err != nil {
+		return err
+	}
+	if shipmentStatus == "pending" || shipmentStatus == "returned" || shipmentStatus == "return" {
+		message := fmt.Sprint(shipmentStatus)
+		return errors.New("this order is in" + message + ",so no point in cancelling")
+	}
+
+	if shipmentStatus == "cancelled" {
+		return errors.New("the order id delivered, you can return it")
+	}
+	if shipmentStatus == "Delivered" {
+		return errors.New("the order is delivered,you can return it")
+	}
+	err = ou.orderRepository.CancelOrders(orderId)
+	if err != nil {
+		return err
+	}
+	return nil
+	err = ou.orderRepository.UpdateQuantityOfProduct(orderProductDetails)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (ou *orderUseCase) GetAllOrdersAdmin(page models.Page) ([]models.CombinedOrderDetails, error) {
+
+}
