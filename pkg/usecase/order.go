@@ -207,5 +207,89 @@ func (ou *orderUseCase) CancelOrders(orderId int, userId int) error {
 }
 
 func (ou *orderUseCase) GetAllOrdersAdmin(page models.Page) ([]models.CombinedOrderDetails, error) {
+	if page.Page == 0 {
+		page.Page == 1
+	}
+	offset := (page.Page - 1) * page.Size
+	orderDetail, err := ou.orderRepository.GetShipmentStatus(orderId)
+	if err != nil {
+		return err
+	}
+	if ShipmentStatus == "cancelled" {
+		return errors.New("the order is cancelled,cannot approve it")
+	}
+	if ShipmentStatus == "pending" {
+		return errors.New("the order is pending, cannot approve it")
+	}
+	if ShipmentStatus == "delivered"{
+		return errors.New("this item is already delivered")
+	}
+	if ShipmentStatus="processing"{
+		err:=ou.orderRepository.ApproveOrder(orderId)
+		if err!=nil{
+			return err
+		}
+		return nil
+	}
+	if ShipmentStatus=="shipped"{
+		err:=ou.orderRepository.ApproveCodPaid(orderid)
+		if err!=nil{
+			return err
+		}
+		return nil
+	}
+	if ShipmentStatus =="returned"{
+		err:=ou.orderRepository.ApproveCodReturn(orderId)
+		if err!=nil{
+			return err
+		}
+	}
+	return nil
 
+}
+
+func (ou*orderUseCase)CancelOrdersFromAdmin(orderId int)error  {
+	ok,err:=ou.orderRepository.CheckOrderID(orderId)
+	if !ok{
+		return err
+	}
+	orderProduct,err:=ou.orderRepository.GetProductDetailsFromOrders(orderId)
+	if err!=nil{
+		return nil
+	}
+
+	ShipmetStatus,err:=ou.orderRepository.GetShipmentStatus(orderId)
+	if err!=nil{
+		return err
+	}
+	if ShipmetStatus=="cancelled"{
+		return errors.New("the order is already cancelled")
+	}
+	if ShipmetStatus=="delivered"{
+		return errors.New("the order is delivered cannot be cancelled")
+	}
+	err:=ou.orderRepository.CancelOrders(orderId)
+	if err!=nil{
+		return err
+	}
+	err=ou.orderRepository.UpdateStockOfProduct(orderProduct)
+	if err !=nil
+{
+		return err
+	}
+}
+
+func (ou*orderUseCase)UpdateStockOfProduct(orderProduct)  {
+	if err!=nil{
+		return err
+	}
+	return nil
+	
+}
+func (ou*orderUseCase) ReturnOrderCod(orderId,userId int)error  {
+	if orderId < 0{
+		return errors.New("the order is not done by user")
+	}
+
+	
 }
