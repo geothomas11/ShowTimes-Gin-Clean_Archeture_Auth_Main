@@ -192,3 +192,62 @@ func (oh *OrderHandler) GetAllOrdersAdmin(c *gin.Context) {
 
 }
 
+func (oh *OrderHandler) ApproveOrder(c *gin.Context) {
+	orderId, err := strconv.Atoi(c.Query("order_id"))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "error from orderID", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+
+	}
+	err = oh.orderUseCase.ApproveOrder(orderId)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "error from orderid", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Order cancel successfullly", nil, nil)
+	c.JSON(http.StatusOK, success)
+
+}
+func (oh *OrderHandler) CancelOrderFromAdmin(c *gin.Context) {
+	order_id, err := strconv.Atoi(c.Query("order_id"))
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "error from order id", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	err = oh.orderUseCase.CancelOrderFromAdmin(order_id)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "could not complete the order", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Order cancel successfully", nil, nil)
+	c.JSON(http.StatusOK, success)
+
+}
+func (oh *OrderHandler) ReturnOrderCod(c *gin.Context) {
+	orderID, err := strconv.Atoi(c.Query("order_id"))
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "could not cancel orderID", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	userId, errs := c.Get("id")
+	if !errs {
+		err := errors.New("error in getting id")
+		errRes := response.ClientResponse(http.StatusBadRequest, "error from userid", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+	}
+	userID := userId.(int)
+	err = oh.orderUseCase.ReturnOrderCod(orderID, userID)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusInternalServerError, "coudn't cancel the order", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errs)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Order returned Successfully", nil, nil)
+	c.JSON(http.StatusOK, success)
+
+}

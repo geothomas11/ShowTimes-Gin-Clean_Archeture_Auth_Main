@@ -41,8 +41,11 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpha
 		{
 			Checkout.GET("/checkout", orderHandler.Checkout)
 			Checkout.POST("/Orderitemsfromcart", orderHandler.OrderItemsFromCart)
+			Checkout.GET("/orderDetails", orderHandler.GetOrderDetails)
+			Checkout.DELETE("/cancelOrder", orderHandler.CanelOrder)
 			Checkout.POST("/placeorderinCOD", orderHandler.PlaceOrderCOD)
-			Checkout.GET("/orderdetails", orderHandler.GetOrderDetails)
+			Checkout.PATCH("/retturnordercod", orderHandler.ReturnOrderCod)
+
 		}
 
 	}
