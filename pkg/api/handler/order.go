@@ -120,12 +120,11 @@ func (oh *OrderHandler) GetOrderDetails(c *gin.Context) {
 	}
 	id, errs := c.Get("id")
 	if !errs {
-		if err != nil {
-			err := errors.New("couldn't get id")
-			erorrRes := response.ClientResponse(http.StatusInternalServerError, "Error in getting id", nil, err.Error())
-			c.JSON(http.StatusInternalServerError, erorrRes)
-			return
-		}
+		err := errors.New("couldn't get id")
+		erorrRes := response.ClientResponse(http.StatusInternalServerError, "Error in getting id", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, erorrRes)
+		return
+
 	}
 	UserID := id.(int)
 	OrderDetails, err := oh.orderUseCase.GetOrderDetails(UserID, page, pageSize)
