@@ -43,9 +43,9 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, Ca
 		}
 		orderManagement := engine.Group("/orders")
 		{
-			orderManagement.GET("", orderHandler.GetAllOrdersAdmin)
-			orderManagement.PATCH("", orderHandler.ApproveOrder)
-			orderManagement.DELETE("", orderHandler.CancelOrderFromAdmin)
+			orderManagement.GET("/getallordersadmin", orderHandler.GetAllOrdersAdmin)
+			orderManagement.PATCH("/approveorder", orderHandler.ApproveOrder)
+			orderManagement.DELETE("/cancelorderfromadmin", orderHandler.CancelOrderFromAdmin)
 		}
 	}
 }
