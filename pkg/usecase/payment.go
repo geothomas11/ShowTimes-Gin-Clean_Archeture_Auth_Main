@@ -39,3 +39,5 @@ func (pu *paymentUseCase) AddPaymentMethod(payment models.NewPaymentMethod) (mod
 	}
 	return paymentadd, nil
 }
+
+//Razorpay
