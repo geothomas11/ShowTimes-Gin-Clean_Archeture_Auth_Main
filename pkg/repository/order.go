@@ -181,7 +181,14 @@ func (or *orderRepository) GetOrderDetails(userId int, page int, count int) ([]m
 	var fullOrderDetails []models.FullOrderDetails
 	for _, od := range OrderDetails {
 		var orderProductDetails []models.OrderProductDetails
-		err := or.db.Raw("SELECT id as order_items.product_id,products.product_name AS product_name,order_items.quantity,order_items.total_price FROM order_items INNER JOIN products ON order_items.product_id= products.id WHERE order_items.order_id = $1", od.OrderId).Scan(&orderProductDetails).Error
+		err := or.db.Raw(`SELECT 
+			order_items.product_id, 
+			products.product_name AS product_name, 
+			order_items.quantity, 
+			order_items.total_price 
+		FROM order_items 
+		INNER JOIN products ON order_items.product_id = products.id 
+		WHERE order_items.order_id = $1`, od.OrderId).Scan(&orderProductDetails).Error
 		if err != nil {
 			return []models.FullOrderDetails{}, err
 		}

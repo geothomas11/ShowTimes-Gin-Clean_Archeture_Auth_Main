@@ -179,7 +179,7 @@ func (cr *CartRepository) TotalAmountInCart(userID int) (float64, error) {
 }
 
 func (cr *CartRepository) UpdateCartAfterOrder(userID, productID int, quantity float64) error {
-	err := cr.db.Exec("DELETE FRO carts WHERE user_id =? and product_id = ?", userID, productID).Error
+	err := cr.db.Exec("DELETE FROM carts WHERE user_id =? and product_id = ?", userID, productID).Error
 	if err != nil {
 		return err
 	}

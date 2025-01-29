@@ -75,8 +75,8 @@ func (oh *OrderHandler) OrderItemsFromCart(c *gin.Context) {
 func (oh *OrderHandler) PlaceOrderCOD(c *gin.Context) {
 	order_id, err := strconv.Atoi(c.Query("order_id"))
 	if err != nil {
-		errr := response.ClientResponse(http.StatusInternalServerError, "error from orderID", nil, err.Error())
-		c.JSON(http.StatusInternalServerError, errr)
+		errr := response.ClientResponse(http.StatusBadRequest, "error from orderID", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errr)
 		return
 	}
 
@@ -129,7 +129,7 @@ func (oh *OrderHandler) GetOrderDetails(c *gin.Context) {
 	UserID := id.(int)
 	OrderDetails, err := oh.orderUseCase.GetOrderDetails(UserID, page, pageSize)
 	if err != nil {
-		erorRes := response.ClientResponse(http.StatusInternalServerError, "could not place the order", nil, err.Error())
+		erorRes := response.ClientResponse(http.StatusInternalServerError, "could not get order", nil, err.Error())
 		c.JSON(http.StatusInternalServerError, erorRes)
 		return
 	}

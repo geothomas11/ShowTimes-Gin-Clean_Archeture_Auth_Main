@@ -3,6 +3,9 @@ package repository
 import (
 	"ShowTimes/pkg/repository/interfaces"
 	"ShowTimes/pkg/utils/models"
+	"database/sql"
+	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -37,13 +40,18 @@ func (pr *paymentRepository) PaymentMethodID(orderID int) (int, error) {
 }
 
 func (pr *paymentRepository) AddPaymentMethod(pay models.NewPaymentMethod) (models.PaymentDetails, error) {
-	var payment string
-	if err := pr.db.Raw("INSERT INTO payment_methods (payment_name) VALUES (?) RETRUNING Payment_name ", pay.PaymentName).Scan(&payment).Error; err != nil {
+	if err := pr.db.Exec("INSERT INTO payment_methods (payment_name) VALUES (?)  ", pay.PaymentName).Error; err != nil {
 		return models.PaymentDetails{}, err
 	}
 	var paymentResponse models.PaymentDetails
-	err := pr.db.Raw("SELECT id,payment_name FROM payment_methods WHERE payment_name = ?", payment).Scan(&paymentResponse).Error
+	err := pr.db.Raw("SELECT id,payment_name FROM payment_methods WHERE payment_name = ?", pay.PaymentName).Scan(&paymentResponse).Error
+	fmt.Println("error in repo", err)
 	if err != nil {
+		if err == sql.ErrNoRows {
+
+			return models.PaymentDetails{}, errors.New("no data found")
+
+		}
 		return models.PaymentDetails{}, err
 	}
 	return paymentResponse, nil
