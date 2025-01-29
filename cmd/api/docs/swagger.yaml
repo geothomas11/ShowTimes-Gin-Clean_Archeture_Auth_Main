@@ -1,0 +1,13 @@
+info:
+  contact:
+    name: API Support
+  description: ShowTimes is an E-commerce platform to purchase Watch
+  title: Go + Gin E-Commerce API Watch Hive
+  version: 1.0.0
+paths: {}
+securityDefinitions:
+  BearerTokenAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
