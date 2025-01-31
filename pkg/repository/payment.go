@@ -70,9 +70,9 @@ func (pr *paymentRepository) CheckIfPaymentMethodAlreadyExists(payment string) (
 
 //RAZOR PAY INTEGRATION
 
-func (repo *ProductRepository) AddRazorPayDetails(orderId int, razorPayId string) error {
+func (repo *paymentRepository) AddRazorPayDetails(orderId int, razorPayId string) error {
 	query := `INSERT INTO payments (order_id,razorpayid) values($1,$2) `
-	if err := repo.DB.Exec(query, orderId, razorPayId).Error; err != nil {
+	if err := repo.db.Exec(query, orderId, razorPayId).Error; err != nil {
 		err = errors.New("error in inserting values to razor pay data table" + err.Error())
 		return err
 	}

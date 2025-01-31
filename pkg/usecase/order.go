@@ -122,9 +122,12 @@ func (ou *orderUseCase) OrderItemsFromCart(orderFromCart models.OrderFromCart, u
 }
 
 func (ou *orderUseCase) ExecutePurchaseCOD(orderID int) error {
-	err := ou.orderRepository.OrderExist(orderID)
+	exist, err := ou.orderRepository.OrderExist(orderID)
 	if err != nil {
 		return err
+	}
+	if !exist {
+		return errors.New("orders does not exist")
 	}
 	shipmentStatus, err := ou.orderRepository.GetShipmentStatus(orderID)
 	if shipmentStatus == "delivered" {

@@ -10,4 +10,5 @@ type PaymentRepository interface {
 	UpdatePaymentDetails(orderId string, paymentId string) error
 	GetPaymentStatus(orderId string) (bool, error)
 	UpdatePaymentStatus(status bool, orderId string) error
+	AddRazorPayDetails(orderId int, razorPayId string) error
 }
