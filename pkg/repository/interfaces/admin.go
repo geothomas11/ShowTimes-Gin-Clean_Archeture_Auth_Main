@@ -11,4 +11,11 @@ type AdminRepository interface {
 	UpdateBlockUserByID(user models.UpdateBlock) error
 	GetUsers(page int) ([]models.UserDetailsAtAdmin, error)
 	IsUserExist(id int) (bool, error)
+
+	//Admin Dashboard details
+	DashboardUserDetails() (models.DashBoardUser, error)
+	DashboardProductDetails() (models.DashBoardProduct, error)
+	DashboardOrderDetails() (models.DashBoardOrder, error)
+	DashboardTotalRevenueDetails() (models.DashBoardRevenue, error)
+	DashboardAmountDetails() (models.DashBoardAmount, error)
 }

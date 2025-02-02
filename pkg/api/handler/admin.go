@@ -120,3 +120,15 @@ func (ad *AdminHandler) GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 
 }
+
+func (ah *AdminHandler) AdminDashboard(c *gin.Context) {
+	dashbord, err := ah.adminUseCase.AdminDashboard()
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "could not retrive records", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+	successResp := response.ClientResponse(http.StatusOK, "Successfully retrived the dashbord", dashbord, nil)
+	c.JSON(http.StatusOK, successResp)
+
+}
