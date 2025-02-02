@@ -138,7 +138,7 @@ func (oh *OrderHandler) GetOrderDetails(c *gin.Context) {
 
 }
 
-func (oh *OrderHandler) CanelOrder(c *gin.Context) {
+func (oh *OrderHandler) CancelOrder(c *gin.Context) {
 	orderID, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "error from orderID", nil, err.Error())

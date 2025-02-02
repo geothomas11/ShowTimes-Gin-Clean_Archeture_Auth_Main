@@ -50,7 +50,7 @@ func (pu *paymentUseCase) AddPaymentMethod(payment models.NewPaymentMethod) (mod
 // Razorpay
 func (pu *paymentUseCase) MakePaymentRazorpay(orderId, userId int) ([]models.CombinedOrderDetails, string, error) {
 	if orderId <= 0 || userId <= 0 {
-		return nil, "", errors.New("Please provide valid IDs")
+		return nil, "", errors.New("please provide valid IDs")
 	}
 
 	order, err := pu.order_Repo.GetOrder(orderId)
@@ -102,6 +102,6 @@ func (pu *paymentUseCase) SavePaymentDetails(paymentId, razorId, orderId string)
 		}
 		return nil
 	}
-	return errors.New("alredy paid")
+	return errors.New("already paid")
 
 }

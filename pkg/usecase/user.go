@@ -176,24 +176,24 @@ func (u *userUseCase) ChangePassword(user models.ChangePassword) error {
 		return errors.New("password cannot be empty")
 	}
 	if user.NewPassword != user.ConfirmPassword {
-		return errors.New("Password mismatch")
+		return errors.New("password mismatch")
 	}
-	newHashed,err:=u.helper.PasswordHashing(user.NewPassword)
-	if err!=nil{
+	newHashed, err := u.helper.PasswordHashing(user.NewPassword)
+	if err != nil {
 		return errors.New("password hashing is failed")
 	}
-	idString:=strconv.FormatUint(uint64(user.UserID),10)
+	idString := strconv.FormatUint(uint64(user.UserID), 10)
 
-	user_details,_:=u.userRepo.FindUserById(idString)
+	user_details, _ := u.userRepo.FindUserById(idString)
 
-	err=u.helper.CompareHashAndPassword(user_details.Password,user.CurrentPassword)
-	if err!=nil{
+	err = u.helper.CompareHashAndPassword(user_details.Password, user.CurrentPassword)
+	if err != nil {
 		return errors.New("current password is incorrect")
 	}
-	err=u.userRepo.ChangePassword(idString,newHashed)
-	if err!=nil{
+	err = u.userRepo.ChangePassword(idString, newHashed)
+	if err != nil {
 		return errors.New("password cannot change")
 	}
 	return nil
-	
+
 }
