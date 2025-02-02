@@ -72,38 +72,38 @@ func (oh *OrderHandler) OrderItemsFromCart(c *gin.Context) {
 
 }
 
-func (oh *OrderHandler) PlaceOrderCOD(c *gin.Context) {
-	order_id, err := strconv.Atoi(c.Query("order_id"))
-	if err != nil {
-		errr := response.ClientResponse(http.StatusBadRequest, "error from orderID", nil, err.Error())
-		c.JSON(http.StatusBadRequest, errr)
-		return
-	}
+// func (oh *OrderHandler) PlaceOrderCOD(c *gin.Context) {
+// 	order_id, err := strconv.Atoi(c.Query("order_id"))
+// 	if err != nil {
+// 		errr := response.ClientResponse(http.StatusBadRequest, "error from orderID", nil, err.Error())
+// 		c.JSON(http.StatusBadRequest, errr)
+// 		return
+// 	}
 
-	paymentMethodID, err := oh.paymentUseCase.PaymentMethodID(order_id)
-	if err != nil {
-		err := response.ClientResponse(http.StatusInternalServerError, "Error from payment id", nil, err.Error())
-		c.JSON(http.StatusInternalServerError, err)
-		return
+// 	paymentMethodID, err := oh.paymentUseCase.PaymentMethodID(order_id)
+// 	if err != nil {
+// 		err := response.ClientResponse(http.StatusInternalServerError, "Error from payment id", nil, err.Error())
+// 		c.JSON(http.StatusInternalServerError, err)
+// 		return
 
-	}
-	if paymentMethodID == 1 {
-		err := oh.orderUseCase.ExecutePurchaseCOD(order_id)
-		if err != nil {
-			errorResp := response.ClientResponse(http.StatusInternalServerError, "error in cash  on delivery", nil, err.Error())
-			c.JSON(http.StatusInternalServerError, errorResp)
-			return
-		}
-		successRes := response.ClientResponse(http.StatusOK, "Order placed on cash on delivery", nil, nil)
-		c.JSON(http.StatusOK, successRes)
-	}
-	if paymentMethodID != 1 {
-		successRes := response.ClientResponse(http.StatusOK, "Cannot place order payment in not COD", nil, nil)
-		c.JSON(http.StatusOK, successRes)
+// 	}
+// 	if paymentMethodID == 1 {
+// 		err := oh.orderUseCase.ExecutePurchaseCOD(order_id)
+// 		if err != nil {
+// 			errorResp := response.ClientResponse(http.StatusInternalServerError, "error in cash  on delivery", nil, err.Error())
+// 			c.JSON(http.StatusInternalServerError, errorResp)
+// 			return
+// 		}
+// 		successRes := response.ClientResponse(http.StatusOK, "Order placed on cash on delivery", nil, nil)
+// 		c.JSON(http.StatusOK, successRes)
+// 	}
+// 	if paymentMethodID != 1 {
+// 		successRes := response.ClientResponse(http.StatusOK, "Cannot place order payment in not COD", nil, nil)
+// 		c.JSON(http.StatusOK, successRes)
 
-	}
+// 	}
 
-}
+// }
 func (oh *OrderHandler) GetOrderDetails(c *gin.Context) {
 	pagestr := c.DefaultQuery("page", "1")
 	page, err := strconv.Atoi(pagestr)

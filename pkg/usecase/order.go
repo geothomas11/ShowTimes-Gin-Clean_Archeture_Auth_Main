@@ -121,36 +121,37 @@ func (ou *orderUseCase) OrderItemsFromCart(orderFromCart models.OrderFromCart, u
 
 }
 
-func (ou *orderUseCase) ExecutePurchaseCOD(orderID int) error {
-	exist, err := ou.orderRepository.OrderExist(orderID)
-	if err != nil {
-		return err
-	}
-	if !exist {
-		return errors.New("orders does not exist")
-	}
-	shipmentStatus, err := ou.orderRepository.GetShipmentStatus(orderID)
-	if shipmentStatus == "delivered" {
-		return errors.New("item delivered, cannot pay")
+// func (ou *orderUseCase) ExecutePurchaseCOD(orderID int) error {
+// 	exist, err := ou.orderRepository.OrderExist(orderID)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if !exist {
+// 		return errors.New("orders does not exist")
+// 	}
+// 	shipmentStatus, err := ou.orderRepository.GetShipmentStatus(orderID)
+// 	// fmt.Println("error", err)
+// 	if shipmentStatus == "delivered" {
+// 		return errors.New("item delivered, cannot pay")
 
-	}
-	if shipmentStatus == "order placed" {
-		return errors.New("item placed,cannot pay")
-	}
-	if shipmentStatus == "cancelled" || shipmentStatus == "returned" || shipmentStatus == "return" {
-		message := fmt.Sprint(shipmentStatus)
-		return errors.New("the order is in" + message + "so can't paid")
-	}
-	if shipmentStatus == "processing" {
-		return errors.New("the order is already paid")
-	}
-	err = ou.orderRepository.UpdateOrder(orderID)
-	if err != nil {
-		return err
-	}
-	return nil
+// 	}
+// 	if shipmentStatus == "order placed" {
+// 		return errors.New("item placed,cannot pay")
+// 	}
+// 	if shipmentStatus == "cancelled" || shipmentStatus == "returned" || shipmentStatus == "return" {
+// 		message := fmt.Sprint(shipmentStatus)
+// 		return errors.New("the order is in" + message + "so can't paid")
+// 	}
+// 	if shipmentStatus == "processing" {
+// 		return errors.New("the order is already paid")
+// 	}
+// 	err = ou.orderRepository.UpdateOrder(orderID)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
 
-}
+// }
 func (or *orderUseCase) GetOrderDetails(userId int, page int, count int) ([]models.FullOrderDetails, error) {
 	fullOrderDetails, err := or.orderRepository.GetOrderDetails(userId, page, count)
 	if err != nil {
@@ -177,36 +178,40 @@ func (ou *orderUseCase) CancelOrders(orderId int, userId int) error {
 	if userTest != userId {
 		return errors.New("the order is done by its user")
 	}
+
 	orderProductDetails, err := ou.orderRepository.GetProductDetailsFromOrders(orderId)
 	if err != nil {
 		return err
 	}
+
 	shipmentStatus, err := ou.orderRepository.GetShipmentStatus(orderId)
 	if err != nil {
 		return err
 	}
+
 	if shipmentStatus == "pending" || shipmentStatus == "returned" || shipmentStatus == "return" {
-		message := fmt.Sprint(shipmentStatus)
-		return errors.New("this order is in" + message + ",so no point in cancelling")
+		return fmt.Errorf("this order is in %s, so no point in cancelling", shipmentStatus)
 	}
 
 	if shipmentStatus == "cancelled" {
-		return errors.New("the order id delivered, you can return it")
+		return errors.New("the order is already cancelled, you can return it")
 	}
 	if shipmentStatus == "Delivered" {
-		return errors.New("the order is delivered,you can return it")
+		return errors.New("the order is delivered, you can return it")
 	}
+
 	err = ou.orderRepository.CancelOrders(orderId)
 	if err != nil {
 		return err
 	}
-	return nil
+
+	// Update product quantity after cancellation
 	err = ou.orderRepository.UpdateQuantityOfProduct(orderProductDetails)
 	if err != nil {
 		return err
 	}
-	return nil
 
+	return nil
 }
 
 func (ou *orderUseCase) GetAllOrdersAdmin(page models.Page) ([]models.CombinedOrderDetails, error) {
