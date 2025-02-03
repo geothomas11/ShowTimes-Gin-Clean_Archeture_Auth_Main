@@ -3,6 +3,7 @@ package interfaces
 import (
 	"ShowTimes/pkg/utils/models"
 	"mime/multipart"
+	"time"
 )
 
 type Helper interface {
@@ -20,4 +21,5 @@ type Helper interface {
 
 	ValidatePhoneNumber(phone string) bool
 	ValidatePin(pin string) bool
+	GetTimeFromPeriod(timePeriod string) (time.Time, time.Time)
 }

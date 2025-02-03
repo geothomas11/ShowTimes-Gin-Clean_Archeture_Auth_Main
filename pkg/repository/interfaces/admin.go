@@ -3,6 +3,7 @@ package interfaces
 import (
 	"ShowTimes/pkg/domain"
 	"ShowTimes/pkg/utils/models"
+	"time"
 )
 
 type AdminRepository interface {
@@ -18,4 +19,5 @@ type AdminRepository interface {
 	DashboardOrderDetails() (models.DashBoardOrder, error)
 	DashboardTotalRevenueDetails() (models.DashBoardRevenue, error)
 	DashboardAmountDetails() (models.DashBoardAmount, error)
+	FilteredSalesReport(startTime time.Time, endTime time.Time) (models.SalesReport, error)
 }

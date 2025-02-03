@@ -224,3 +224,21 @@ func (h *helper) ValidatePin(pin string) bool {
 	return match
 
 }
+
+func (h *helper) GetTimeFromPeriod(timePeriod string) (time.Time, time.Time) {
+	endDate := time.Now()
+	if timePeriod == "week" {
+		startDate := endDate.AddDate(0, 0, -1)
+		return startDate, endDate
+	}
+	if timePeriod == "monthly" {
+		startDate := endDate.AddDate(0, -1, 0)
+		return startDate, endDate
+	}
+	if timePeriod == "year" {
+		startDate := endDate.AddDate(-1, 0, 0)
+		return startDate, endDate
+	}
+	return endDate.AddDate(0, 0, -6), endDate
+
+}

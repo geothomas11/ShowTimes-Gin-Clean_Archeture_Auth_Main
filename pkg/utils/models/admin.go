@@ -14,6 +14,7 @@ type UpdateBlock struct {
 	ID      int
 	Blocked bool
 }
+
 // type UserDetailsAtAdmin struct {
 // 	Id      int    `json:"id"`
 // 	Name    string `json:"name"`
@@ -22,7 +23,6 @@ type UpdateBlock struct {
 // 	Blocked bool   `json:"blocked"`
 // }
 
-// 
 type Admin struct {
 	ID       uint   `json:"id" gorm:"unique;not null"`
 	Name     string `json:"name" gorm:"validate:required"`
@@ -65,4 +65,11 @@ type CompleteAdminDashboard struct {
 	DashboardRevenue DashBoardRevenue
 	DashboardOrder   DashBoardOrder
 	DashboardAmount  DashBoardAmount
+}
+type SalesReport struct {
+	TotalSales      float64
+	TotalOrders     int
+	CompletedOrders int
+	PendingOrders   int
+	TrendingProduct string
 }

@@ -132,3 +132,17 @@ func (ah *AdminHandler) AdminDashboard(c *gin.Context) {
 	c.JSON(http.StatusOK, successResp)
 
 }
+
+// salesReport
+func (ah *AdminHandler) FilteredSalesReport(c *gin.Context) {
+	timePeriod := c.Query("period")
+	salesReport, err := ah.adminUseCase.FilteredSalesReport(timePeriod)
+	if err != nil {
+
+		errorResp := response.ClientResponse(http.StatusInternalServerError, "sales report could not be retrived", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errorResp)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "Successfully retived sales report", salesReport, err)
+	c.JSON(http.StatusOK, success)
+}
