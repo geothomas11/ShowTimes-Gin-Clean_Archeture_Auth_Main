@@ -102,7 +102,7 @@ func (ar *adminRepository) DashboardProductDetails() (models.DashBoardProduct, e
 
 func (ar *adminRepository) DashboardAmountDetails() (models.DashBoardAmount, error) {
 	var amountDetails models.DashBoardAmount
-	query := `SELECT coalesce(sum(final_price),0) FROM orders WHERE payment_status ='paid' `
+	query := `SELECT coalesce(sum(final_price),0) FROM orders WHERE payment_status ='PAID' `
 	err := ar.DB.Raw(query).Scan(&amountDetails.CreditedAmount).Error
 	if err != nil {
 		err = errors.New("cannot get total amount from  db")
@@ -126,12 +126,12 @@ func (ar *adminRepository) DashboardAmountDetails() (models.DashBoardAmount, err
 
 func (ar *adminRepository) DashboardOrderDetails() (models.DashBoardOrder, error) {
 	var orderDetails models.DashBoardOrder
-	err := ar.DB.Raw("SELECT count(*) FROM orders WHERE payment_status = 'paid' ").Scan(&orderDetails.CompletedOrder).Error
+	err := ar.DB.Raw("SELECT count(*) FROM orders WHERE payment_status = 'PAID' ").Scan(&orderDetails.CompletedOrder).Error
 	if err != nil {
 		err = errors.New("cannot get total order from db")
 		return models.DashBoardOrder{}, err
 	}
-	err = ar.DB.Raw("SELECT COUNT(*) from orders WHERE shipment_status = 'pending or shipment_status = 'processing'").Scan(&orderDetails.PendingOrder).Error
+	err = ar.DB.Exec("SELECT COUNT(*) FROM  orders WHERE shipment_status = 'pending or shipment_status = 'processing'").Scan(&orderDetails.PendingOrder).Error
 	if err != nil {
 		err = errors.New("cannoot get pending orders from db")
 		return models.DashBoardOrder{}, err
@@ -153,19 +153,19 @@ func (ar *adminRepository) DashboardOrderDetails() (models.DashBoardOrder, error
 func (ar *adminRepository) DashboardTotalRevenueDetails() (models.DashBoardRevenue, error) {
 	var revenueDetails models.DashBoardRevenue
 	startTime := time.Now().AddDate(0, 0, 1)
-	err := ar.DB.Raw("SELECT coalesce(sum(final_price),0) FROM orders WHERE payment_status ='paid' and created_at >=?", startTime).Scan(&revenueDetails.TodayRevenue).Error
+	err := ar.DB.Raw("SELECT coalesce(sum(final_price),0) FROM orders WHERE payment_status ='PAID' and created_at >=?", startTime).Scan(&revenueDetails.TodayRevenue).Error
 	if err != nil {
 		err = errors.New("cannot get today revenue from db")
 		return models.DashBoardRevenue{}, err
 	}
 	startTime = time.Now().AddDate(0, -1, 1)
-	err = ar.DB.Raw("SELECT COALESCE(sum(final_price),0) FROM orders WHERE payment_status = 'paid' and created_at >= ?", startTime).Scan(&revenueDetails.MonthRevenue).Error
+	err = ar.DB.Raw("SELECT COALESCE(sum(final_price),0) FROM orders WHERE payment_status = 'PAID' and created_at >= ?", startTime).Scan(&revenueDetails.MonthRevenue).Error
 	if err != nil {
 		err = errors.New("cannot get month revenue from db")
 		return models.DashBoardRevenue{}, err
 	}
 	startTime = time.Now().AddDate(-1, 1, 1)
-	err = ar.DB.Raw("SELECT COALESCE(sum(final_price),0) FROM orders WHERE payment_status = 'paid' and created_at >= ?", startTime).Scan(&revenueDetails.YearRevenue).Error
+	err = ar.DB.Raw("SELECT COALESCE(sum(final_price),0) FROM orders WHERE payment_status = 'PAID' and created_at >= ?", startTime).Scan(&revenueDetails.YearRevenue).Error
 	if err != nil {
 		err = errors.New("cannot get year revenue from db")
 		return models.DashBoardRevenue{}, err

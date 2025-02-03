@@ -14,7 +14,8 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, Ca
 	engine.Use(middleware.AdminAuthMiddleware)
 
 	{
-		engine.GET("/dashboard",adminHandler.AdminDashboard)
+		engine.GET("/dashboard", adminHandler.AdminDashboard)
+		
 		userManagement := engine.Group("/users")
 		{
 			userManagement.PUT("/block", adminHandler.BlockUser)
