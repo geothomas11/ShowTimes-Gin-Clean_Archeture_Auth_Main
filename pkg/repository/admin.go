@@ -178,7 +178,9 @@ func (ar *adminRepository) DashboardTotalRevenueDetails() (models.DashBoardReven
 
 func (ar *adminRepository) FilteredSalesReport(startTime time.Time, endTime time.Time) (models.SalesReport, error) {
 	var salesReport models.SalesReport
-	query := `SELECT COALESCE(SUM(final_price),0) FROM orders WHERE payment_status = 'PAID' AND created_at >= ? AND created_at <= ?`
+
+	query :=
+		`SELECT COALESCE(SUM(final_price),0) FROM orders WHERE payment_status = 'PAID' AND created_at >= ? AND created_at <= ?`
 	result := ar.DB.Raw(query, startTime, endTime).Scan(&salesReport.TotalSales)
 	if result.Error != nil {
 		return models.SalesReport{}, result.Error
@@ -187,18 +189,29 @@ func (ar *adminRepository) FilteredSalesReport(startTime time.Time, endTime time
 	if result.Error != nil {
 		return models.SalesReport{}, result.Error
 	}
-	query = `SELECT COUNT(*) FROM orders WHERE payment_status = 'PAID' AND created_at >= ? AND created_at <= ? `
+	query =
+		`SELECT COUNT(*) FROM orders WHERE payment_status = 'PAID' AND created_at >= ? AND created_at <= ? `
 
 	result = ar.DB.Raw(query, startTime, endTime).Scan(&salesReport.CompletedOrders)
 	if result.Error != nil {
 		return models.SalesReport{}, result.Error
 	}
+	query = `SELECT COUNT(*) FROM orders WHERE shipment_status = 'processing' AND approval = 'false' AND created_at >= ? AND created_at <= ?`
+
+	result = ar.DB.Raw(query, startTime, endTime).Scan(&salesReport.PendingOrders)
+	if result.Error != nil {
+		return models.SalesReport{}, result.Error
+	}
+
 	var productID int
-	query = `SELECT product_id FROM order_items GROUP BY product_id ORDER BY SUM(quantity) DESC LIMIT 1`
+	query =
+		`SELECT product_id FROM order_items GROUP BY product_id ORDER BY SUM(quantity) DESC LIMIT 1`
+
 	result = ar.DB.Raw(query).Scan(&productID)
 	if result.Error != nil {
 		return models.SalesReport{}, result.Error
 	}
+
 	result = ar.DB.Raw("SELECT product_name FROM products WHERE id = ?", productID).Scan(&salesReport.TrendingProduct)
 	if result.Error != nil {
 		return models.SalesReport{}, result.Error
