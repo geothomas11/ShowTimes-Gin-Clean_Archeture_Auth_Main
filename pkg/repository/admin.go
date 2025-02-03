@@ -108,12 +108,12 @@ func (ar *adminRepository) DashboardAmountDetails() (models.DashBoardAmount, err
 		err = errors.New("cannot get total amount from  db")
 		return models.DashBoardAmount{}, err
 	}
-	query = `SELECT coalese(sum(final_price),0) FROM orders WHERE payment_status ='not_paid'
-	 and
+	query = `SELECT coalesce(sum(final_price),0) FROM orders WHERE payment_status ='not_paid'
+	 AND
 	  shipment_status = 'pending'
-	  or 
+	  OR 
 	  shipment_status = 'processing'
-	  or 
+	  OR 
 	  shipment_status = 'shipped'
 	    `
 	err = ar.DB.Raw(query).Scan(&amountDetails.PendingAmount).Error
@@ -131,7 +131,7 @@ func (ar *adminRepository) DashboardOrderDetails() (models.DashBoardOrder, error
 		err = errors.New("cannot get total order from db")
 		return models.DashBoardOrder{}, err
 	}
-	err = ar.DB.Exec("SELECT COUNT(*) FROM  orders WHERE shipment_status = 'pending or shipment_status = 'processing'").Scan(&orderDetails.PendingOrder).Error
+	err = ar.DB.Raw("SELECT COUNT(*) FROM  orders WHERE shipment_status = 'pending' OR shipment_status = 'processing'").Scan(&orderDetails.PendingOrder).Error
 	if err != nil {
 		err = errors.New("cannoot get pending orders from db")
 		return models.DashBoardOrder{}, err
