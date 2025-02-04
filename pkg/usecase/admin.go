@@ -166,6 +166,15 @@ func (au *adminUseCase) AdminDashboard() (models.CompleteAdminDashboard, error) 
 
 func (ah *adminUseCase) FilteredSalesReport(timePeriod string) (models.SalesReport, error) {
 
+	if timePeriod == "" {
+		err := errors.New("field cannot be empty")
+		return models.SalesReport{}, err
+	}
+	if timePeriod != "week" && timePeriod != "month" && timePeriod != "year" {
+		err := errors.New("invalid time period, available options : week, month & year")
+		return models.SalesReport{}, err
+	}
+
 	startTime, endTime := ah.helper.GetTimeFromPeriod(timePeriod)
 	salesReport, err := ah.adminRepository.FilteredSalesReport(startTime, endTime)
 

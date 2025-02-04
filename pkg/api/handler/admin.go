@@ -143,6 +143,7 @@ func (ah *AdminHandler) FilteredSalesReport(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, errorResp)
 		return
 	}
-	success := response.ClientResponse(http.StatusOK, "Successfully retived sales report", salesReport, err)
+	message := "current" + timePeriod + "Successfully retived sales report "
+	success := response.ClientResponse(http.StatusOK, message, salesReport, err)
 	c.JSON(http.StatusOK, success)
 }
