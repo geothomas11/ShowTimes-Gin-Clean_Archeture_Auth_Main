@@ -147,3 +147,23 @@ func (ah *AdminHandler) FilteredSalesReport(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, message, salesReport, err)
 	c.JSON(http.StatusOK, success)
 }
+
+// Report by date
+func (ah *AdminHandler) SalesReportByDate(c *gin.Context) {
+	startDateStr := c.Query("start")
+	endDateStr := c.Query("end")
+	if startDateStr == "" || endDateStr == "" {
+		err := response.ClientResponse(http.StatusBadGateway, "Start or end date is empty", nil, "Empty date string")
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	report, err := ah.adminUseCase.ExecuteSalesReportByDate(startDateStr, endDateStr)
+	if err != nil {
+		errorResp := response.ClientResponse(http.StatusInternalServerError, "sales report could not be retrived", nil, err.Error)
+		c.JSON(http.StatusInternalServerError, errorResp)
+		return
+	}
+	success := response.ClientResponse(http.StatusOK, "sales report retrived successfully", report, nil)
+	c.JSON(http.StatusOK, success)
+
+}

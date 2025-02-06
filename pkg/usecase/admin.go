@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"ShowTimes/pkg/utils/models"
 
@@ -164,7 +165,7 @@ func (au *adminUseCase) AdminDashboard() (models.CompleteAdminDashboard, error) 
 
 //sales Report
 
-func (ah *adminUseCase) FilteredSalesReport(timePeriod string) (models.SalesReport, error) {
+func (au *adminUseCase) FilteredSalesReport(timePeriod string) (models.SalesReport, error) {
 
 	if timePeriod == "" {
 		err := errors.New("field cannot be empty")
@@ -175,11 +176,43 @@ func (ah *adminUseCase) FilteredSalesReport(timePeriod string) (models.SalesRepo
 		return models.SalesReport{}, err
 	}
 
-	startTime, endTime := ah.helper.GetTimeFromPeriod(timePeriod)
-	salesReport, err := ah.adminRepository.FilteredSalesReport(startTime, endTime)
+	startTime, endTime := au.helper.GetTimeFromPeriod(timePeriod)
+	salesReport, err := au.adminRepository.FilteredSalesReport(startTime, endTime)
 
 	if err != nil {
 		return models.SalesReport{}, err
 	}
 	return salesReport, nil
+}
+func (au *adminUseCase) ExecuteSalesReportByDate(startDate, endDate string) (models.SalesReport, error) {
+	parsedStartDate, err := time.Parse("02-01-2006", startDate)
+	if err != nil {
+		err := errors.New("enter the date in correct format")
+		return models.SalesReport{}, err
+	}
+	isValid := !parsedStartDate.IsZero()
+	if !isValid {
+		err := errors.New("enter date in correct format & valid date")
+		return models.SalesReport{}, err
+	}
+	parsedEndDate, err := time.Parse("02-01-2005", endDate)
+	if err != nil {
+		err := errors.New("enter the date in correct format")
+		return models.SalesReport{}, err
+	}
+	isValid = !parsedEndDate.IsZero()
+	if !isValid {
+		err := errors.New("enter the date in correct format & vallid date")
+		return models.SalesReport{}, err
+	}
+	if parsedStartDate.After(parsedEndDate) {
+		err := errors.New("start date is after end date")
+		return models.SalesReport{}, err
+	}
+	orders, err := au.adminRepository.FilteredSalesReport(parsedStartDate, parsedEndDate)
+	if err != nil {
+		return models.SalesReport{}, errors.New("report fetching failed")
+	}
+	return orders, nil
+
 }
