@@ -194,21 +194,21 @@ func (oh *OrderHandler) GetAllOrdersAdmin(c *gin.Context) {
 func (oh *OrderHandler) ApproveOrder(c *gin.Context) {
 	orderId, err := strconv.Atoi(c.Query("order_id"))
 	if err != nil {
-		errs := response.ClientResponse(http.StatusInternalServerError, "error from orderID", nil, err.Error())
-		c.JSON(http.StatusInternalServerError, errs)
+		errs := response.ClientResponse(http.StatusBadRequest, "Invalid order ID", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errs)
 		return
-
 	}
+
 	err = oh.orderUseCase.ApproveOrder(orderId)
 	if err != nil {
-		errs := response.ClientResponse(http.StatusInternalServerError, "error from orderid", nil, err.Error())
-		c.JSON(http.StatusInternalServerError, errs)
-		return
+		errs := response.ClientResponse(http.StatusConflict, "Order approval failed", nil, err.Error())
+		c.JSON(http.StatusConflict, errs) 
 	}
-	success := response.ClientResponse(http.StatusOK, "Order cancel successfullly", nil, nil)
-	c.JSON(http.StatusOK, success)
 
+	success := response.ClientResponse(http.StatusOK, "Order approved successfully", nil, nil)
+	c.JSON(http.StatusOK, success)
 }
+
 func (oh *OrderHandler) CancelOrderFromAdmin(c *gin.Context) {
 	order_id, err := strconv.Atoi(c.Query("order_id"))
 	if err != nil {
