@@ -202,7 +202,8 @@ func (oh *OrderHandler) ApproveOrder(c *gin.Context) {
 	err = oh.orderUseCase.ApproveOrder(orderId)
 	if err != nil {
 		errs := response.ClientResponse(http.StatusConflict, "Order approval failed", nil, err.Error())
-		c.JSON(http.StatusConflict, errs) 
+		c.JSON(http.StatusConflict, errs)
+		return
 	}
 
 	success := response.ClientResponse(http.StatusOK, "Order approved successfully", nil, nil)

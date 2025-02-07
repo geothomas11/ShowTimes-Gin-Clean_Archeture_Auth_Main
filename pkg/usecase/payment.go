@@ -48,15 +48,16 @@ func (pu *paymentUseCase) AddPaymentMethod(payment models.NewPaymentMethod) (mod
 }
 
 // Razorpay
-func (pu *paymentUseCase) MakePaymentRazorpay(orderId, userId int) ([]models.CombinedOrderDetails, string, error) {
+func (pu *paymentUseCase) MakePaymentRazorpay(orderId, userId int) (models.CombinedOrderDetails, string, error) {
+
 	if orderId <= 0 || userId <= 0 {
-		return nil, "", errors.New("please provide valid IDs")
+		return models.CombinedOrderDetails{}, "", errors.New("please provide valid IDs")
 	}
 
 	order, err := pu.order_Repo.GetOrder(orderId)
 	if err != nil {
-		err = errors.New("error in getting order details through order id: " + err.Error())
-		return nil, "", err
+		err = errors.New("error in getting order details through order id" + err.Error())
+		return models.CombinedOrderDetails{}, "", err
 	}
 
 	client := razorpay.NewClient(pu.cfg.RazorPay_key_id, pu.cfg.RazorPay_key_secret)
@@ -69,25 +70,21 @@ func (pu *paymentUseCase) MakePaymentRazorpay(orderId, userId int) ([]models.Com
 
 	body, err := client.Order.Create(data, nil)
 	if err != nil {
-		return nil, "", err
+		return models.CombinedOrderDetails{}, "", nil
 	}
 
-	razorPayOrderId, ok := body["id"].(string)
-	if !ok {
-		return nil, "", errors.New("failed to extract Razorpay order ID")
-	}
+	razorPayOrderId := body["id"].(string)
 
 	err = pu.paymentRepository.AddRazorPayDetails(orderId, razorPayOrderId)
 	if err != nil {
-		return nil, "", err
+		return models.CombinedOrderDetails{}, "", err
 	}
-
-	body2, err := pu.order_Repo.GetDetailedOrderThroughId(orderId)
+	body2, err := pu.order_Repo.GetDetailedOrderThroughId(int(order.ID))
 	if err != nil {
-		return nil, "", err
+		return models.CombinedOrderDetails{}, "", err
 	}
 
-	return []models.CombinedOrderDetails{body2}, razorPayOrderId, nil
+	return body2, razorPayOrderId, nil
 }
 
 func (pu *paymentUseCase) SavePaymentDetails(paymentId, razorId, orderId string) error {

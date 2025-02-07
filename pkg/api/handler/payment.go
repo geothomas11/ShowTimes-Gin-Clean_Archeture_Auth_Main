@@ -4,7 +4,10 @@ import (
 	interfaces "ShowTimes/pkg/usecase/interface"
 	"ShowTimes/pkg/utils/models"
 	"ShowTimes/pkg/utils/response"
+	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,4 +40,66 @@ func (ph *PaymentHandler) AddPaymentMethod(c *gin.Context) {
 	successResp := response.ClientResponse(http.StatusOK, "Successfully added", paymentResp, nil)
 	c.JSON(http.StatusOK, successResp)
 
+}
+
+// razor
+
+func (ph *PaymentHandler) MakePaymentRazorpay(c *gin.Context) {
+
+	userId := c.Query("user_id")
+
+	userIdInt, err := strconv.Atoi(userId)
+	if err != nil {
+		err := errors.New("error in converting string to int userid")
+		fmt.Println("userId", err)
+		errRes := response.ClientResponse(http.StatusBadRequest, "Cannot make payment", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	// userId := 5
+	orderId := c.Query("order_id")
+	orderIdInt, err := strconv.Atoi(orderId)
+	if err != nil {
+		fmt.Println("error conversion", err)
+		err := errors.New("error in converting string to int orderId")
+		errRes := response.ClientResponse(http.StatusBadRequest, "error", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	body, razorId, err := ph.paymentUseCase.MakePaymentRazorpay(orderIdInt, userIdInt)
+
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "error", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	// razorPay:=
+
+	c.HTML(http.StatusOK, "index.html", gin.H{
+
+		"final_price": body.FinalPrice * 100,
+		"razor_id":    razorId,
+		"user_id":     userId,
+		"order_id":    body.OrderId,
+		"user_name":   body.Name,
+		"total":       int(body.FinalPrice),
+		// "razor_key": razorPay,
+	})
+}
+
+func (pu *PaymentHandler) VerifyPayment(c *gin.Context) {
+	orderId := c.Query("order_id")
+	paymentId := c.Query("payment_id")
+	razorId := c.Query("razor_id")
+
+	if err := pu.paymentUseCase.SavePaymentDetails(paymentId, razorId, orderId); err != nil {
+		errorRes := response.ClientResponse(http.StatusInternalServerError, "could not update payment details", nil, err.Error())
+		c.JSON(http.StatusOK, errorRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "Successfully updated payment details", nil, nil)
+	c.JSON(http.StatusOK, successRes)
 }

@@ -103,7 +103,11 @@ func (ou *orderUseCase) OrderItemsFromCart(orderFromCart models.OrderFromCart, u
 		return models.OrderSuccessResponse{}, err
 	}
 
-	orderSuccessResponse, err := ou.orderRepository.GetBriefOrderDetails(order_id)
+	// orderSuccessResponse, err := ou.orderRepository.GetBriefOrderDetails(order_id)
+	// if err != nil {
+	// 	return models.OrderSuccessResponse{}, err
+	// }
+	err = ou.orderRepository.UpdateOrder(order_id)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
@@ -116,6 +120,10 @@ func (ou *orderUseCase) OrderItemsFromCart(orderFromCart models.OrderFromCart, u
 			return models.OrderSuccessResponse{}, err
 		}
 
+	}
+	orderSuccessResponse, err := ou.orderRepository.GetBriefOrderDetails(order_id)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
 	}
 	return orderSuccessResponse, nil
 
@@ -242,7 +250,9 @@ func (ou *orderUseCase) ApproveOrder(orderId int) error {
 	if ShipmentStatus == "delivered" {
 		return errors.New("this item is already delivered")
 	}
+	fmt.Println("ss ou", ShipmentStatus)
 	if ShipmentStatus == "processing" {
+		fmt.Println("usc order")
 		err := ou.orderRepository.ApproveOrder(orderId)
 		if err != nil {
 			return err
@@ -262,6 +272,7 @@ func (ou *orderUseCase) ApproveOrder(orderId int) error {
 			return err
 		}
 	}
+	fmt.Println("last ao")
 	return nil
 
 }

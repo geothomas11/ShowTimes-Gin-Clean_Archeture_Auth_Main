@@ -11,10 +11,11 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, Ca
 	engine.POST("/adminlogin", adminHandler.LoginHandler)
 
 	engine.Use(middleware.AdminAuthMiddleware)
-	engine.GET("/salesreport", adminHandler.FilteredSalesReport)
 
 	{
 		engine.GET("/dashboard", adminHandler.AdminDashboard)
+		engine.GET("/currentsalesreport", adminHandler.FilteredSalesReport)
+		engine.GET("/salesreport", adminHandler.SalesReportByDate)
 
 		userManagement := engine.Group("/users")
 		{

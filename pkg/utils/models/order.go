@@ -33,7 +33,7 @@ type OrderProductDetails struct {
 	ProductID   uint    `json:"product_id"`
 	ProductName string  `json:"product_name"`
 	Quantity    int     `json:"quantity"`
-	TOtoalPrice float64 `json:"total_price"`
+	TotalPrice  float64 `json:"total_price"`
 }
 
 type FullOrderDetails struct {

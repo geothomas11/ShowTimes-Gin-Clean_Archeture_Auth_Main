@@ -127,7 +127,7 @@ func (or *orderRepository) GetShipmentStatus(orderID int) (string, error) {
 }
 
 func (or *orderRepository) UpdateOrder(orderID int) error {
-	err := or.db.Exec("UPDATE orders SET S shipment_status ='processing' WHERE id =?", orderID).Error
+	err := or.db.Exec("UPDATE orders SET  shipment_status ='processing' WHERE id = ?", orderID).Error
 	if err != nil {
 		return err
 	}
@@ -168,6 +168,7 @@ func (or *orderRepository) OrderItems(ob models.OrderIncoming, price float64) (i
 	or.db.Raw(query, ob.UserID, ob.AddressID, ob.PaymentID, price).Scan(&id)
 	return id, nil
 }
+
 func (or *orderRepository) GetOrderDetails(userId int, page int, count int) ([]models.FullOrderDetails, error) {
 	if page == 0 {
 		page = 1
@@ -282,7 +283,7 @@ func (or *orderRepository) GetAllOrdersAdmin(offset, count int) ([]models.Combin
 
 }
 func (or *orderRepository) ApproveOrder(orderID int) error {
-	err := or.db.Exec("UPDATE orders SET shipment_status = 'shipped',approval = 'true' WHERE  id ? ", orderID).Error
+	err := or.db.Exec("UPDATE orders SET shipment_status = 'shipped',approval = 'true' WHERE  id = ? ", orderID).Error
 	if err != nil {
 		return err
 	}
@@ -290,7 +291,7 @@ func (or *orderRepository) ApproveOrder(orderID int) error {
 }
 
 func (or *orderRepository) ApproveCodPaid(orderID int) error {
-	err := or.db.Exec("UPDATE orders SET shipment_status='deliverd', approval = 'true',payment_status  WHERE id =? ", orderID).Error
+	err := or.db.Exec("UPDATE orders SET shipment_status='deliverd', approval = 'true',payment_status='paid'  WHERE id = ? ", orderID).Error
 	if err != nil {
 		return err
 	}
@@ -333,7 +334,15 @@ func (repo *orderRepository) GetOrder(orderId int) (domain.Order, error) {
 func (repo *orderRepository) GetDetailedOrderThroughId(orderId int) (models.CombinedOrderDetails, error) {
 	var body models.CombinedOrderDetails
 
-	query := `SELECT orders.id as order_id,orders.final_price,orders.shipment_status,orders.payment_status,users.name,users.email,users.phone,addresses.house_name,addresses.street,addresses.city,addresses.state,addresses.pin FROM orders INNER JOIN users ON orders.user_id = user.id INNER JOIN addresses ON orders.addresses_id = addresses.id WHERE orders.id = ?`
+	query := `SELECT orders.id as order_id,orders.final_price,
+orders.shipment_status,orders.payment_status,
+users.name,users.email,users.phone,
+addresses.house_name,addresses.street,
+addresses.city,addresses.state,
+addresses.pin 
+FROM orders INNER JOIN users 
+ON orders.user_id = users.id INNER JOIN addresses 
+ON orders.address_id = addresses.id WHERE orders.id =?`
 
 	if err := repo.db.Raw(query, orderId).Scan(&body).Error; err != nil {
 		err = errors.New("error in getting detailed order through id in repository:" + err.Error())

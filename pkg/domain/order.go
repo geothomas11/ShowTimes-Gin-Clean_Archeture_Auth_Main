@@ -10,7 +10,7 @@ type Order struct {
 	Address         Address       `json:"-" gorm:"foreignkey:AddressID"`
 	PaymentMethodID uint          `json:"paymentmethod_id"`
 	PaymentMethod   PaymentMethod `json:"-" gorm:"foreignkey:PaymentMethodID"`
-	ShipmentStatus  string        `json:"shipment_status" gorm:"default:'pending'"`
+	ShipmentStatus  string        `json:"shipment_status" gorm:"default:'processing'"`
 	PaymentStatus   string        `json:"payment_status" gorm:"default:'not paid'"`
 	FinalPrice      float64       `json:"final_price"`
 	Approval        bool          `json:"approval" gorm:"default:false"`
