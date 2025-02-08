@@ -6,6 +6,7 @@ import (
 	"ShowTimes/pkg/utils/models"
 	"errors"
 	"fmt"
+	"unicode"
 
 	"mime/multipart"
 	"regexp"
@@ -241,4 +242,21 @@ func (h *helper) GetTimeFromPeriod(timePeriod string) (time.Time, time.Time) {
 	}
 	return endDate.AddDate(0, 0, -6), endDate
 
+}
+func (h *helper) ValidateDate(dateString string) bool {
+
+	dateLayout := "2006-01-02"
+
+	_, err := time.Parse(dateLayout, dateString)
+
+	return err == nil
+}
+
+func (h *helper) ValidateAlphabets(data string) (bool, error) {
+    for _, char := range data {
+        if !unicode.IsLetter(char) {
+            return false, errors.New("data contains non-alphabetical character")
+        }
+    }
+    return true, nil
 }
