@@ -349,6 +349,7 @@ func (ou *orderUseCase) ReturnOrderCod(orderId, userId int) error {
 		}
 
 	}
+	//cod
 	if paymentType == 2 {
 		if shipmentStatus == "delivered" {
 			err = ou.orderRepository.ReturnOrderRazorPay(orderId)
