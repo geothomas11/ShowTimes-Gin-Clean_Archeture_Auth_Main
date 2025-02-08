@@ -16,4 +16,5 @@ type UserRepository interface {
 	ChangePassword(userID, Password string) error
 	FindUserById(id string) (models.UserSignInResponse, error)
 	AddressExist(orderBody models.OrderIncoming) (bool, error)
+	
 }

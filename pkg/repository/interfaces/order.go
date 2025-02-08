@@ -35,6 +35,7 @@ type OrderRepository interface {
 	GetOrder(orderId int) (domain.Order, error)
 	GetDetailedOrderThroughId(orderId int) (models.CombinedOrderDetails, error)
 	// ApproveRazorPaid(orderID int) error
-	// GetPaymentType(orderID int) (int, error)
 	// ApproveRazorDelivered(orderID int) error
+	ReturnOrderRazorPay(order int) error
+	GetPaymentType(orderID int) (int, error)
 }

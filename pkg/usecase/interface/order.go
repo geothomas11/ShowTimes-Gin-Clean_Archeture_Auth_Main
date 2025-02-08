@@ -12,4 +12,5 @@ type OrderUseCase interface {
 	ApproveOrder(orderId int) error
 	CancelOrderFromAdmin(orderId int) error
 	ReturnOrderCod(orderId, userId int) error
+	// GetPaymentType(orderID int) (int, error)
 }

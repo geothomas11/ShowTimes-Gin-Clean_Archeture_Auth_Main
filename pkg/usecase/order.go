@@ -324,6 +324,10 @@ func (ou *orderUseCase) ReturnOrderCod(orderId, userId int) error {
 	if err != nil {
 		return err
 	}
+	paymentType, err := ou.orderRepository.GetPaymentType(orderId)
+	if err != nil {
+		return err
+	}
 	if shipmentStatus == "cancelled" {
 		return errors.New("the order is cancelled, cannot return it")
 	}
@@ -336,13 +340,23 @@ func (ou *orderUseCase) ReturnOrderCod(orderId, userId int) error {
 	if shipmentStatus == "shipped" {
 		return errors.New("the order is shipped ,cannot return it")
 	}
-	if shipmentStatus == "delivered" {
-		err = ou.orderRepository.ReturnOrderCod(orderId)
-		if err != nil {
-			return err
+	if paymentType == 1 {
+		if shipmentStatus == "delivered" {
+			err = ou.orderRepository.ReturnOrderCod(orderId)
+			if err != nil {
+				return err
+			}
 		}
-		return nil
+
+	}
+	if paymentType == 2 {
+		if shipmentStatus == "delivered" {
+			err = ou.orderRepository.ReturnOrderRazorPay(orderId)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 	return nil
-
 }

@@ -125,6 +125,15 @@ func (or *orderRepository) GetShipmentStatus(orderID int) (string, error) {
 	}
 	return status, nil
 }
+func (or *orderRepository) GetPaymentType(orderID int) (int, error) {
+	var status int
+	err := or.db.Raw("SELECT payment_method_id FROM orders WHERE id = ?", orderID).Scan(&status).Error
+	if err != nil {
+		return 0, err
+	}
+	return status, nil
+
+}
 
 func (or *orderRepository) UpdateOrder(orderID int) error {
 	err := or.db.Exec("UPDATE orders SET  shipment_status ='processing' WHERE id = ?", orderID).Error
@@ -250,6 +259,16 @@ func (or *orderRepository) ReturnOrderCod(orderID int) error {
 	shipStatus := "returned"
 	payStatus := "processing"
 	err := or.db.Exec("UPATE orders SET shipment_status = ?, approval ='false',payment_status = ? WHERE id = ? ", shipStatus, payStatus, orderID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+func (or *orderRepository) ReturnOrderRazorPay(orderId int) error {
+	shipStatus := "returned"
+	payStatus := "credited to wallet"
+	err := or.db.Exec("UPDATE orders SET shipmentStatus = ?,approval='false', payment_status = ? WHERE id = ?", shipStatus, payStatus, orderId).Error
 	if err != nil {
 		return err
 	}
