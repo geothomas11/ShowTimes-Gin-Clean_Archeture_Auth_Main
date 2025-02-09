@@ -16,14 +16,17 @@ type orderUseCase struct {
 	cartRepository    repo_interface.CartRepository
 	userRepository    repo_interface.UserRepository
 	paymentRepository repo_interface.PaymentRepository
+	walletRepo        repo_interface.WalletRepository
 }
 
-func NewOrderUseCase(orderRepo repo_interface.OrderRepository, cartRepo repo_interface.CartRepository, userRepo repo_interface.UserRepository, paymentRepo repo_interface.PaymentRepository) interfaces.OrderUseCase {
+func NewOrderUseCase(orderRepo repo_interface.OrderRepository,
+	walletRepo repo_interface.WalletRepository, cartRepo repo_interface.CartRepository, userRepo repo_interface.UserRepository, paymentRepo repo_interface.PaymentRepository) interfaces.OrderUseCase {
 	return &orderUseCase{
 		orderRepository:   orderRepo,
 		cartRepository:    cartRepo,
 		userRepository:    userRepo,
 		paymentRepository: paymentRepo,
+		walletRepo:        walletRepo,
 	}
 
 }
@@ -56,7 +59,7 @@ func (ou *orderUseCase) Checkout(userID int) (models.CheckoutDetails, error) {
 
 }
 
-func (ou *orderUseCase) OrderItemsFromCart(orderFromCart models.OrderFromCart, userID int) (models.OrderSuccessResponse, error) {
+func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID int) (models.OrderSuccessResponse, error) {
 	var orderBody models.OrderIncoming
 	err := copier.Copy(&orderBody, &orderFromCart)
 	if err != nil {
@@ -196,6 +199,10 @@ func (ou *orderUseCase) CancelOrders(orderId int, userId int) error {
 	if err != nil {
 		return err
 	}
+	paymentStatus, err := ou.orderRepository.GetPaymentStatus(orderId)
+	if err != nil {
+		return err
+	}
 
 	if shipmentStatus == "pending" || shipmentStatus == "returned" || shipmentStatus == "return" {
 		return fmt.Errorf("this order is in %s, so no point in cancelling", shipmentStatus)
@@ -206,6 +213,16 @@ func (ou *orderUseCase) CancelOrders(orderId int, userId int) error {
 	}
 	if shipmentStatus == "Delivered" {
 		return errors.New("the order is delivered, you can return it")
+	}
+	if paymentStatus == "paid" || paymentStatus == "PAID" {
+		amount, err := ou.orderRepository.GetFinalPriceOrder(orderId)
+		if err != nil {
+			return err
+		}
+		err = ou.walletRepo.AddToWallet(userId, amount)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = ou.orderRepository.CancelOrders(orderId)

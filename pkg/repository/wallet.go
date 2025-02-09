@@ -43,3 +43,11 @@ func (wr *WalletDB) IsWalletExist(userID int) (bool, error) {
 	return count >= 1, nil
 
 }
+func (wr *WalletDB) AddToWallet(userID int, Amount float64) error {
+	err := wr.Db.Exec("UPDATE wallets SET amount =amount+? WHERE user_id = ? returning amount ", Amount, userID).Error
+	if err != nil {
+		return errors.New("inserting into wallet failed at db")
+	}
+	return nil
+
+}

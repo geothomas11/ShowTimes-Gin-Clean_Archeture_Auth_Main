@@ -45,7 +45,7 @@ func (oh *OrderHandler) Checkout(c *gin.Context) {
 
 }
 
-func (oh *OrderHandler) OrderItemsFromCart(c *gin.Context) {
+func (oh *OrderHandler) OrderItems(c *gin.Context) {
 	id, errs := c.Get("id")
 	if !errs {
 		err := errors.New("error getting id")
@@ -60,7 +60,7 @@ func (oh *OrderHandler) OrderItemsFromCart(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorResp)
 		return
 	}
-	OrderSuccessResponse, err := oh.orderUseCase.OrderItemsFromCart(orderFromCart, userID)
+	OrderSuccessResponse, err := oh.orderUseCase.OrderItems(orderFromCart, userID)
 	if err != nil {
 		errorRes := response.ClientResponse(http.StatusInternalServerError, "Could not do the order", nil, err.Error())
 		c.JSON(http.StatusInternalServerError, errorRes)

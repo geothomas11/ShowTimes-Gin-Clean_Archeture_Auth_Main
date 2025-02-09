@@ -178,6 +178,14 @@ func (or *orderRepository) OrderItems(ob models.OrderIncoming, price float64) (i
 	return id, nil
 }
 
+func (or *orderRepository) GetPaymentStatus(orderID int) (string, error) {
+	var paymentStatus string
+	if err := or.db.Raw("select payment_status from orders where id = ?", orderID).Scan(&paymentStatus).Error; err != nil {
+		return "", errors.New("retriving data from database failed")
+	}
+	return paymentStatus, nil
+}
+
 func (or *orderRepository) GetOrderDetails(userId int, page int, count int) ([]models.FullOrderDetails, error) {
 	if page == 0 {
 		page = 1
@@ -370,4 +378,12 @@ ON orders.address_id = addresses.id WHERE orders.id =?`
 	fmt.Println("body in repo", body.OrderId)
 	return body, nil
 
+}
+func (or *orderRepository) GetFinalPriceOrder(orderID int) (float64, error) {
+	var final_price float64
+	err := or.db.Raw("select final_price from orders where id = ?", orderID).Scan(&final_price).Error
+	if err != nil {
+		return 0.0, errors.New("getting final price is failed at db")
+	}
+	return final_price, nil
 }
