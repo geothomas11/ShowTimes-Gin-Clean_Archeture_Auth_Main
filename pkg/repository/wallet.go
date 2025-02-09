@@ -13,12 +13,12 @@ type WalletDB struct {
 	Db *gorm.DB
 }
 
-func NewWalletReppsitory(db *gorm.DB) interfaces.WalletRepository {
+func NewWalletRepository(db *gorm.DB) interfaces.WalletRepository {
 	return &WalletDB{Db: db}
 }
 func (wr *WalletDB) CreateWallet(userID int) error {
-	result := wr.Db.Exec("INSERT INTO wallets(userID) VALUES (?) RETURNING id  ", userID)
-	if result.Error != nil {
+	err := wr.Db.Exec("INSERT INTO wallets (created_at ,user_id) VALUES (NOW(),?) RETURNING id", userID).Error
+	if err != nil {
 		fmt.Println("err in wallet creation id")
 		return errors.New("cannot create wallet error at database")
 	}

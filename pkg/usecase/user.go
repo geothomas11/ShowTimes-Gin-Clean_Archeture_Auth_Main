@@ -3,28 +3,31 @@ package usecase
 import (
 	"ShowTimes/pkg/config"
 	helper_interfaces "ShowTimes/pkg/helper/interface"
-	interfaces "ShowTimes/pkg/usecase/interface"
+	services "ShowTimes/pkg/usecase/interface"
 	"ShowTimes/pkg/utils/models"
 	"errors"
 	"strconv"
 
+	"ShowTimes/pkg/repository/interfaces"
 	interfaces_repo "ShowTimes/pkg/repository/interfaces"
 )
 
-type UserHandler struct {
-	userUseCase interfaces.UserUseCase
-}
+//	type UserHandler struct {
+//		userUseCase interfaces.UserUseCase
+//	}
 type userUseCase struct {
-	userRepo interfaces_repo.UserRepository
-	cfg      config.Config
-	helper   helper_interfaces.Helper
+	userRepo   interfaces_repo.UserRepository
+	cfg        config.Config
+	helper     helper_interfaces.Helper
+	walletRepo interfaces.WalletRepository
 }
 
-func NewUserUseCase(repo interfaces_repo.UserRepository, cfg config.Config, h helper_interfaces.Helper) interfaces.UserUseCase {
+func NewUserUseCase(repo interfaces_repo.UserRepository, cfg config.Config, h helper_interfaces.Helper, wallet interfaces.WalletRepository) services.UserUseCase {
 	return &userUseCase{
-		userRepo: repo,
-		cfg:      cfg,
-		helper:   h,
+		userRepo:   repo,
+		cfg:        cfg,
+		helper:     h,
+		walletRepo: wallet,
 	}
 }
 
@@ -49,7 +52,13 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 	userData, err := u.userRepo.UserSignup(user)
 	if err != nil {
 		return models.TokenUsers{}, err
+
 	}
+	err = u.walletRepo.CreateWallet(userData.Id)
+	if err != nil {
+		return models.TokenUsers{}, err
+	}
+
 	tokenString, err := u.helper.GenerateTokenClients(userData)
 	if err != nil {
 		return models.TokenUsers{}, errors.New("could not create token")
