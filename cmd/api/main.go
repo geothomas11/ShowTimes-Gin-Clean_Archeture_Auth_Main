@@ -3,8 +3,6 @@ package main
 import (
 	"ShowTimes/pkg/config"
 	"ShowTimes/pkg/di"
-
-	// "ShowTimes/pg/di"
 	"log"
 
 	"github.com/joho/godotenv"

@@ -18,6 +18,13 @@ type AdminHandler struct {
 	adminUseCase interfaces.AdminUseCase
 }
 
+func NewAdminHandler(usecase interfaces.AdminUseCase) *AdminHandler {
+	return &AdminHandler{
+		adminUseCase: usecase,
+	}
+
+}
+
 // LoginHandler handles the login operation for an admin.
 // @Summary Admin login
 // @Description Authenticate an admin and get access token
@@ -25,17 +32,11 @@ type AdminHandler struct {
 // @Accept json
 // @Produce json
 // @Param body body models.AdminLogin true "Admin credentials for login"
-// @Success 200 {object} successResp "Admin login successful"
-// @Failure 400 {object} errResp "Invalid request or constraints not satisfied"
-// @Failure 401 {object} errREsp "Unauthorized: cannot authenticate user"
-// @Router /admin/ [post
+// @Success 200 {object} response.Response "Admin login successful"
+// @Failure 400 {object} response.Response "Invalid request or constraints not satisfied"
+// @Failure 401 {object} response.Response "Unauthorized: cannot authenticate user"
+// @Router /admin/ [post]
 
-func NewAdminHandler(usecase interfaces.AdminUseCase) *AdminHandler {
-	return &AdminHandler{
-		adminUseCase: usecase,
-	}
-
-}
 func (ad *AdminHandler) LoginHandler(c *gin.Context) {
 	var adminDetails models.AdminLogin
 
@@ -91,8 +92,8 @@ func (ad *AdminHandler) ValidateRefreshTokenAndCreateNewAccess(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id query string true "User ID to block" Format(uuid)
-// @Success 200 {object} SuccessResponse "User blocked successfully"
-// @Failure 400 {object} ErrorResponse "Failed to block user"
+// @Success 200 {object} response.Response "User blocked successfully"
+// @Failure 400 {object} response.Response "Failed to block user"
 // @Router /admin/block [put]
 
 func (ad *AdminHandler) BlockUser(c *gin.Context) {
@@ -108,6 +109,17 @@ func (ad *AdminHandler) BlockUser(c *gin.Context) {
 
 }
 
+// UnBlockUser unblocks a user by ID.
+// @Summary Unblock a user
+// @Description Unblocks a user based on the provided ID
+// @Tags admin
+// @Accept json
+// @Produce json
+// @Param id query string true "User ID to unblock"
+// @Success 200 {object} response.Response "User unblocked successfully"
+// @Failure 400 {object} response.Response "Invalid request or unable to unblock user"
+// @Router /admin/users/unblock [patch]
+
 func (ad *AdminHandler) UnBlockUser(c *gin.Context) {
 	id := c.Query("id")
 	err := ad.adminUseCase.UnBlockUser(id)
@@ -121,6 +133,17 @@ func (ad *AdminHandler) UnBlockUser(c *gin.Context) {
 	c.JSON(http.StatusOK, successResp)
 
 }
+
+// GetUsers retrieves users based on the provided page number.
+// @Summary Retrieve users with pagination
+// @Description Retrieves users based on the provided page number
+// @Tags admin
+// @Accept json
+// @Produce json
+// @Param page query int true "Page number for pagination"
+// @Success 200 {object} response.Response "Users retrieved successfully"
+// @Failure 400 {object} response.Response "Invalid request or unable to retrieve users"
+// @Router /admin/users [get]
 func (ad *AdminHandler) GetUsers(c *gin.Context) {
 
 	pageStr := c.Query("page")
@@ -144,6 +167,16 @@ func (ad *AdminHandler) GetUsers(c *gin.Context) {
 
 }
 
+// AdminDashBoard retrieves the dashboard information for admin.
+// @Summary Retrieve admin dashboard information
+// @Description Retrieves dashboard information for admin
+// @Tags admin
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.Response "Admin dashboard retrieved successfully"
+// @Failure 400 {object} response.Response "Invalid request or unable to retrieve dashboard"
+// @Router /admin/dashboard [get]
+
 func (ah *AdminHandler) AdminDashboard(c *gin.Context) {
 	dashbord, err := ah.adminUseCase.AdminDashboard()
 	if err != nil {
@@ -157,6 +190,17 @@ func (ah *AdminHandler) AdminDashboard(c *gin.Context) {
 }
 
 // salesReport
+
+// FilteredSalesReport retrieves the sales report for a specified time period.
+// @Summary Retrieve sales report for a specific time period
+// @Description Retrieves sales report for the specified time period
+// @Tags admin
+// @Accept json
+// @Produce json
+// @Param period query string true "Time period for sales report"
+// @Success 200 {object} response.Response "Sales report retrieved successfully"
+// @Failure 500 {object} response.Response "Unable to retrieve sales report"
+// @Router /admin/currentsalesreport [get]
 func (ah *AdminHandler) FilteredSalesReport(c *gin.Context) {
 	timePeriod := c.Query("period")
 	salesReport, err := ah.adminUseCase.FilteredSalesReport(timePeriod)

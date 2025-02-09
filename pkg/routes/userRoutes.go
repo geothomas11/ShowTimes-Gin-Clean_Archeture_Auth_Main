@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otphandler *handler.OtpHandler, cartHandler *handler.CartHandler, orderHandler *handler.OrderHandler, paymenthandler *handler.PaymentHandler, paymentHandler *handler.PaymentHandler) {
+func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otphandler *handler.OtpHandler, cartHandler *handler.CartHandler, orderHandler *handler.OrderHandler, paymenthandler *handler.PaymentHandler, paymentHandler *handler.PaymentHandler, walletHandler *handler.WalletHandler) {
 	engine.GET("/google_callback", userHandler.GoogleCallback)
 	engine.GET("/google_login", userHandler.Authv2)
 
@@ -55,5 +55,9 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpha
 		// {
 		// 	Payment.POST("payment")
 		// }
+		wallet := engine.Group("/wallet", walletHandler.GetWallet)
+		{
+			wallet.GET("/getwallet", walletHandler.GetWallet)
+		}
 	}
 }
