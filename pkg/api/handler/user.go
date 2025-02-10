@@ -33,17 +33,17 @@ func NewUserHandler(usecase interfaces.UserUseCase) *UserHandler {
 }
 
 // UserSignUp registers a new user.
+//
 // @Summary Register a new user
-// @Description Registers a new user with provided details
-// @Tags user
+// @Description Registers a new user with the provided details.
+// @Tags Users
 // @Accept json
 // @Produce json
-// @security BearerTokenAuth
-// @Param body body models.UserDetails true "User details for sign-up"
+// @Security BearerTokenAuth
+// @Param request body models.UserDetails true "User details for sign-up"
 // @Success 201 {object} response.Response "User signed up successfully"
-// @Failure 400 {object} response.Response "Invalid request or constraints not satisfied"
+// @Failure 400 {object} response.Response "Bad request: Invalid input format or constraints not satisfied"
 // @Router /user/signup [post]
-
 func (u *UserHandler) UserSignUp(c *gin.Context) {
 	var user models.UserDetails
 
@@ -77,17 +77,17 @@ func (u *UserHandler) UserSignUp(c *gin.Context) {
 }
 
 // LoginHandler handles user login.
-// @Summary Handle user login
-// @Description Handles user login using provided credentials
-// @Tags users
+//
+// @Summary User login
+// @Description Authenticates a user using provided credentials.
+// @Tags Users
 // @Accept json
 // @Produce json
-// @security BearerTokenAuth
-// @Param body body models.UserLogin true "User credentials for login"
+// @Security BearerTokenAuth
+// @Param request body models.UserLogin true "User login credentials"
 // @Success 200 {object} response.Response "User logged in successfully"
-// @Failure 400 {object} response.Response "Invalid request or unable to log in user"
+// @Failure 400 {object} response.Response "Bad request: Invalid credentials or unable to log in"
 // @Router /user/login [post]
-
 func (u *UserHandler) LoginHandler(c *gin.Context) {
 	var user models.UserLogin
 
@@ -113,8 +113,13 @@ func (u *UserHandler) LoginHandler(c *gin.Context) {
 
 }
 
-//Google Authentication
-
+// Authv2 initiates Google authentication.
+//
+// @Summary Google login
+// @Description Redirects the user to Google login page.
+// @Tags Users
+// @Success 302 "Redirects to Google login page"
+// @Router /user/google_login [get]
 func (h *UserHandler) Authv2(c *gin.Context) {
 	url := config.AppConfig.GoogleLoginConfig.AuthCodeURL("randomstate")
 
@@ -164,21 +169,18 @@ func (h *UserHandler) GoogleCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, userResponse)
 }
 
-// AddAddress adds an address for a user.
+// AddAddress adds a new address for the user.
+//
 // @Summary Add user address
-// @Description Adds an address for the user identified by ID
-// @Tags user
+// @Description Adds an address for the authenticated user.
+// @Tags Users
 // @Accept json
 // @Produce json
-// @security BearerTokenAuth
-// @Param id header int true "User ID" Format(int64)
-// @Param body body models.AddressInfoResponse true "Address details for addition"
+// @Security BearerTokenAuth
+// @Param request body models.AddressInfoResponse true "User address details"
 // @Success 200 {object} response.Response "Address added successfully"
-// @Failure 400 {object} response.Response "Invalid request or constraints not satisfied"
+// @Failure 400 {object} response.Response "Bad request: Invalid input or unable to add address"
 // @Router /user/profile/address [post]
-
-//Profile Updates
-
 func (u *UserHandler) AddAddress(c *gin.Context) {
 	var address models.AddressInfoResponse
 
@@ -216,17 +218,18 @@ func (u *UserHandler) AddAddress(c *gin.Context) {
 
 }
 
-// ShowUserDetails retrieves details of a user.
-// @Summary Retrieve user details
-// @Description Retrieves details of the user identified by ID
-// @Tags users
+// ShowUserDetails retrieves user details.
+//
+// @Summary Get user details
+// @Description Retrieves the details of the authenticated user.
+// @Tags Users
 // @Accept json
 // @Produce json
-// @security BearerTokenAuth
-// @Param id header int true "User ID" Format(int64)
-// @Success 200 {object} response.Response "User details retrieved successfully"
-// @Failure 400 {object} response.Response "Invalid request or unable to get user details"
-
+// @Security BearerTokenAuth
+// @Param id header int true "User ID of the authenticated user"
+// @Success 200 {object} response.Response "Successfully retrieved user details"
+// @Failure 400 {object} response.Response "Bad request: Invalid user ID format or unable to retrieve details"
+// @Router /user/details [get]
 func (u *UserHandler) ShowUserDetails(c *gin.Context) {
 	userIdstring, _ := c.Get("id")
 	userId, strErr := userIdstring.(int)
@@ -245,16 +248,17 @@ func (u *UserHandler) ShowUserDetails(c *gin.Context) {
 	c.JSON(http.StatusOK, successResp)
 }
 
-// GetAllAddress retrieves all addresses of a user.
-// @Summary Retrieve all user addresses
-// @Description Retrieves all addresses of the user identified by ID
-// @Tags users
+// GetAllAddress retrieves all addresses of the authenticated user.
+//
+// @Summary Get all user addresses
+// @Description Retrieves all saved addresses of the authenticated user.
+// @Tags Users
 // @Accept json
 // @Produce json
-// @security BearerTokenAuth
-// @Param id header int true "User ID" Format(int64)
-// @Success 200 {object} response.Response "All user addresses retrieved successfully"
-// @Failure 400 {object} response.Response "Invalid request or unable to get user addresses"
+// @Security BearerTokenAuth
+// @Param id header int true "Authenticated User ID"
+// @Success 200 {object} response.Response "Successfully retrieved all user addresses"
+// @Failure 400 {object} response.Response "Bad request: Invalid user ID format or unable to retrieve addresses"
 // @Router /user/profile/alladdress [get]
 
 func (u *UserHandler) GetAllAddress(c *gin.Context) {
@@ -274,19 +278,19 @@ func (u *UserHandler) GetAllAddress(c *gin.Context) {
 	c.JSON(http.StatusOK, successResp)
 }
 
-// EditProfile updates user profile details.
+// EditProfile updates the profile details of the authenticated user.
+//
 // @Summary Update user profile
-// @Description Updates user profile details based on provided information
-// @Tags users
+// @Description Updates the profile information of the authenticated user.
+// @Tags Users
 // @Accept json
 // @Produce json
-// @security BearerTokenAuth
-// @Param id header int true "User ID" Format(int64)
-// @Param body body models.UsersProfileDetails true "User profile details for update"
+// @Security BearerTokenAuth
+// @Param id header int true "Authenticated User ID"
+// @Param request body models.UsersProfileDetails true "Updated user profile details"
 // @Success 200 {object} response.Response "User profile updated successfully"
-// @Failure 400 {object} response.Response "Invalid request or unable to update user profile"
+// @Failure 400 {object} response.Response "Bad request: Invalid input format or unable to update profile"
 // @Router /user/profile [patch]
-
 func (u *UserHandler) EditProfile(c *gin.Context) {
 	var details models.UsersProfileDetails
 
@@ -322,18 +326,19 @@ func (u *UserHandler) EditProfile(c *gin.Context) {
 
 }
 
-// ChangePassword changes the user's password.
+// ChangePassword updates the password of the authenticated user.
+//
 // @Summary Change user password
-// @Description Changes the password for the user identified by ID
-// @Tags users
+// @Description Allows the authenticated user to change their password.
+// @Tags Users
 // @Accept json
 // @Produce json
-// @security BearerTokenAuth
-// @Param id header int true "User ID" Format(int64)
-// @Param body body models.ChangePassword true "Password details for change"
+// @Security BearerTokenAuth
+// @Param id header int true "Authenticated User ID"
+// @Param request body models.ChangePassword true "New password details"
 // @Success 200 {object} response.Response "Password changed successfully"
-// @Failure 400 {object} response.Response "Invalid request or unable to change password"
-
+// @Failure 400 {object} response.Response "Bad request: Invalid input format or unable to change password"
+// @Router /user/password [patch]
 func (u *UserHandler) ChangePassword(c *gin.Context) {
 	var change models.ChangePassword
 	userString, er := c.Get("id")

@@ -23,19 +23,19 @@ func NewOrderHandler(OUsecase interfaces.OrderUseCase, PUseCase interfaces.Payme
 	}
 }
 
-// CheckOut processes the checkout for the user's order.
+// Checkout processes the checkout for the user's order.
 // @Summary Process checkout
 // @Description Processes the checkout for the user's order.
-// @Tags Order
+// @Tags Order Management
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param id header string true "User ID"
-// @Success 200 {object} response.Response  "Success: Checkout completed successfully"
-// @Failure 400 {object} response.Response  "Bad request: Getting user ID failed"
-// @Failure 401 {object} response.Response  "Unauthorized: Invalid or missing authentication"
-// @Failure 500 {object} response.Response  "Internal server error: Checkout failed"
-// @Router /user/orders/checkout [post]
+// @Param Authorization header string true "Bearer Token"
+// @Success 200 {object} response.Response "Success: Checkout completed successfully"
+// @Failure 400 {object} response.Response "Bad request: Getting user ID failed"
+// @Failure 401 {object} response.Response "Unauthorized: Invalid or missing authentication"
+// @Failure 500 {object} response.Response "Internal server error: Checkout failed"
+// @Router /user/orders/checkout [post]post]
 func (oh *OrderHandler) Checkout(c *gin.Context) {
 
 	userID, errs := c.Get("id")
@@ -60,19 +60,18 @@ func (oh *OrderHandler) Checkout(c *gin.Context) {
 
 // OrderItems places an order with items from the user's cart.
 // @Summary Place order from cart
-// @Description Places an order with items from the user's cart based on the provided details.
-// @Tags Order
+// @Description Places an order with items from the user's cart.
+// @Tags Order Management
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param id header string true "User ID"
+// @Param Authorization header string true "Bearer Token"
 // @Param OrderFromCart body models.OrderFromCart true "Order details from cart"
-// @Success 200 {object} response.Response  "Success: Order placed successfully"
-// @Failure 400 {object} response.Response  "Bad request: Error in getting ID or bad request"
-// @Failure 401 {object} response.Response  "Unauthorized: Invalid or missing authentication"
-// @Failure 500 {object} response.Response  "Internal server error: Could not place the order"
+// @Success 200 {object} response.Response "Success: Order placed successfully"
+// @Failure 400 {object} response.Response "Bad request: Error in getting user ID or invalid request"
+// @Failure 401 {object} response.Response "Unauthorized: Invalid or missing authentication"
+// @Failure 500 {object} response.Response "Internal server error: Could not place the order"
 // @Router /user/orders [post]
-
 func (oh *OrderHandler) OrderItems(c *gin.Context) {
 	id, errs := c.Get("id")
 	if !errs {
@@ -149,21 +148,18 @@ func (oh *OrderHandler) GetOrderDetails(c *gin.Context) {
 
 }
 
-// CancelOrder cancels an order by ID for the logged-in user.
-// @Summary Cancel order
-// @Description Cancels an order based on the provided order ID for the logged-in user.
-// @Tags Order
+// CancelOrderFromAdmin cancels an order by ID from an admin perspective.
+// @Summary Cancel order as admin
+// @Description Cancels an order based on the provided order ID from an admin perspective.
+// @Tags Admin Order Management
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param id query integer true "Order ID to cancel"
-// @Param id header string true "User ID"
-// @Success 200 {object} response.Response  "Success: Order canceled successfully"
-// @Failure 400 {object} response.Response  "Bad request: Error from orderID or error from userid"
-// @Failure 401 {object} response.Response  "Unauthorized: Invalid or missing authentication"
-// @Failure 500 {object} response.Response  "Internal server error: Could not cancel the order"
-// @Router /user/orders [delete]
-
+// @Param Authorization header string true "Bearer Token"
+// @Param order_id query integer true "Order ID to cancel"
+// @Success 200 {object} response.Response "Success: Order canceled successfully"
+// @Failure 500 {object} response.Response "Internal server error: Could not cancel the order"
+// @Router /admin/orders [delete]
 func (oh *OrderHandler) CancelOrder(c *gin.Context) {
 	orderID, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
@@ -202,7 +198,6 @@ func (oh *OrderHandler) CancelOrder(c *gin.Context) {
 // @Failure 401 {object} response.Response  "Unauthorized: Invalid or missing authentication"
 // @Failure 500 {object} response.Response  "Internal server error: Could not retrieve order details for admin"
 // @Router /admin/orders [get]
-
 func (oh *OrderHandler) GetAllOrdersAdmin(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	page, err := strconv.Atoi(pageStr)
@@ -245,7 +240,6 @@ func (oh *OrderHandler) GetAllOrdersAdmin(c *gin.Context) {
 // @Failure 401 {object} response.Response  "Unauthorized: Invalid or missing authentication"
 // @Failure 500 {object} response.Response  "Internal server error: Failed to approve the order"
 // @Router /admin/orders [patch]
-
 func (oh *OrderHandler) ApproveOrder(c *gin.Context) {
 	orderId, err := strconv.Atoi(c.Query("order_id"))
 	if err != nil {
@@ -276,7 +270,6 @@ func (oh *OrderHandler) ApproveOrder(c *gin.Context) {
 // @Success 200 {object} response.Response  "Success: Order canceled successfully"
 // @Failure 500 {object} response.Response  "Internal server error: Error from orderID or couldn't cancel the order"
 // @Router /admin/orders [delete]
-
 func (oh *OrderHandler) CancelOrderFromAdmin(c *gin.Context) {
 	order_id, err := strconv.Atoi(c.Query("order_id"))
 	if err != nil {
@@ -298,15 +291,15 @@ func (oh *OrderHandler) CancelOrderFromAdmin(c *gin.Context) {
 // ReturnOrder initiates the return process for a specific order.
 // @Summary Initiate order return
 // @Description Initiates the return process for an order based on the provided order ID and user ID.
-// @Tags Order
+// @Tags Order Management
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
+// @Param Authorization header string true "Bearer Token"
 // @Param order_id query integer true "Order ID to initiate return"
-// @Param id header string true "User ID"
-// @Success 200 {object} response.Response  "Success: Order returned successfully"
-// @Failure 400 {object} response.Response  "Bad request: Error from orderID or error from userid"
-// @Failure 500 {object} response.Response  "Internal server error: Couldn't initiate the order return"
+// @Success 200 {object} response.Response "Success: Order returned successfully"
+// @Failure 400 {object} response.Response "Bad request: Invalid order ID"
+// @Failure 500 {object} response.Response "Internal server error: Couldn't process the order return"
 // @Router /user/orders [patch]
 func (oh *OrderHandler) ReturnOrder(c *gin.Context) {
 	orderID, err := strconv.Atoi(c.Query("order_id"))
