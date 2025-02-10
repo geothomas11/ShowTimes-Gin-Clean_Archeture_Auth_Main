@@ -241,7 +241,7 @@ func (oh *OrderHandler) ReturnOrderCod(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errRes)
 	}
 	userID := userId.(int)
-	err = oh.orderUseCase.ReturnOrderCod(orderID, userID)
+	err = oh.orderUseCase.ReturnOrder(orderID, userID)
 	if err != nil {
 		errs := response.ClientResponse(http.StatusInternalServerError, "coudn't cancel the order", nil, err.Error())
 		c.JSON(http.StatusInternalServerError, errs)
