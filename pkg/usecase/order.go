@@ -267,7 +267,7 @@ func (ou *orderUseCase) ApproveOrder(orderId int) error {
 	if ShipmentStatus == "delivered" {
 		return errors.New("this item is already delivered")
 	}
-	fmt.Println("ss ou", ShipmentStatus)
+
 	if ShipmentStatus == "processing" {
 		fmt.Println("usc order")
 		err := ou.orderRepository.ApproveOrder(orderId)
@@ -325,7 +325,7 @@ func (ou *orderUseCase) CancelOrderFromAdmin(orderId int) error {
 	return nil
 }
 
-func (ou *orderUseCase) ReturnOrderCod(orderId, userId int) error {
+func (ou *orderUseCase) ReturnOrder(orderId, userId int) error {
 	if orderId < 0 {
 		return errors.New("invalid order id")
 	}
@@ -351,15 +351,26 @@ func (ou *orderUseCase) ReturnOrderCod(orderId, userId int) error {
 	if shipmentStatus == "pending" {
 		return errors.New("the order is pending, cannot return it")
 	}
+	if shipmentStatus == "processing" {
+		return errors.New("the order is processing cannot return it")
+	}
 	if shipmentStatus == "returned" {
 		return errors.New("the order is returned,cannot return it")
 	}
 	if shipmentStatus == "shipped" {
 		return errors.New("the order is shipped ,cannot return it")
 	}
+	amount, err := ou.orderRepository.GetFinalPriceOrder(orderId)
+	if err != nil {
+		return err
+	}
 	if paymentType == 1 {
 		if shipmentStatus == "delivered" {
 			err = ou.orderRepository.ReturnOrderCod(orderId)
+			if err != nil {
+				return err
+			}
+			err = ou.walletRepo.AddToWallet(userId, amount)
 			if err != nil {
 				return err
 			}
@@ -370,6 +381,10 @@ func (ou *orderUseCase) ReturnOrderCod(orderId, userId int) error {
 	if paymentType == 2 {
 		if shipmentStatus == "delivered" {
 			err = ou.orderRepository.ReturnOrderRazorPay(orderId)
+			if err != nil {
+				return err
+			}
+			err = ou.walletRepo.AddToWallet(userId, amount)
 			if err != nil {
 				return err
 			}

@@ -11,7 +11,7 @@ type OrderUseCase interface {
 	GetAllOrdersAdmin(page models.Page) ([]models.CombinedOrderDetails, error)
 	ApproveOrder(orderId int) error
 	CancelOrderFromAdmin(orderId int) error
-	ReturnOrderCod(orderId, userId int) error
+	ReturnOrder(orderId, userId int) error
 	// GetPaymentType(orderID int) (int, error)
 	// GetPaymentStatus(orderID int) (string, error)
 	// GetFinalPriceOrder(orderID int) (float64, error)

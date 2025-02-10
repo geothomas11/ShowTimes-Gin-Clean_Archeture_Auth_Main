@@ -247,7 +247,7 @@ func (or *orderRepository) CancelOrders(orderID int) error {
 		return err
 	}
 	if paymentMethod == 3 || paymentMethod == 2 {
-		err = or.db.Exec("UPDATE orders SET payment_status ='refunded' WHERE id = ?", orderID).Error
+		err = or.db.Exec("UPDATE orders SET payment_status = 'credited to wallet' WHERE id = ?", orderID).Error
 		if err != nil {
 			return err
 		}
