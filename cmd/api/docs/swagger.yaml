@@ -1,8 +1,8 @@
 info:
   contact:
     name: API Support
-  description: ShowTimes is an E-commerce platform to purchase Watch
-  title: Go + Gin E-Commerce API Watch Hive
+  description: Show Times is an E-commerce platform to purchase Watch
+  title: Go + Gin E-Commerce API Show Times
   version: 1.0.0
 paths: {}
 securityDefinitions:

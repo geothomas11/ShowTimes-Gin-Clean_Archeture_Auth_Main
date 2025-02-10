@@ -38,6 +38,7 @@ func NewUserHandler(usecase interfaces.UserUseCase) *UserHandler {
 // @Tags user
 // @Accept json
 // @Produce json
+// @security BearerTokenAuth
 // @Param body body models.UserDetails true "User details for sign-up"
 // @Success 201 {object} response.Response "User signed up successfully"
 // @Failure 400 {object} response.Response "Invalid request or constraints not satisfied"
@@ -81,6 +82,7 @@ func (u *UserHandler) UserSignUp(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
+// @security BearerTokenAuth
 // @Param body body models.UserLogin true "User credentials for login"
 // @Success 200 {object} response.Response "User logged in successfully"
 // @Failure 400 {object} response.Response "Invalid request or unable to log in user"
@@ -150,10 +152,6 @@ func (h *UserHandler) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	// fmt.Println("userdata", userData)
-
-	// userDetails := models.UserDetailsGoogleAuth{}
-
 	var userdata models.UserDetails
 
 	json.Unmarshal(userData, &userdata)
@@ -172,6 +170,7 @@ func (h *UserHandler) GoogleCallback(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
+// @security BearerTokenAuth
 // @Param id header int true "User ID" Format(int64)
 // @Param body body models.AddressInfoResponse true "Address details for addition"
 // @Success 200 {object} response.Response "Address added successfully"
@@ -223,6 +222,7 @@ func (u *UserHandler) AddAddress(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
+// @security BearerTokenAuth
 // @Param id header int true "User ID" Format(int64)
 // @Success 200 {object} response.Response "User details retrieved successfully"
 // @Failure 400 {object} response.Response "Invalid request or unable to get user details"
@@ -251,6 +251,7 @@ func (u *UserHandler) ShowUserDetails(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
+// @security BearerTokenAuth
 // @Param id header int true "User ID" Format(int64)
 // @Success 200 {object} response.Response "All user addresses retrieved successfully"
 // @Failure 400 {object} response.Response "Invalid request or unable to get user addresses"
@@ -279,6 +280,7 @@ func (u *UserHandler) GetAllAddress(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
+// @security BearerTokenAuth
 // @Param id header int true "User ID" Format(int64)
 // @Param body body models.UsersProfileDetails true "User profile details for update"
 // @Success 200 {object} response.Response "User profile updated successfully"
@@ -326,6 +328,7 @@ func (u *UserHandler) EditProfile(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
+// @security BearerTokenAuth
 // @Param id header int true "User ID" Format(int64)
 // @Param body body models.ChangePassword true "Password details for change"
 // @Success 200 {object} response.Response "Password changed successfully"

@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "ShowTimes/cmd/api/docs"
 	"ShowTimes/pkg/config"
 	"ShowTimes/pkg/di"
 	"log"
@@ -10,9 +11,9 @@ import (
 	_ "github.com/swaggo/gin-swagger"
 )
 
-// @title Go + Gin E-Commerce API Watch Hive
+// @title Go + Gin E-Commerce API Show Times
 // @version 1.0.0
-// @description ShowTimes is an E-commerce platform to purchase Watch
+// @description Show Times is an E-commerce platform to purchase Watch
 // @contact.name API Support
 // @securityDefinitions.apikey BearerTokenAuth
 // @in header
