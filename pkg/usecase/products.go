@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"ShowTimes/pkg/domain"
 	helper "ShowTimes/pkg/helper/interface"
 
 	"mime/multipart"
@@ -56,12 +55,23 @@ func (i *productUseCase) ListProducts(pageNo, pageList int) ([]models.ProductUse
 
 }
 
-func (usecase *productUseCase) EditProducts(inventory domain.Product, id int) (domain.Product, error) {
-	modInventory, err := usecase.repository.EditProducts(inventory, id)
-	if err != nil {
-		return domain.Product{}, err
+func (usecase *productUseCase) EditProduct(product models.ProductEdit) (models.ProductUserResponse, error) {
+
+	if product.ID <= 0 || product.CategoryID <= 0 || product.Price <= 0 || product.Stock <= 0 {
+		err := errors.New("enter valid values")
+		return models.ProductUserResponse{}, err
 	}
-	return modInventory, nil
+	if product.ProductName == "" {
+		return models.ProductUserResponse{}, errors.New("product name cannot be empty")
+	}
+	if product.Color == "" {
+		return models.ProductUserResponse{}, errors.New("color cannot be empty")
+	}
+	modProduct, err := usecase.repository.EditProduct(product)
+	if err != nil {
+		return models.ProductUserResponse{}, err
+	}
+	return modProduct, nil
 }
 
 func (usecase *productUseCase) DeleteProducts(inventoryID string) error {

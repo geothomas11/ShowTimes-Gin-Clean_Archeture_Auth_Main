@@ -50,3 +50,11 @@ type ProductUserResponse struct {
 	Price       int    `json:"price"`
 	Url         string `json:"url"`
 }
+type ProductEdit struct {
+	ID          uint    `json:"id" gorm:"primaryKey"`
+	CategoryID  uint    `json:"category_id"`
+	ProductName string  `json:"product_name"`
+	Color       string  `json:"color" gorm:"color:6;default:'Black';Check:color IN ('Black', 'Blue', 'Red', 'Green','RoseGold');"`
+	Stock       int     `json:"stock"`
+	Price       float64 `json:"price"`
+}

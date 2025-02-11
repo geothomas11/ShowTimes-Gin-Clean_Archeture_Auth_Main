@@ -6,25 +6,6 @@ definitions:
       id:
         type: integer
     type: object
-  domain.Product:
-    properties:
-      category:
-        $ref: '#/definitions/domain.Category'
-      category_id:
-        type: integer
-      color:
-        type: string
-      id:
-        type: integer
-      price:
-        type: number
-      product_name:
-        type: string
-      stock:
-        type: integer
-      url:
-        type: string
-    type: object
   models.AddCart:
     properties:
       id:
@@ -97,6 +78,21 @@ definitions:
     required:
     - address_id
     - payment_id
+    type: object
+  models.ProductEdit:
+    properties:
+      category_id:
+        type: integer
+      color:
+        type: string
+      id:
+        type: integer
+      price:
+        type: number
+      product_name:
+        type: string
+      stock:
+        type: integer
     type: object
   models.ProductUpdate:
     properties:
@@ -575,6 +571,11 @@ paths:
       - application/json
       description: Updates an existing product using the provided details.
       parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Inventory ID of the product to update
         in: query
         name: inventory_id
@@ -585,23 +586,31 @@ paths:
         name: product
         required: true
         schema:
-          $ref: '#/definitions/domain.Product'
+          $ref: '#/definitions/models.ProductEdit'
       produces:
       - application/json
       responses:
         "200":
-          description: Product updated successfully
+          description: 'Success: Product updated successfully'
           schema:
             $ref: '#/definitions/response.Response'
         "400":
           description: 'Bad request: Invalid input or product update error'
           schema:
             $ref: '#/definitions/response.Response'
+        "401":
+          description: 'Unauthorized: Invalid or missing authentication'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Internal server error: Unable to update product'
+          schema:
+            $ref: '#/definitions/response.Response'
       security:
       - BearerTokenAuth: []
       summary: Edit product
       tags:
-      - Product
+      - Product Management
     post:
       consumes:
       - multipart/form-data

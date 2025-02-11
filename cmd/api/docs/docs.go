@@ -722,10 +722,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Product"
+                    "Product Management"
                 ],
                 "summary": "Edit product",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Inventory ID of the product to update",
@@ -739,19 +746,31 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Product"
+                            "$ref": "#/definitions/models.ProductEdit"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Product updated successfully",
+                        "description": "Success: Product updated successfully",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "Bad request: Invalid input or product update error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: Invalid or missing authentication",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error: Unable to update product",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1972,35 +1991,6 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.Product": {
-            "type": "object",
-            "properties": {
-                "category": {
-                    "$ref": "#/definitions/domain.Category"
-                },
-                "category_id": {
-                    "type": "integer"
-                },
-                "color": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "product_name": {
-                    "type": "string"
-                },
-                "stock": {
-                    "type": "integer"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
         "models.AddCart": {
             "type": "object",
             "properties": {
@@ -2107,6 +2097,29 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "payment_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ProductEdit": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "product_name": {
+                    "type": "string"
+                },
+                "stock": {
                     "type": "integer"
                 }
             }

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"ShowTimes/pkg/domain"
 	interfaces "ShowTimes/pkg/usecase/interface"
 	"ShowTimes/pkg/utils/models"
 	"ShowTimes/pkg/utils/response"
@@ -102,41 +101,39 @@ func (i *ProductHandler) ListProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, successResp)
 }
 
-// EditProduct updates the details of an existing product.
-//
+// EditProducts updates the details of an existing product.
 // @Summary Edit product
 // @Description Updates an existing product using the provided details.
-// @Tags Product
+// @Tags Product Management
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
+// @Param Authorization header string true "Bearer Token"
 // @Param inventory_id query integer true "Inventory ID of the product to update"
-// @Param product body domain.Product true "Updated product details"
-// @Success 200 {object} response.Response "Product updated successfully"
+// @Param product body models.ProductEdit true "Updated product details"
+// @Success 200 {object} response.Response "Success: Product updated successfully"
 // @Failure 400 {object} response.Response "Bad request: Invalid input or product update error"
+// @Failure 401 {object} response.Response "Unauthorized: Invalid or missing authentication"
+// @Failure 500 {object} response.Response "Internal server error: Unable to update product"
 // @Router /admin/product [patch]
 func (u *ProductHandler) EditProducts(c *gin.Context) {
-	var inventory domain.Product
-	id := c.Query("inventory_id")
-	idInt, err := strconv.Atoi(id)
+	var product models.ProductEdit
+
+	if err := c.BindJSON(&product); err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "fields are in the wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	modProduct, err := u.ProductUseCase.EditProduct(product)
 	if err != nil {
-		errResp := response.ClientResponse(http.StatusBadRequest, "Invalid inventory ID format", nil, err.Error())
-		c.JSON(http.StatusBadRequest, errResp)
+		errRes := response.ClientResponse(http.StatusBadRequest, "could not edit the product", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
-	if err := c.BindJSON(&inventory); err != nil {
-		errResp := response.ClientResponse(http.StatusBadRequest, "Invalid input format", nil, err.Error())
-		c.JSON(http.StatusBadRequest, errResp)
-		return
-	}
-	modInventory, err := u.ProductUseCase.EditProducts(inventory, idInt)
-	if err != nil {
-		errResp := response.ClientResponse(http.StatusBadRequest, "Error updating the product", nil, err.Error())
-		c.JSON(http.StatusBadRequest, errResp)
-		return
-	}
-	successResp := response.ClientResponse(http.StatusOK, "Product updated successfully", modInventory, nil)
-	c.JSON(http.StatusOK, successResp)
+
+	successRes := response.ClientResponse(http.StatusOK, "sucessfully edited products", modProduct, nil)
+	c.JSON(http.StatusOK, successRes)
 }
 
 // DeleteProduct removes a product by its ID.

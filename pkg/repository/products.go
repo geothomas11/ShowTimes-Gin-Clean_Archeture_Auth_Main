@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"ShowTimes/pkg/domain"
 	interfaces "ShowTimes/pkg/repository/interfaces"
 	"ShowTimes/pkg/utils/models"
 	"errors"
@@ -58,18 +57,34 @@ func (prod *ProductRepository) ListProducts(pageList, offset int) ([]models.Prod
 
 }
 
-func (db *ProductRepository) EditProducts(inventory domain.Product, id int) (domain.Product, error) {
-	var modInventory domain.Product
+func (db *ProductRepository) EditProduct(product models.ProductEdit) (models.ProductUserResponse, error) {
+	var modProduct models.ProductUserResponse
 
-	query := "UPDATE products SET category_id =?,product_name = ?, color = ?, stock = ?, price = ? WHERE id = ?"
+	query := "UPDATE products SET category_id = ?, product_name = ?, color = ?, stock = ?, price = ? WHERE id = ?"
 
-	if err := db.DB.Exec(query, inventory.CategoryID, inventory.ProductName, inventory.Color, inventory.Stock, inventory.Price, id).Error; err != nil {
-		return domain.Product{}, err
+	if err := db.DB.Exec(query, product.CategoryID, product.ProductName, product.Color, product.Stock, product.Price, product.ID).Error; err != nil {
+		return models.ProductUserResponse{}, err
 	}
-	if err := db.DB.First(&modInventory, id).Error; err != nil {
-		return domain.Product{}, err
+
+	if err := db.DB.Raw("select * from products where id = ?", product.ID).Scan(&modProduct).Error; err != nil {
+		return models.ProductUserResponse{}, err
 	}
-	return modInventory, nil
+	return modProduct, nil
+}
+func (i *ProductRepository) DeleteProduct(productID string) error {
+
+	id, err := strconv.Atoi(productID)
+	if err != nil {
+		return errors.New("converting into integet is not happened")
+	}
+
+	result := i.DB.Exec("DELETE FROM products WHERE id = ?", id)
+
+	if result.RowsAffected < 1 {
+		return errors.New("no records with that ID exist")
+	}
+
+	return nil
 }
 
 func (i *ProductRepository) DeleteProducts(inventoryID string) error {
