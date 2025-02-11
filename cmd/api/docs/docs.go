@@ -18,7 +18,7 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/admin/block": {
-            "put": {
+            "patch": {
                 "description": "Blocks a user based on the provided ID.",
                 "consumes": [
                     "application/json"
@@ -790,7 +790,7 @@ const docTemplate = `{
                 "tags": [
                     "Sales Reports"
                 ],
-                "summary": "Retrieve sales report for a specific time period",
+                "summary": "Retrieve sales report for a current time period",
                 "parameters": [
                     {
                         "type": "string",

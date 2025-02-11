@@ -170,7 +170,7 @@ info:
   version: 1.0.0
 paths:
   /admin/block:
-    put:
+    patch:
       consumes:
       - application/json
       description: Blocks a user based on the provided ID.
@@ -684,7 +684,7 @@ paths:
           description: Unable to retrieve sales report
           schema:
             $ref: '#/definitions/response.Response'
-      summary: Retrieve sales report for a specific time period
+      summary: Retrieve sales report for a current time period
       tags:
       - Sales Reports
   /admin/salesreport/daterange:
