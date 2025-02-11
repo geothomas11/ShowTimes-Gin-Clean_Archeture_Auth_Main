@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, CategoryHandler *handler.CategoryHandler, InventoryHandler *handler.ProductHandler, PaymentHandler *handler.PaymentHandler, orderHandler *handler.OrderHandler) {
+func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, CategoryHandler *handler.CategoryHandler, InventoryHandler *handler.ProductHandler, PaymentHandler *handler.PaymentHandler, orderHandler *handler.OrderHandler, offerHandler *handler.OfferHandler) {
 	engine.POST("/adminlogin", adminHandler.LoginHandler)
 
 	engine.Use(middleware.AdminAuthMiddleware)
@@ -51,6 +51,16 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, Ca
 			orderManagement.GET("/getallordersadmin", orderHandler.GetAllOrdersAdmin)
 			orderManagement.PATCH("/approveorder", orderHandler.ApproveOrder)
 			orderManagement.DELETE("/cancelorderfromadmin", orderHandler.CancelOrderFromAdmin)
+		}
+		offer := engine.Group("offer")
+		{
+			offer.POST("/product_offer", offerHandler.AddProductOffer)
+			offer.GET("/product_offer", offerHandler.GetProductOffer)
+			offer.DELETE("/product_offer", offerHandler.ExpireProductOffer)
+
+			offer.POST("/category_offer", offerHandler.AddCategoryOffer)
+			offer.GET("/category_offer", offerHandler.GetCategoryOffer)
+			offer.DELETE("/category_offer", offerHandler.ExpireCategoryOffer)
 		}
 	}
 }
