@@ -345,6 +345,172 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/offer/category-offer": {
+            "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Retrieves a list of all active category-wide offers.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Offer Management"
+                ],
+                "summary": "Get All Category Offers",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved all category offers",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request: Unable to fetch category offers",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Adds a new offer applicable to a specific category.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Offer Management"
+                ],
+                "summary": "Add Category Offer",
+                "parameters": [
+                    {
+                        "description": "Category offer details in JSON format",
+                        "name": "categoryOffer",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CategorytOfferResp"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully added the category offer",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or constraints not satisfied",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to add the category offer",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/offer/product-offer": {
+            "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Retrieves a list of all active product offers.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Offer Management"
+                ],
+                "summary": "Get All Product Offers",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved all product offers",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request: Unable to fetch product offers",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Adds a new offer for a specific product.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Offer Management"
+                ],
+                "summary": "Add Product Offer",
+                "parameters": [
+                    {
+                        "description": "Product offer details in JSON format",
+                        "name": "productOffer",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ProductOfferResp"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully added the product offer",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or constraints not satisfied",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to add the product offer",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/orders": {
             "get": {
                 "security": [
@@ -2053,6 +2219,25 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CategorytOfferResp": {
+            "type": "object",
+            "required": [
+                "category_id",
+                "discount_percentage",
+                "offer_name"
+            ],
+            "properties": {
+                "category_id": {
+                    "type": "integer"
+                },
+                "discount_percentage": {
+                    "type": "integer"
+                },
+                "offer_name": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ChangePassword": {
             "type": "object",
             "properties": {
@@ -2120,6 +2305,25 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "stock": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ProductOfferResp": {
+            "type": "object",
+            "required": [
+                "discount_percentage",
+                "offer_name",
+                "product_id"
+            ],
+            "properties": {
+                "discount_percentage": {
+                    "type": "integer"
+                },
+                "offer_name": {
+                    "type": "string"
+                },
+                "product_id": {
                     "type": "integer"
                 }
             }

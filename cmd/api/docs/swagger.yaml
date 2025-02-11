@@ -48,6 +48,19 @@ definitions:
         minLength: 8
         type: string
     type: object
+  models.CategorytOfferResp:
+    properties:
+      category_id:
+        type: integer
+      discount_percentage:
+        type: integer
+      offer_name:
+        type: string
+    required:
+    - category_id
+    - discount_percentage
+    - offer_name
+    type: object
   models.ChangePassword:
     properties:
       confirm_password:
@@ -93,6 +106,19 @@ definitions:
         type: string
       stock:
         type: integer
+    type: object
+  models.ProductOfferResp:
+    properties:
+      discount_percentage:
+        type: integer
+      offer_name:
+        type: string
+      product_id:
+        type: integer
+    required:
+    - discount_percentage
+    - offer_name
+    - product_id
     type: object
   models.ProductUpdate:
     properties:
@@ -380,6 +406,110 @@ paths:
       summary: Admin login
       tags:
       - Admin Authentication
+  /admin/offer/category-offer:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all active category-wide offers.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all category offers
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 'Bad request: Unable to fetch category offers'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Get All Category Offers
+      tags:
+      - Admin Offer Management
+    post:
+      consumes:
+      - application/json
+      description: Adds a new offer applicable to a specific category.
+      parameters:
+      - description: Category offer details in JSON format
+        in: body
+        name: categoryOffer
+        required: true
+        schema:
+          $ref: '#/definitions/models.CategorytOfferResp'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully added the category offer
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format or constraints not satisfied
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Failed to add the category offer
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Add Category Offer
+      tags:
+      - Admin Offer Management
+  /admin/offer/product-offer:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all active product offers.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all product offers
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 'Bad request: Unable to fetch product offers'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Get All Product Offers
+      tags:
+      - Admin Offer Management
+    post:
+      consumes:
+      - application/json
+      description: Adds a new offer for a specific product.
+      parameters:
+      - description: Product offer details in JSON format
+        in: body
+        name: productOffer
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProductOfferResp'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully added the product offer
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid request format or constraints not satisfied
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Failed to add the product offer
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Add Product Offer
+      tags:
+      - Admin Offer Management
   /admin/orders:
     delete:
       consumes:

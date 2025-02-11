@@ -22,6 +22,19 @@ func NewOfferHandler(usecase interfaces.OfferUsecase) *OfferHandler {
 
 }
 
+// AddProductOffer adds a new product offer.
+//
+// @Summary Add Product Offer
+// @Description Adds a new offer for a specific product.
+// @Tags Admin Offer Management
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param productOffer body models.ProductOfferResp true "Product offer details in JSON format"
+// @Success 201 {object} response.Response "Successfully added the product offer"
+// @Failure 400 {object} response.Response "Invalid request format or constraints not satisfied"
+// @Failure 500 {object} response.Response "Failed to add the product offer"
+// @Router /admin/offer/product-offer [post]
 func (oh *OfferHandler) AddProductOffer(c *gin.Context) {
 	var productOffer models.ProductOfferResp
 
@@ -46,6 +59,20 @@ func (oh *OfferHandler) AddProductOffer(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusCreated, "Successfully added the offer", nil, nil)
 	c.JSON(http.StatusCreated, successRes)
 }
+
+// AddCategoryOffer adds a new category-wide offer.
+//
+// @Summary Add Category Offer
+// @Description Adds a new offer applicable to a specific category.
+// @Tags Admin Offer Management
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param categoryOffer body models.CategorytOfferResp true "Category offer details in JSON format"
+// @Success 201 {object} response.Response "Successfully added the category offer"
+// @Failure 400 {object} response.Response "Invalid request format or constraints not satisfied"
+// @Failure 500 {object} response.Response "Failed to add the category offer"
+// @Router /admin/offer/category-offer [post]
 func (of *OfferHandler) AddCategoryOffer(c *gin.Context) {
 
 	var categoryOffer models.CategorytOfferResp
@@ -72,6 +99,18 @@ func (of *OfferHandler) AddCategoryOffer(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusCreated, "Successfully added offer", nil, nil)
 	c.JSON(http.StatusCreated, successRes)
 }
+
+// GetProductOffer retrieves all product offers.
+//
+// @Summary Get All Product Offers
+// @Description Retrieves a list of all active product offers.
+// @Tags Admin Offer Management
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Success 200 {object} response.Response "Successfully retrieved all product offers"
+// @Failure 400 {object} response.Response "Bad request: Unable to fetch product offers"
+// @Router /admin/offer/product-offer [get]
 func (of *OfferHandler) GetProductOffer(c *gin.Context) {
 
 	products, err := of.OfferUsecase.GetProductOffer()
@@ -84,6 +123,18 @@ func (of *OfferHandler) GetProductOffer(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusOK, "Successfully got all offers", products, nil)
 	c.JSON(http.StatusOK, successRes)
 }
+
+// GetCategoryOffer retrieves all category-wide offers.
+//
+// @Summary Get All Category Offers
+// @Description Retrieves a list of all active category-wide offers.
+// @Tags Admin Offer Management
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Success 200 {object} response.Response "Successfully retrieved all category offers"
+// @Failure 400 {object} response.Response "Bad request: Unable to fetch category offers"
+// @Router /admin/offer/category-offer [get]
 func (of *OfferHandler) GetCategoryOffer(c *gin.Context) {
 
 	categories, err := of.OfferUsecase.GetCategoryOffer()
@@ -105,7 +156,18 @@ func (of *OfferHandler) ExpireProductOffer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-
+	// ExpireProductOffer invalidates a product-specific offer.
+	//
+	// @Summary Expire Product Offer
+	// @Description Marks a product offer as expired based on its ID.
+	// @Tags Admin Offer Management
+	// @Accept json
+	// @Produce json
+	// @Security BearerTokenAuth
+	// @Param id query int true "Product offer ID"
+	// @Success 200 {object} response.Response "Successfully expired the product offer"
+	// @Failure 400 {object} response.Response "Bad request: Invalid offer ID format"
+	// @Failure 400 {object} response.Response "Bad requ
 	if err := of.OfferUsecase.ExpireProductOffer(id); err != nil {
 		errorRes := response.ClientResponse(http.StatusBadRequest, "Coupon cannot be made invalid", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errorRes)
@@ -123,7 +185,19 @@ func (of *OfferHandler) ExpireCategoryOffer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-
+	// ExpireCategoryOffer invalidates a category-wide offer.
+	//
+	// @Summary Expire Category Offer
+	// @Description Marks a category-wide offer as expired based on its ID.
+	// @Tags Admin Offer Management
+	// @Accept json
+	// @Produce json
+	// @Security BearerTokenAuth
+	// @Param id query int true "Category offer ID"
+	// @Success 200 {object} response.Response "Successfully expired the category offer"
+	// @Failure 400 {object} response.Response "Bad request: Invalid offer ID format"
+	// @Failure 400 {object} response.Response "Bad request: Unable to expire the category offer"
+	// @Router /admin/offer/category-offer/expire [patch]
 	if err := of.OfferUsecase.ExpireCategoryOffer(id); err != nil {
 		errorRes := response.ClientResponse(http.StatusBadRequest, "Coupon cannot be made invalid", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errorRes)
