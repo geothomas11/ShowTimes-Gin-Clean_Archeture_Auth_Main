@@ -2,10 +2,12 @@ package handler
 
 import (
 	"ShowTimes/pkg/helper"
-	interfaces "ShowTimes/pkg/usecase/interface"
+	interfaces "ShowTimes/pkg/helper/interface"
+	interfaces_u "ShowTimes/pkg/usecase/interface"
 	"ShowTimes/pkg/utils/models"
 	"ShowTimes/pkg/utils/response"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,10 +17,11 @@ import (
 )
 
 type AdminHandler struct {
-	adminUseCase interfaces.AdminUseCase
+	adminUseCase interfaces_u.AdminUseCase
+	helper       interfaces.Helper
 }
 
-func NewAdminHandler(usecase interfaces.AdminUseCase) *AdminHandler {
+func NewAdminHandler(usecase interfaces_u.AdminUseCase) *AdminHandler {
 	return &AdminHandler{
 		adminUseCase: usecase,
 	}
@@ -252,4 +255,121 @@ func (ah *AdminHandler) SalesReportByDate(c *gin.Context) {
 	success := response.ClientResponse(http.StatusOK, "sales report retrived successfully", report, nil)
 	c.JSON(http.StatusOK, success)
 
+}
+func (ah *AdminHandler) PrintSalesReportByDate(c *gin.Context) {
+	startDateStr := c.Query("start")
+	endDateStr := c.Query("end")
+	if startDateStr == "" || endDateStr == "" {
+		err := response.ClientResponse(http.StatusBadRequest, "start or end date is empty", nil, "Empty date string")
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	report, err := ah.adminUseCase.ExecuteSalesReportByDate(startDateStr, endDateStr)
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusInternalServerError, "sales report could not be retrieved", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errorRes)
+		return
+	}
+
+	success := response.ClientResponse(http.StatusOK, "sales report retrieved successfully", report, nil)
+	c.JSON(http.StatusOK, success)
+}
+
+func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
+	year := c.Query("year")
+	yearInt, err := strconv.Atoi(year)
+
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting year", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	month := c.Query("month")
+	monthInt, err := strconv.Atoi(month)
+
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting month", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	day := c.Query("day")
+	dayInt, err := strconv.Atoi(day)
+
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting day", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	body, err := a.adminUseCase.SalesByDate(dayInt, monthInt, yearInt)
+
+	fmt.Println("body handler", dayInt)
+	fmt.Println("body handler", monthInt)
+	fmt.Println("body handler", yearInt)
+
+	fmt.Println("body ", body)
+
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting sales details", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	download := c.Query("download")
+	if download == "pdf" {
+		pdf, err := a.adminUseCase.PrintSalesReport(body)
+		if err != nil {
+			errRes := response.ClientResponse(http.StatusBadGateway, "error in printing sales report", nil, err)
+			c.JSON(http.StatusBadRequest, errRes)
+			return
+		}
+		c.Header("Content-Disposition", "attachment;filename=totalsalesreport.pdf")
+
+		pdfFilePath := "salesReport/totalsalesreport.pdf"
+
+		err = pdf.OutputFileAndClose(pdfFilePath)
+		if err != nil {
+			errRes := response.ClientResponse(http.StatusBadGateway, "error in printing sales report", nil, err)
+			c.JSON(http.StatusBadRequest, errRes)
+			return
+		}
+
+		c.Header("Content-Disposition", "attachment; filename=total_sales_report.pdf")
+		c.Header("Content-Type", "application/pdf")
+
+		c.File(pdfFilePath)
+
+		c.Header("Content-Type", "application/pdf")
+
+		err = pdf.Output(c.Writer)
+		if err != nil {
+			errRes := response.ClientResponse(http.StatusBadGateway, "error in printing sales report", nil, err)
+			c.JSON(http.StatusBadRequest, errRes)
+			return
+		}
+	} else {
+		fmt.Println("body ", body)
+		excel, err := a.helper.ConvertToExel(body)
+		if err != nil {
+			errRes := response.ClientResponse(http.StatusBadGateway, "error in printing sales report", nil, err)
+			c.JSON(http.StatusBadRequest, errRes)
+			return
+		}
+
+		fileName := "sales_report.xlsx"
+
+		c.Header("Content-Disposition", "attachment; filename="+fileName)
+		c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+		if err := excel.Write(c.Writer); err != nil {
+			errRes := response.ClientResponse(http.StatusBadGateway, "Error in serving the sales report", nil, err)
+			c.JSON(http.StatusBadRequest, errRes)
+			return
+		}
+	}
+
+	succesRes := response.ClientResponse(http.StatusOK, "success", body, nil)
+	c.JSON(http.StatusOK, succesRes)
 }

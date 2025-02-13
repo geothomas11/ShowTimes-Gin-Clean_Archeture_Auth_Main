@@ -4,6 +4,8 @@ import (
 	"ShowTimes/pkg/utils/models"
 	"mime/multipart"
 	"time"
+
+	"github.com/xuri/excelize/v2"
 )
 
 type Helper interface {
@@ -23,4 +25,6 @@ type Helper interface {
 	ValidatePin(pin string) bool
 	GetTimeFromPeriod(timePeriod string) (time.Time, time.Time)
 	ValidateAlphabets(data string) (bool, error)
+
+	ConvertToExel(sales []models.OrderDetailsAdmin) (*excelize.File, error)
 }

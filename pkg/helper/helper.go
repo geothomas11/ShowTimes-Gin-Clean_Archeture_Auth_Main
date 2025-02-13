@@ -21,6 +21,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/twilio/twilio-go"
 	twilioApi "github.com/twilio/twilio-go/rest/verify/v2"
+	"github.com/xuri/excelize/v2"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -253,10 +254,34 @@ func (h *helper) ValidateDate(dateString string) bool {
 }
 
 func (h *helper) ValidateAlphabets(data string) (bool, error) {
-    for _, char := range data {
-        if !unicode.IsLetter(char) {
-            return false, errors.New("data contains non-alphabetical character")
-        }
-    }
-    return true, nil
+	for _, char := range data {
+		if !unicode.IsLetter(char) {
+			return false, errors.New("data contains non-alphabetical character")
+		}
+	}
+	return true, nil
+}
+
+func (h *helper) ConvertToExel(sales []models.OrderDetailsAdmin) (*excelize.File, error) {
+
+	filename := "salesReport/sales_report.xlsx"
+	file := excelize.NewFile()
+
+	file.SetCellValue("Sheet1", "A1", "Item")
+	file.SetCellValue("Sheet1", "B1", "Total Amount Sold")
+
+	for i, sale := range sales {
+		col1 := fmt.Sprintf("A%d", i+1)
+		col2 := fmt.Sprintf("B%d", i+1)
+
+		file.SetCellValue("Sheet1", col1, sale.ProductName)
+		file.SetCellValue("Sheet1", col2, sale.TotalAmount)
+
+	}
+
+	if err := file.SaveAs(filename); err != nil {
+		return nil, err
+	}
+
+	return file, nil
 }
