@@ -52,7 +52,7 @@ func (oh *OfferHandler) AddProductOffer(c *gin.Context) {
 	err = oh.OfferUsecase.AddProductOffer(productOffer)
 
 	if err != nil {
-		errRes := response.ClientResponse(http.StatusInternalServerError, "could not add offer", nil, err.Error())
+		errRes := response.ClientResponse(http.StatusInternalServerError, "could not add offer ", nil, err.Error())
 		c.JSON(http.StatusInternalServerError, errRes)
 		return
 	}
@@ -91,7 +91,7 @@ func (of *OfferHandler) AddCategoryOffer(c *gin.Context) {
 	err = of.OfferUsecase.AddCategoryOffer(categoryOffer)
 
 	if err != nil {
-		errRes := response.ClientResponse(http.StatusInternalServerError, "could not add offer", nil, err.Error())
+		errRes := response.ClientResponse(http.StatusInternalServerError, "could not add offer in categorOffer", nil, err.Error())
 		c.JSON(http.StatusInternalServerError, errRes)
 		return
 	}
@@ -149,6 +149,19 @@ func (of *OfferHandler) GetCategoryOffer(c *gin.Context) {
 
 }
 
+// ExpireProductOffer invalidates a product-specific offer.
+//
+// @Summary Expire Product Offer
+// @Description Marks a product offer as expired based on its ID.
+// @Tags Admin Offer Management
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param id query int true "Product offer ID to be expired"
+// @Success 200 {object} response.Response "Successfully expired the product offer"
+// @Failure 400 {object} response.Response "Bad request: Invalid offer ID format"
+// @Failure 400 {object} response.Response "Bad request: Unable to expire the product offer"
+// @Router /admin/offer/product-offer/expire [patch]
 func (of *OfferHandler) ExpireProductOffer(c *gin.Context) {
 	id, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
@@ -156,18 +169,7 @@ func (of *OfferHandler) ExpireProductOffer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-	// ExpireProductOffer invalidates a product-specific offer.
-	//
-	// @Summary Expire Product Offer
-	// @Description Marks a product offer as expired based on its ID.
-	// @Tags Admin Offer Management
-	// @Accept json
-	// @Produce json
-	// @Security BearerTokenAuth
-	// @Param id query int true "Product offer ID"
-	// @Success 200 {object} response.Response "Successfully expired the product offer"
-	// @Failure 400 {object} response.Response "Bad request: Invalid offer ID format"
-	// @Failure 400 {object} response.Response "Bad requ
+
 	if err := of.OfferUsecase.ExpireProductOffer(id); err != nil {
 		errorRes := response.ClientResponse(http.StatusBadRequest, "Coupon cannot be made invalid", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errorRes)

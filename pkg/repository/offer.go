@@ -32,14 +32,14 @@ func (or *OfferRepository) AddProductOffer(ProductOffer models.ProductOfferResp)
 		return err
 	}
 	if count > 0 {
-		err = or.DB.Exec("DELETE from product_offers WHERE product_id = ?", ProductOffer.ProductID).Scan(&count).Error
+		err = or.DB.Exec("DELETE FROM product_offers WHERE product_id = ?", ProductOffer.ProductID).Scan(&count).Error
 		if err != nil {
 			return err
 		}
 	}
 	startDate := time.Now()
 	endDate := time.Now().Add(time.Hour * 24 * 5)
-	err = or.DB.Exec("INSERT INTO product_offers (product_id,offer_name,discount_percentage,start_date,end_date) VALUES (?,?,?,?,?) ", ProductOffer.ProductID, ProductOffer.OfferName, ProductOffer.DiscountPercentage, startDate, endDate).Error
+	err = or.DB.Exec("INSERT INTO product_offers (product_id, offer_name, discount_percentage, start_date, end_date) VALUES (?, ?, ?, ?, ?)", ProductOffer.ProductID, ProductOffer.OfferName, ProductOffer.DiscountPercentage, startDate, endDate).Error
 	if err != nil {
 		return err
 	}
@@ -49,13 +49,27 @@ func (or *OfferRepository) AddProductOffer(ProductOffer models.ProductOfferResp)
 
 func (or *OfferRepository) AddCategoryOffer(CategoryOffer models.CategorytOfferResp) error {
 	var count int
-	err := or.DB.Raw("select count(*) from category_offers where offer_name = ?  and  category_id = ?", CategoryOffer.OfferName, CategoryOffer.CategoryID).Scan(&count).Error
+
+	// ✅ Check if the category exists before adding an offer
+	var categoryCount int
+	err := or.DB.Raw("SELECT COUNT(*) FROM categories WHERE id = ?", CategoryOffer.CategoryID).Scan(&categoryCount).Error
 	if err != nil {
-		return errors.New("errors in getting offer details")
+		return errors.New("error checking category existence")
+	}
+	if categoryCount == 0 {
+		return errors.New("invalid category_id: the referenced category does not exist")
+	}
+
+	// ✅ Check if the same offer already exists for the category
+	err = or.DB.Raw("SELECT COUNT(*) FROM category_offers WHERE offer_name = ? AND category_id = ?", CategoryOffer.OfferName, CategoryOffer.CategoryID).Scan(&count).Error
+	if err != nil {
+		return errors.New("error in getting offer details")
 	}
 	if count > 0 {
-		return errors.New("offer already exist")
+		return errors.New("offer already exists")
 	}
+
+	// ✅ Check if another offer exists for the same category and delete it
 	err = or.DB.Raw("SELECT COUNT(*) FROM category_offers WHERE category_id = ?", CategoryOffer.CategoryID).Scan(&count).Error
 	if err != nil {
 		return err
@@ -66,15 +80,26 @@ func (or *OfferRepository) AddCategoryOffer(CategoryOffer models.CategorytOfferR
 			return err
 		}
 	}
+
+	// ✅ Use a transaction for safe operations
+	tx := or.DB.Begin()
+
 	startDate := time.Now()
-	endDate := time.Now().Add(time.Hour * 24 * 5)
-	err = or.DB.Exec("INSERT INTO category_offers (category_id,offer_name,discount_percentage,start_date,end_date) VALUES (?,?,?,?,?)", CategoryOffer.CategoryID, CategoryOffer.DiscountPercentage, CategoryOffer.OfferName, startDate, endDate).Error
+	endDate := startDate.Add(time.Hour * 24 * 5)
+
+	err = tx.Exec("INSERT INTO category_offers (category_id, offer_name, discount_percentage, start_date, end_date) VALUES (?, ?, ?, ?, ?)", 
+		CategoryOffer.CategoryID, CategoryOffer.OfferName, CategoryOffer.DiscountPercentage, startDate, endDate).Error
 	if err != nil {
+		tx.Rollback() // Rollback in case of failure
 		return err
 	}
-	return nil
 
+	tx.Commit() // Commit the transaction
+	return nil
 }
+
+
+
 func (or *OfferRepository) GetProductOffer() ([]domain.ProductOffer, error) {
 	var producttOfferDetails []domain.ProductOffer
 	err := or.DB.Raw("SELECT * from product_offers").Scan(&producttOfferDetails).Error

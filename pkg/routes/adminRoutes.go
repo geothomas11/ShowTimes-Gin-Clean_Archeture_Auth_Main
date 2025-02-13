@@ -54,13 +54,13 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, Ca
 		}
 		offer := engine.Group("offer")
 		{
-			offer.POST("/product_offer", offerHandler.AddProductOffer)
-			offer.GET("/product_offer", offerHandler.GetProductOffer)
-			offer.DELETE("/product_offer", offerHandler.ExpireProductOffer)
+			offer.POST("/addproduct_offer", offerHandler.AddProductOffer)
+			offer.GET("/getproduct_offer", offerHandler.GetProductOffer)
+			offer.DELETE("/expireproduct_offer", offerHandler.ExpireProductOffer)
 
-			offer.POST("/category_offer", offerHandler.AddCategoryOffer)
-			offer.GET("/category_offer", offerHandler.GetCategoryOffer)
-			offer.DELETE("/category_offer", offerHandler.ExpireCategoryOffer)
+			offer.POST("/addcategory_offer", offerHandler.AddCategoryOffer)
+			offer.GET("/getcategory_offer", offerHandler.GetCategoryOffer)
+			offer.DELETE("/exppirecategory_offer", offerHandler.ExpireCategoryOffer)
 		}
 	}
 }

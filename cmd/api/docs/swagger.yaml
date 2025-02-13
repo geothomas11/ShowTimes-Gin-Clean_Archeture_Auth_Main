@@ -510,6 +510,33 @@ paths:
       summary: Add Product Offer
       tags:
       - Admin Offer Management
+  /admin/offer/product-offer/expire:
+    patch:
+      consumes:
+      - application/json
+      description: Marks a product offer as expired based on its ID.
+      parameters:
+      - description: Product offer ID to be expired
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully expired the product offer
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 'Bad request: Unable to expire the product offer'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Expire Product Offer
+      tags:
+      - Admin Offer Management
   /admin/orders:
     delete:
       consumes:
