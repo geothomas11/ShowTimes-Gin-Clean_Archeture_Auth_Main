@@ -80,25 +80,17 @@ func (or *OfferRepository) AddCategoryOffer(CategoryOffer models.CategorytOfferR
 			return err
 		}
 	}
-
-	// ✅ Use a transaction for safe operations
-	tx := or.DB.Begin()
-
 	startDate := time.Now()
 	endDate := startDate.Add(time.Hour * 24 * 5)
 
-	err = tx.Exec("INSERT INTO category_offers (category_id, offer_name, discount_percentage, start_date, end_date) VALUES (?, ?, ?, ?, ?)", 
+	err = or.DB.Exec("INSERT INTO category_offers (category_id, offer_name, discount_percentage, start_date, end_date) VALUES (?, ?, ?, ?, ?)",
 		CategoryOffer.CategoryID, CategoryOffer.OfferName, CategoryOffer.DiscountPercentage, startDate, endDate).Error
 	if err != nil {
-		tx.Rollback() // Rollback in case of failure
 		return err
 	}
 
-	tx.Commit() // Commit the transaction
 	return nil
 }
-
-
 
 func (or *OfferRepository) GetProductOffer() ([]domain.ProductOffer, error) {
 	var producttOfferDetails []domain.ProductOffer

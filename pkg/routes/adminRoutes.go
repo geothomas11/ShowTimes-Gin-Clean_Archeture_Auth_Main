@@ -60,7 +60,7 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, Ca
 
 			offer.POST("/addcategory_offer", offerHandler.AddCategoryOffer)
 			offer.GET("/getcategory_offer", offerHandler.GetCategoryOffer)
-			offer.DELETE("/exppirecategory_offer", offerHandler.ExpireCategoryOffer)
+			offer.DELETE("/expirecategory_offer", offerHandler.ExpireCategoryOffer)
 		}
 	}
 }

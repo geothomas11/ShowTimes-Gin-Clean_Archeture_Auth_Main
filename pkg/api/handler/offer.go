@@ -180,6 +180,19 @@ func (of *OfferHandler) ExpireProductOffer(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+// ExpireCategoryOffer invalidates a category-wide offer.
+//
+// @Summary Expire Category Offer
+// @Description Marks a category-wide offer as expired based on its ID.
+// @Tags Admin Offer Management
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param id query int true "Category offer ID"
+// @Success 200 {object} response.Response "Successfully expired the category offer"
+// @Failure 400 {object} response.Response "Bad request: Invalid offer ID format"
+// @Failure 400 {object} response.Response "Bad request: Unable to expire the category offer"
+// @Router /admin/offer/category-offer/expire [patch]
 func (of *OfferHandler) ExpireCategoryOffer(c *gin.Context) {
 	id, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
@@ -187,19 +200,7 @@ func (of *OfferHandler) ExpireCategoryOffer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-	// ExpireCategoryOffer invalidates a category-wide offer.
-	//
-	// @Summary Expire Category Offer
-	// @Description Marks a category-wide offer as expired based on its ID.
-	// @Tags Admin Offer Management
-	// @Accept json
-	// @Produce json
-	// @Security BearerTokenAuth
-	// @Param id query int true "Category offer ID"
-	// @Success 200 {object} response.Response "Successfully expired the category offer"
-	// @Failure 400 {object} response.Response "Bad request: Invalid offer ID format"
-	// @Failure 400 {object} response.Response "Bad request: Unable to expire the category offer"
-	// @Router /admin/offer/category-offer/expire [patch]
+
 	if err := of.OfferUsecase.ExpireCategoryOffer(id); err != nil {
 		errorRes := response.ClientResponse(http.StatusBadRequest, "Coupon cannot be made invalid", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errorRes)
