@@ -265,19 +265,18 @@ func (ar *adminRepository) SalesByMonth(yearInt int, monthInt int) ([]models.Ord
 func (ar *adminRepository) SalesByDay(yearInt int, monthInt int, dayInt int) ([]models.OrderDetailsAdmin, error) {
 	var orderDetails []models.OrderDetailsAdmin
 
-	query:=`SELECT i.product_name, SUM(oi.total_price) AS total_amount
+	query := `SELECT p.product_name, SUM(oi.total_price) AS total_amount
               FROM orders o
               JOIN order_items oi ON o.id = oi.order_id
-              JOIN inventories i ON oi.inventory_id = i.id
+              JOIN products p ON oi.product_id = p.id
               WHERE o.payment_status = 'PAID'
 			  AND EXTRACT(YEAR FROM o.created_at) = ?
 			  AND EXTRACT(MONTH FROM o.created_at) = ?
                 AND EXTRACT(DAY FROM o.created_at) = ?
-              GROUP BY i.product_name
-			  `
-			  if err:=ar.DB.Raw(query,yearInt,monthInt,dayInt).Scan(&orderDetails).Error;err!=nil{
-				return []models.OrderDetailsAdmin{},err
-			  }
-			  return orderDetails,nil
+              GROUP BY p.product_name`
+	if err := ar.DB.Raw(query, yearInt, monthInt, dayInt).Scan(&orderDetails).Error; err != nil {
+		return []models.OrderDetailsAdmin{}, err
+	}
+	return orderDetails, nil
 
 }

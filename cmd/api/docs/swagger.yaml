@@ -458,6 +458,33 @@ paths:
       summary: Add Category Offer
       tags:
       - Admin Offer Management
+  /admin/offer/category-offer/expire:
+    patch:
+      consumes:
+      - application/json
+      description: Marks a category-wide offer as expired based on its ID.
+      parameters:
+      - description: Category offer ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully expired the category offer
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 'Bad request: Unable to expire the category offer'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Expire Category Offer
+      tags:
+      - Admin Offer Management
   /admin/offer/product-offer:
     get:
       consumes:
@@ -874,6 +901,89 @@ paths:
       summary: Retrieve sales report by date range
       tags:
       - Sales Reports
+  /admin/salesreport/download:
+    get:
+      consumes:
+      - application/json
+      description: Generates and downloads a sales report in either PDF or Excel format
+        for the given day, month, and year.
+      parameters:
+      - description: Year of the sales report
+        in: query
+        name: year
+        required: true
+        type: integer
+      - description: Month of the sales report
+        in: query
+        name: month
+        required: true
+        type: integer
+      - description: Day of the sales report
+        in: query
+        name: day
+        required: true
+        type: integer
+      - description: Download format (pdf or excel), defaults to excel
+        in: query
+        name: download
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: 'Bad request: Invalid date format or unable to generate report'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Internal server error: Unable to generate sales report'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Generate and download sales report by date
+      tags:
+      - Admin Sales Reports
+  /admin/salesreport/print:
+    get:
+      consumes:
+      - application/json
+      description: Generates and retrieves a sales report based on the provided start
+        and end dates.
+      parameters:
+      - description: Start date in YYYY-MM-DD format
+        in: query
+        name: start
+        required: true
+        type: string
+      - description: End date in YYYY-MM-DD format
+        in: query
+        name: end
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sales report retrieved successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 'Bad request: Start or end date is missing'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Internal server error: Unable to retrieve sales report'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Generate sales report by date range
+      tags:
+      - Admin Sales Reports
   /admin/unblock:
     patch:
       consumes:
