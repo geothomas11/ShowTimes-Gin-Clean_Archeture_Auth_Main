@@ -1126,28 +1126,28 @@
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Year of the sales report",
+                        "description": "Year of the sales report (e.g., 2024)",
                         "name": "year",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "Month of the sales report",
+                        "description": "Month of the sales report (1-12)",
                         "name": "month",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "Day of the sales report",
+                        "description": "Day of the sales report (1-31)",
                         "name": "day",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Download format (pdf or excel), defaults to excel",
+                        "description": "Download format: 'pdf' or 'excel' (defaults to 'excel')",
                         "name": "download",
                         "in": "query"
                     }
@@ -1167,62 +1167,6 @@
                     },
                     "500": {
                         "description": "Internal server error: Unable to generate sales report",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/salesreport/print": {
-            "get": {
-                "security": [
-                    {
-                        "BearerTokenAuth": []
-                    }
-                ],
-                "description": "Generates and retrieves a sales report based on the provided start and end dates.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Admin Sales Reports"
-                ],
-                "summary": "Generate sales report by date range",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Start date in YYYY-MM-DD format",
-                        "name": "start",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "End date in YYYY-MM-DD format",
-                        "name": "end",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Sales report retrieved successfully",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request: Start or end date is missing",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error: Unable to retrieve sales report",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }

@@ -8,6 +8,7 @@ import (
 	"ShowTimes/pkg/utils/response"
 	"errors"
 	"fmt"
+
 	"net/http"
 	"strconv"
 	"time"
@@ -60,20 +61,6 @@ func (ad *AdminHandler) LoginHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, succesResp)
 }
 
-// FilteredSalesReport retrieves the sales report for a specified time period.
-// @Summary Retrieve sales report for a specific time period
-// @Description Retrieves the sales report based on the provided time period.
-// @Tags Admin Sales Reports
-// @Accept json
-// @Produce json
-// @Security BearerTokenAuth
-// @Param Authorization header string true "Bearer Token"
-// @Param period query string true "Time period for sales report (e.g., daily, weekly, monthly)"
-// @Success 200 {object} response.Response "Success: Sales report retrieved successfully"
-// @Failure 400 {object} response.Response "Bad request: Invalid period format"
-// @Failure 401 {object} response.Response "Unauthorized: Invalid or missing authentication"
-// @Failure 500 {object} response.Response "Internal server error: Could not retrieve sales report"
-// @Router /admin/salesreport [get]
 func (ad *AdminHandler) ValidateRefreshTokenAndCreateNewAccess(c *gin.Context) {
 	refreshToken := c.Request.Header.Get("RefreshToken")
 
@@ -215,15 +202,17 @@ func (ah *AdminHandler) AdminDashboard(c *gin.Context) {
 // @Router /admin/salesreport [get]
 func (ah *AdminHandler) FilteredSalesReport(c *gin.Context) {
 	timePeriod := c.Query("period")
+
 	salesReport, err := ah.adminUseCase.FilteredSalesReport(timePeriod)
 	if err != nil {
-
-		errorResp := response.ClientResponse(http.StatusInternalServerError, "sales report could not be retrived", nil, err.Error())
+		errorResp := response.ClientResponse(http.StatusInternalServerError, "Sales report could not be retrieved", nil, err.Error())
 		c.JSON(http.StatusInternalServerError, errorResp)
 		return
 	}
-	message := "current" + timePeriod + "Successfully retived sales report "
-	success := response.ClientResponse(http.StatusOK, message, salesReport, err)
+
+	// Fix message formatting
+	message := fmt.Sprintf("Successfully retrieved sales report for %s", timePeriod)
+	success := response.ClientResponse(http.StatusOK, message, salesReport, nil)
 	c.JSON(http.StatusOK, success)
 }
 
@@ -257,39 +246,6 @@ func (ah *AdminHandler) SalesReportByDate(c *gin.Context) {
 
 }
 
-// PrintSalesReportByDate generates and retrieves a sales report within a specified date range.
-//
-// @Summary Generate sales report by date range
-// @Description Generates and retrieves a sales report based on the provided start and end dates.
-// @Tags Admin Sales Reports
-// @Accept json
-// @Produce json
-// @Security BearerTokenAuth
-// @Param start query string true "Start date in YYYY-MM-DD format"
-// @Param end query string true "End date in YYYY-MM-DD format"
-// @Success 200 {object} response.Response "Sales report retrieved successfully"
-// @Failure 400 {object} response.Response "Bad request: Start or end date is missing"
-// @Failure 500 {object} response.Response "Internal server error: Unable to retrieve sales report"
-// // @Router /admin/salesreport/print [get]
-// func (ah *AdminHandler) PrintSalesByDate(c *gin.Context) {
-// 	startDateStr := c.Query("start")
-// 	endDateStr := c.Query("end")
-// 	if startDateStr == "" || endDateStr == "" {
-// 		err := response.ClientResponse(http.StatusBadRequest, "start or end date is empty", nil, "Empty date string")
-// 		c.JSON(http.StatusBadRequest, err)
-// 		return
-// 	}
-// 	report, err := ah.adminUseCase.ExecuteSalesReportByDate(startDateStr, endDateStr)
-// 	if err != nil {
-// 		errorRes := response.ClientResponse(http.StatusInternalServerError, "sales report could not be retrieved", nil, err.Error())
-// 		c.JSON(http.StatusInternalServerError, errorRes)
-// 		return
-// 	}
-
-// 	success := response.ClientResponse(http.StatusOK, "sales report retrieved successfully", report, nil)
-// 	c.JSON(http.StatusOK, success)
-// }
-
 // PrintSalesByDate generates and downloads a sales report for a specific date.
 //
 // @Summary Generate and download sales report by date
@@ -298,10 +254,10 @@ func (ah *AdminHandler) SalesReportByDate(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param year query int true "Year of the sales report"
-// @Param month query int true "Month of the sales report"
-// @Param day query int true "Day of the sales report"
-// @Param download query string false "Download format (pdf or excel), defaults to excel"
+// @Param year query int true "Year of the sales report (e.g., 2024)"
+// @Param month query int true "Month of the sales report (1-12)"
+// @Param day query int true "Day of the sales report (1-31)"
+// @Param download query string false "Download format: 'pdf' or 'excel' (defaults to 'excel')"
 // @Success 200 {file} application/pdf "PDF sales report downloaded successfully"
 // @Success 200 {file} application/vnd.openxmlformats-officedocument.spreadsheetml.sheet "Excel sales report downloaded successfully"
 // @Failure 400 {object} response.Response "Bad request: Invalid date format or unable to generate report"
@@ -309,53 +265,42 @@ func (ah *AdminHandler) SalesReportByDate(c *gin.Context) {
 // @Router /admin/salesreport/download [get]
 func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 	year := c.Query("year")
-	fmt.Println("err1", year)
 	yearInt, err := strconv.Atoi(year)
-	fmt.Println("err2")
 
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting year", nil, err.Error())
-		fmt.Println("err3")
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
 
 	month := c.Query("month")
-	fmt.Println("err4")
 	monthInt, err := strconv.Atoi(month)
-	fmt.Println("err5")
 
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting month", nil, err.Error())
-		fmt.Println("err6")
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
 
 	day := c.Query("day")
-	fmt.Println("err7")
 	dayInt, err := strconv.Atoi(day)
-	fmt.Println("err8")
 
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting day", nil, err.Error())
-		fmt.Println("err9")
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
 
 	body, err := a.adminUseCase.SalesByDate(dayInt, monthInt, yearInt)
-	fmt.Println("err10")
 
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting sales details", nil, err.Error())
-		fmt.Println("err11")
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
 
 	download := c.Query("download")
-	
+
 	if download == "pdf" {
 		pdf, err := a.adminUseCase.PrintSalesReport(body)
 		if err != nil {
@@ -388,7 +333,6 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 			return
 		}
 	} else {
-		fmt.Println("body ", body)
 		excel, err := a.helper.ConvertToExel(body)
 		if err != nil {
 			errRes := response.ClientResponse(http.StatusBadGateway, "error in printing sales report", nil, err)

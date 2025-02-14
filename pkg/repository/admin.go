@@ -185,7 +185,7 @@ func (ar *adminRepository) FilteredSalesReport(startTime time.Time, endTime time
 	if result.Error != nil {
 		return models.SalesReport{}, result.Error
 	}
-	result = ar.DB.Raw("SELECT COUNT(*) FROM orders where created_at >= ? AND created_at <= ?", result).Scan(&salesReport.TotalOrders)
+	result = ar.DB.Raw("SELECT COUNT(*) FROM orders WHERE created_at >= ? AND created_at <= ?", startTime, endTime).Scan(&salesReport.TotalOrders)
 	if result.Error != nil {
 		return models.SalesReport{}, result.Error
 	}
@@ -207,8 +207,8 @@ func (ar *adminRepository) FilteredSalesReport(startTime time.Time, endTime time
 	if result.Error != nil {
 		return models.SalesReport{}, result.Error
 	}
-	query = ` SELECT COUNT(*) FROM orders WHERE shipment_status = 'returned' AND created_at >=? AND created_at <= ?`
-	result = ar.DB.Raw(query).Scan(&salesReport.ReturnedOrders)
+	query = `SELECT COUNT(*) FROM orders WHERE shipment_status = 'returned' AND created_at >= ? AND created_at <= ?`
+	result = ar.DB.Raw(query, startTime, endTime).Scan(&salesReport.ReturnedOrders)
 	if result.Error != nil {
 		return models.SalesReport{}, result.Error
 
