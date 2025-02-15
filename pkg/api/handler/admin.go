@@ -298,7 +298,7 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
-
+	//give this in params for sure otherwise it will get panic
 	download := c.Query("download")
 
 	if download == "pdf" {
