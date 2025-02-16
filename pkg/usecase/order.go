@@ -295,23 +295,30 @@ func (ou *orderUseCase) ApproveOrder(orderId int) error {
 }
 
 func (ou *orderUseCase) CancelOrderFromAdmin(orderId int) error {
+	if orderId <= 0 {
+		return errors.New("invalid order id")
+	}
 	ok, err := ou.orderRepository.CheckOrderID(orderId)
+
 	if !ok {
+		return errors.New("order does not exist")
+	}
+	if err != nil {
 		return err
 	}
 	orderProduct, err := ou.orderRepository.GetProductDetailsFromOrders(orderId)
 	if err != nil {
-		return nil
+		return err
 	}
 
-	ShipmetStatus, err := ou.orderRepository.GetShipmentStatus(orderId)
+	ShipmentStatus, err := ou.orderRepository.GetShipmentStatus(orderId)
 	if err != nil {
 		return err
 	}
-	if ShipmetStatus == "cancelled" {
+	if ShipmentStatus == "cancelled" {
 		return errors.New("the order is already cancelled")
 	}
-	if ShipmetStatus == "delivered" {
+	if ShipmentStatus == "deliverd" {
 		return errors.New("the order is delivered cannot be cancelled")
 	}
 	err = ou.orderRepository.CancelOrders(orderId)
