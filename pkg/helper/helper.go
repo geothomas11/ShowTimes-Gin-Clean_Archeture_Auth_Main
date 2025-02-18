@@ -266,61 +266,54 @@ func (h *helper) ConvertToExel(sales []models.OrderDetailsAdmin) (*excelize.File
 	filename := "salesReport/sales_report.xlsx"
 	file := excelize.NewFile()
 
-	// Set column headers
+	// Set headers
 	file.SetCellValue("Sheet1", "A1", "Product")
 	file.SetCellValue("Sheet1", "B1", "Amount Sold")
 
-	// Define bold style for headings
-	boldStyle := &excelize.Style{
+	// Create a bold style for headers
+	boldStyle, err := file.NewStyle(&excelize.Style{
 		Font: &excelize.Font{
 			Bold: true,
 		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create bold style: %v", err)
 	}
 
-	// Apply the bold style to the header row
-	boldStyleID, err := file.NewStyle(boldStyle)
-	if err != nil {
-		return nil, err
-	}
-	file.SetCellStyle("Sheet1", "A1", "B1", boldStyleID)
+	// Apply bold style to headers
+	file.SetCellStyle("Sheet1", "A1", "B1", boldStyle)
 
 	var total float64
-	var limit int
-	// Insert sales data
 	for i, sale := range sales {
-		col1 := fmt.Sprintf("A%d", i+2)
-		col2 := fmt.Sprintf("B%d", i+2)
-
-		file.SetCellValue("Sheet1", col1, sale.ProductName)
-		file.SetCellValue("Sheet1", col2, sale.TotalAmount)
-		limit = i + 3
+		row := i + 2 // Start from row 2
+		file.SetCellValue("Sheet1", fmt.Sprintf("A%d", row), sale.ProductName)
+		file.SetCellValue("Sheet1", fmt.Sprintf("B%d", row), sale.TotalAmount)
 		total += sale.TotalAmount
 	}
 
-	// Add the total row
-	col1 := fmt.Sprintf("A%d", limit)
-	file.SetCellValue("Sheet1", col1, "Final Total")
-	col2 := fmt.Sprintf("B%d", limit)
-	file.SetCellValue("Sheet1", col2, total)
+	// Add "Final Total" row
+	finalRow := len(sales) + 2
+	file.SetCellValue("Sheet1", fmt.Sprintf("A%d", finalRow), "Final Total")
+	file.SetCellValue("Sheet1", fmt.Sprintf("B%d", finalRow), total)
 
-	// Define larger font style for the 'Final Total' row
-	largerFontStyle := &excelize.Style{
+	// Create a larger font style for the "Final Total" row
+	largerFontStyle, err := file.NewStyle(&excelize.Style{
 		Font: &excelize.Font{
-			Size: 10,   // Larger font size for 'Final Total'
-			Bold: true, // Bold font
+			Size: 14, // Adjust the size as needed
+			Bold: true,
 		},
-	}
-
-	// Apply the larger font style
-	largerFontStyleID, err := file.NewStyle(largerFontStyle)
+	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create larger font style: %v", err)
 	}
-	file.SetCellStyle("Sheet1", col1, col2, largerFontStyleID)
 
-	// Save the file
-	if err := file.SaveAs(filename); err != nil {
-		return nil, err
+	// Apply larger font style to the "Final Total" row
+	file.SetCellStyle("Sheet1", fmt.Sprintf("A%d", finalRow), fmt.Sprintf("B%d", finalRow), largerFontStyle)
+
+	// Save the file to disk
+	err = file.SaveAs(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to save Excel file: %v", err)
 	}
 
 	return file, nil

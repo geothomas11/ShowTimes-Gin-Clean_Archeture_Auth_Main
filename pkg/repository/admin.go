@@ -5,6 +5,7 @@ import (
 	interfaces "ShowTimes/pkg/repository/interfaces"
 	"ShowTimes/pkg/utils/models"
 	"errors"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -230,7 +231,7 @@ func (ar *adminRepository) FilteredSalesReport(startTime time.Time, endTime time
 	return salesReport, nil
 
 }
-func (ar *adminRepository) SalesByYear(yearInt int, monthInt int, dayInt int) ([]models.OrderDetailsAdmin, error) {
+func (ar *adminRepository) SalesByYear(yearInt int) ([]models.OrderDetailsAdmin, error) {
 	var orderDetails []models.OrderDetailsAdmin
 
 	query := `SELECT i.product_name,SUM(oi.total_price) AS total_amount FROM orders o JOIN order_items oi ON o.id = oi.order_id
@@ -263,7 +264,9 @@ func (ar *adminRepository) SalesByMonth(yearInt int, monthInt int) ([]models.Ord
 }
 
 func (ar *adminRepository) SalesByDay(yearInt int, monthInt int, dayInt int) ([]models.OrderDetailsAdmin, error) {
-	var orderDetails []models.OrderDetailsAdmin
+	// var orderDetails []models.OrderDetailsAdmin
+	orderDetails := make([]models.OrderDetailsAdmin, 0)
+	fmt.Println("moda", orderDetails)
 
 	query := `SELECT p.product_name, SUM(oi.total_price) AS total_amount
               FROM orders o

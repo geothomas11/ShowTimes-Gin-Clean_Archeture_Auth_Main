@@ -694,6 +694,54 @@ paths:
       summary: Add Payment Method
       tags:
       - Admin Payment Methods
+  /admin/printsales:
+    get:
+      consumes:
+      - application/json
+      description: Generates and downloads a sales report in either PDF or Excel format
+        for a given day, month, and year. If no format is specified, the report is
+        downloaded as an Excel file by default.
+      parameters:
+      - description: Year of the sales report (e.g., 2025)
+        in: query
+        name: year
+        required: true
+        type: integer
+      - description: Month of the sales report (1-12)
+        in: query
+        name: month
+        required: true
+        type: integer
+      - description: Day of the sales report (1-31)
+        in: query
+        name: day
+        required: true
+        type: integer
+      - description: 'Download format: ''pdf'' or ''excel'' (defaults to ''excel'')'
+        in: query
+        name: download
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: 'Bad request: Invalid date format or unable to generate the
+            report'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Internal server error: Unable to generate the sales report'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Generate and download sales report by date
+      tags:
+      - Admin Sales Reports
   /admin/product:
     delete:
       consumes:
@@ -901,52 +949,6 @@ paths:
       summary: Retrieve sales report by date range
       tags:
       - Sales Reports
-  /admin/salesreport/download:
-    get:
-      consumes:
-      - application/json
-      description: Generates and downloads a sales report in either PDF or Excel format
-        for the given day, month, and year.
-      parameters:
-      - description: Year of the sales report (e.g., 2024)
-        in: query
-        name: year
-        required: true
-        type: integer
-      - description: Month of the sales report (1-12)
-        in: query
-        name: month
-        required: true
-        type: integer
-      - description: Day of the sales report (1-31)
-        in: query
-        name: day
-        required: true
-        type: integer
-      - description: 'Download format: ''pdf'' or ''excel'' (defaults to ''excel'')'
-        in: query
-        name: download
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: file
-        "400":
-          description: 'Bad request: Invalid date format or unable to generate report'
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: 'Internal server error: Unable to generate sales report'
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - BearerTokenAuth: []
-      summary: Generate and download sales report by date
-      tags:
-      - Admin Sales Reports
   /admin/unblock:
     patch:
       consumes:

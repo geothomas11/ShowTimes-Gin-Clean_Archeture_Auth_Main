@@ -796,6 +796,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/printsales": {
+            "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Generates and downloads a sales report in either PDF or Excel format for a given day, month, and year. If no format is specified, the report is downloaded as an Excel file by default.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Sales Reports"
+                ],
+                "summary": "Generate and download sales report by date",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Year of the sales report (e.g., 2025)",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Month of the sales report (1-12)",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Day of the sales report (1-31)",
+                        "name": "day",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Download format: 'pdf' or 'excel' (defaults to 'excel')",
+                        "name": "download",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request: Invalid date format or unable to generate the report",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error: Unable to generate the sales report",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/product": {
             "get": {
                 "security": [
@@ -1106,75 +1175,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Unable to retrieve sales report",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/salesreport/download": {
-            "get": {
-                "security": [
-                    {
-                        "BearerTokenAuth": []
-                    }
-                ],
-                "description": "Generates and downloads a sales report in either PDF or Excel format for the given day, month, and year.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Admin Sales Reports"
-                ],
-                "summary": "Generate and download sales report by date",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Year of the sales report (e.g., 2024)",
-                        "name": "year",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Month of the sales report (1-12)",
-                        "name": "month",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Day of the sales report (1-31)",
-                        "name": "day",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Download format: 'pdf' or 'excel' (defaults to 'excel')",
-                        "name": "download",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "file"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request: Invalid date format or unable to generate report",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error: Unable to generate sales report",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }

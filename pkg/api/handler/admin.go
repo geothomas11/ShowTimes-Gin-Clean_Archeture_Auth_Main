@@ -22,9 +22,10 @@ type AdminHandler struct {
 	helper       interfaces.Helper
 }
 
-func NewAdminHandler(usecase interfaces_u.AdminUseCase) *AdminHandler {
+func NewAdminHandler(usecase interfaces_u.AdminUseCase, helper interfaces.Helper) *AdminHandler {
 	return &AdminHandler{
 		adminUseCase: usecase,
+		helper:       helper,
 	}
 
 }
@@ -249,20 +250,20 @@ func (ah *AdminHandler) SalesReportByDate(c *gin.Context) {
 // PrintSalesByDate generates and downloads a sales report for a specific date.
 //
 // @Summary Generate and download sales report by date
-// @Description Generates and downloads a sales report in either PDF or Excel format for the given day, month, and year.
+// @Description Generates and downloads a sales report in either PDF or Excel format for a given day, month, and year. If no format is specified, the report is downloaded as an Excel file by default.
 // @Tags Admin Sales Reports
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param year query int true "Year of the sales report (e.g., 2024)"
+// @Param year query int true "Year of the sales report (e.g., 2025)"
 // @Param month query int true "Month of the sales report (1-12)"
 // @Param day query int true "Day of the sales report (1-31)"
 // @Param download query string false "Download format: 'pdf' or 'excel' (defaults to 'excel')"
 // @Success 200 {file} application/pdf "PDF sales report downloaded successfully"
 // @Success 200 {file} application/vnd.openxmlformats-officedocument.spreadsheetml.sheet "Excel sales report downloaded successfully"
-// @Failure 400 {object} response.Response "Bad request: Invalid date format or unable to generate report"
-// @Failure 500 {object} response.Response "Internal server error: Unable to generate sales report"
-// @Router /admin/salesreport/download [get]
+// @Failure 400 {object} response.Response "Bad request: Invalid date format or unable to generate the report"
+// @Failure 500 {object} response.Response "Internal server error: Unable to generate the sales report"
+// @Router /admin/printsales [get]
 func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 	year := c.Query("year")
 	yearInt, err := strconv.Atoi(year)
@@ -298,9 +299,8 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
-	//give this in params for sure otherwise it will get panic
-	download := c.Query("download")
 
+	download := c.Query("download")
 	if download == "pdf" {
 		pdf, err := a.adminUseCase.PrintSalesReport(body)
 		if err != nil {
@@ -319,8 +319,8 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 			return
 		}
 
-		c.Header("Content-Disposition", "attachment; filename=total_sales_report.pdf")
-		c.Header("Content-Type", "application/pdf")
+		c.Header("Content-Disposition", "attachment; filename=sales_report.xlsx")
+		c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 		c.File(pdfFilePath)
 
@@ -333,6 +333,7 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 			return
 		}
 	} else {
+
 		excel, err := a.helper.ConvertToExel(body)
 		if err != nil {
 			errRes := response.ClientResponse(http.StatusBadGateway, "error in printing sales report", nil, err)
