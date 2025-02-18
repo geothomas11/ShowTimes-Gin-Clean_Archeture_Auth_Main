@@ -263,22 +263,62 @@ func (h *helper) ValidateAlphabets(data string) (bool, error) {
 }
 
 func (h *helper) ConvertToExel(sales []models.OrderDetailsAdmin) (*excelize.File, error) {
-
 	filename := "salesReport/sales_report.xlsx"
 	file := excelize.NewFile()
 
-	file.SetCellValue("Sheet1", "A1", "Item")
-	file.SetCellValue("Sheet1", "B1", "Total Amount Sold")
+	// Set column headers
+	file.SetCellValue("Sheet1", "A1", "Product")
+	file.SetCellValue("Sheet1", "B1", "Amount Sold")
 
+	// Define bold style for headings
+	boldStyle := &excelize.Style{
+		Font: &excelize.Font{
+			Bold: true,
+		},
+	}
+
+	// Apply the bold style to the header row
+	boldStyleID, err := file.NewStyle(boldStyle)
+	if err != nil {
+		return nil, err
+	}
+	file.SetCellStyle("Sheet1", "A1", "B1", boldStyleID)
+
+	var total float64
+	var limit int
+	// Insert sales data
 	for i, sale := range sales {
-		col1 := fmt.Sprintf("A%d", i+1)
-		col2 := fmt.Sprintf("B%d", i+1)
+		col1 := fmt.Sprintf("A%d", i+2)
+		col2 := fmt.Sprintf("B%d", i+2)
 
 		file.SetCellValue("Sheet1", col1, sale.ProductName)
 		file.SetCellValue("Sheet1", col2, sale.TotalAmount)
-
+		limit = i + 3
+		total += sale.TotalAmount
 	}
 
+	// Add the total row
+	col1 := fmt.Sprintf("A%d", limit)
+	file.SetCellValue("Sheet1", col1, "Final Total")
+	col2 := fmt.Sprintf("B%d", limit)
+	file.SetCellValue("Sheet1", col2, total)
+
+	// Define larger font style for the 'Final Total' row
+	largerFontStyle := &excelize.Style{
+		Font: &excelize.Font{
+			Size: 10,   // Larger font size for 'Final Total'
+			Bold: true, // Bold font
+		},
+	}
+
+	// Apply the larger font style
+	largerFontStyleID, err := file.NewStyle(largerFontStyle)
+	if err != nil {
+		return nil, err
+	}
+	file.SetCellStyle("Sheet1", col1, col2, largerFontStyleID)
+
+	// Save the file
 	if err := file.SaveAs(filename); err != nil {
 		return nil, err
 	}
