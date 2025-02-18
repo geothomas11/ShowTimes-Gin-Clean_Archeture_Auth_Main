@@ -845,9 +845,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Sales report downloaded successfully",
                         "schema": {
-                            "type": "file"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {

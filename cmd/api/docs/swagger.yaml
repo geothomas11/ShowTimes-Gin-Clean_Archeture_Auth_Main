@@ -725,9 +725,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Sales report downloaded successfully
           schema:
-            type: file
+            $ref: '#/definitions/response.Response'
         "400":
           description: 'Bad request: Invalid date format or unable to generate the
             report'

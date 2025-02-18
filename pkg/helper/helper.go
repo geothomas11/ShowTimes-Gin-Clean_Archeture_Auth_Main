@@ -262,8 +262,13 @@ func (h *helper) ValidateAlphabets(data string) (bool, error) {
 	return true, nil
 }
 
-func (h *helper) ConvertToExel(sales []models.OrderDetailsAdmin) (*excelize.File, error) {
-	filename := "salesReport/sales_report.xlsx"
+func (h *helper) ConvertToExel(sales []models.OrderDetailsAdmin, filename string) (*excelize.File, error) {
+	// Default filename if not provided
+	if filename == "" {
+		filename = "salesReport/sales_report.xlsx"
+	}
+
+	// Create a new Excel file
 	file := excelize.NewFile()
 
 	// Set headers
@@ -283,6 +288,7 @@ func (h *helper) ConvertToExel(sales []models.OrderDetailsAdmin) (*excelize.File
 	// Apply bold style to headers
 	file.SetCellStyle("Sheet1", "A1", "B1", boldStyle)
 
+	// Insert sales data
 	var total float64
 	for i, sale := range sales {
 		row := i + 2 // Start from row 2
@@ -316,5 +322,6 @@ func (h *helper) ConvertToExel(sales []models.OrderDetailsAdmin) (*excelize.File
 		return nil, fmt.Errorf("failed to save Excel file: %v", err)
 	}
 
+	// Return the created file
 	return file, nil
 }

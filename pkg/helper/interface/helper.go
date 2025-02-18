@@ -26,5 +26,5 @@ type Helper interface {
 	GetTimeFromPeriod(timePeriod string) (time.Time, time.Time)
 	ValidateAlphabets(data string) (bool, error)
 
-	ConvertToExel(sales []models.OrderDetailsAdmin) (*excelize.File, error)
+	ConvertToExel(sales []models.OrderDetailsAdmin, filename string) (*excelize.File, error)
 }

@@ -259,8 +259,7 @@ func (ah *AdminHandler) SalesReportByDate(c *gin.Context) {
 // @Param month query int true "Month of the sales report (1-12)"
 // @Param day query int true "Day of the sales report (1-31)"
 // @Param download query string false "Download format: 'pdf' or 'excel' (defaults to 'excel')"
-// @Success 200 {file} application/pdf "PDF sales report downloaded successfully"
-// @Success 200 {file} application/vnd.openxmlformats-officedocument.spreadsheetml.sheet "Excel sales report downloaded successfully"
+// @Success 200 {object} response.Response "Sales report downloaded successfully"
 // @Failure 400 {object} response.Response "Bad request: Invalid date format or unable to generate the report"
 // @Failure 500 {object} response.Response "Internal server error: Unable to generate the sales report"
 // @Router /admin/printsales [get]
@@ -333,8 +332,8 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 			return
 		}
 	} else {
-
-		excel, err := a.helper.ConvertToExel(body)
+		// Here you need to pass the filename along with the sales data
+		excel, err := a.helper.ConvertToExel(body, "salesReport/sales_report.xlsx")
 		if err != nil {
 			errRes := response.ClientResponse(http.StatusBadGateway, "error in printing sales report", nil, err)
 			c.JSON(http.StatusBadRequest, errRes)
