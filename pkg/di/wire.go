@@ -53,6 +53,7 @@ func InitializeAPI(cfg config.Config) (*http.ServerHTTP, error) {
 		handler.NewPaymentHandler,
 		handler.NewWalletHandler,
 		handler.NewOfferHandler,
+		
 
 		helper.NewHelper,
 

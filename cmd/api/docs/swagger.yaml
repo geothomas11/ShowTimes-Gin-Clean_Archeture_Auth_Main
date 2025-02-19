@@ -153,6 +153,8 @@ definitions:
         type: string
       phone:
         type: string
+      referral_code:
+        type: string
     type: object
   models.UserLogin:
     properties:
@@ -380,9 +382,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticate an admin and get an access token.
+      description: Authenticates an admin and returns an access token.
       parameters:
-      - description: Admin credentials for login
+      - description: Admin login credentials
         in: body
         name: body
         required: true
@@ -392,18 +394,22 @@ paths:
       - application/json
       responses:
         "200":
-          description: Admin login successful
+          description: Admin login successful, returns access token
           schema:
             $ref: '#/definitions/response.Response'
         "400":
-          description: Invalid request or incorrect format
+          description: 'Bad request: Invalid request or incorrect format'
           schema:
             $ref: '#/definitions/response.Response'
         "401":
-          description: 'Unauthorized: cannot authenticate user'
+          description: 'Unauthorized: Incorrect credentials'
           schema:
             $ref: '#/definitions/response.Response'
-      summary: Admin login
+        "500":
+          description: 'Internal server error: Login failed'
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Admin Login
       tags:
       - Admin Authentication
   /admin/offer/category-offer:
@@ -1535,6 +1541,39 @@ paths:
       summary: Change user password
       tags:
       - Users
+  /user/products:
+    get:
+      consumes:
+      - application/json
+      description: Fetches a paginated list of products available to users.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Number of products per page (default: 5)'
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved the product list
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 'Bad request: Invalid pagination parameters or unable to fetch
+            products'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Internal server error: Could not retrieve products'
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get paginated list of products
+      tags:
+      - Products
   /user/profile:
     patch:
       consumes:

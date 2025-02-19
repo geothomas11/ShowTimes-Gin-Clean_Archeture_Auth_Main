@@ -301,7 +301,7 @@ const docTemplate = `{
         },
         "/admin/login": {
             "post": {
-                "description": "Authenticate an admin and get an access token.",
+                "description": "Authenticates an admin and returns an access token.",
                 "consumes": [
                     "application/json"
                 ],
@@ -311,10 +311,10 @@ const docTemplate = `{
                 "tags": [
                     "Admin Authentication"
                 ],
-                "summary": "Admin login",
+                "summary": "Admin Login",
                 "parameters": [
                     {
-                        "description": "Admin credentials for login",
+                        "description": "Admin login credentials",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -325,19 +325,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Admin login successful",
+                        "description": "Admin login successful, returns access token",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
-                        "description": "Invalid request or incorrect format",
+                        "description": "Bad request: Invalid request or incorrect format",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized: cannot authenticate user",
+                        "description": "Unauthorized: Incorrect credentials",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error: Login failed",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -2077,6 +2083,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/products": {
+            "get": {
+                "description": "Fetches a paginated list of products available to users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get paginated list of products",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of products per page (default: 5)",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved the product list",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request: Invalid pagination parameters or unable to fetch products",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error: Could not retrieve products",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/user/profile": {
             "patch": {
                 "security": [
@@ -2532,6 +2587,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phone": {
+                    "type": "string"
+                },
+                "referral_code": {
                     "type": "string"
                 }
             }

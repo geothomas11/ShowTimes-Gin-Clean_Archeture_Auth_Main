@@ -63,6 +63,49 @@ func (i *ProductHandler) AddProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, successResp)
 }
 
+// ListProductsUser retrieves a paginated list of products for users.
+//
+// @Summary Get paginated list of products
+// @Description Fetches a paginated list of products available to users.
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number (default: 1)"
+// @Param per_page query int false "Number of products per page (default: 5)"
+// @Success 200 {object} response.Response "Successfully retrieved the product list"
+// @Failure 400 {object} response.Response "Bad request: Invalid pagination parameters or unable to fetch products"
+// @Failure 500 {object} response.Response "Internal server error: Could not retrieve products"
+// @Router /user/products [get]
+func (i *ProductHandler) ListProductsUser(c *gin.Context) {
+
+	pageNo := c.DefaultQuery("page", "1")
+	pageList := c.DefaultQuery("per_page", "5")
+	pageNoInt, err := strconv.Atoi(pageNo)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "Product cannot be displayed", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	pageListInt, err := strconv.Atoi(pageList)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "Product cannot be displayed", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+	}
+
+	products_list, err := i.ProductUseCase.ListProducts(pageNoInt, pageListInt)
+
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "Product cannot be displayed", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	message := "product list"
+
+	successRes := response.ClientResponse(http.StatusOK, message, products_list, nil)
+	c.JSON(http.StatusOK, successRes)
+}
+
 // ListProducts retrieves a paginated list of products.
 //
 // @Summary List products

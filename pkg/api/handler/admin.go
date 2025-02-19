@@ -4,6 +4,7 @@ import (
 	"ShowTimes/pkg/helper"
 	interfaces "ShowTimes/pkg/helper/interface"
 	interfaces_u "ShowTimes/pkg/usecase/interface"
+	"ShowTimes/pkg/utils/errmsg"
 	"ShowTimes/pkg/utils/models"
 	"ShowTimes/pkg/utils/response"
 	"errors"
@@ -31,21 +32,23 @@ func NewAdminHandler(usecase interfaces_u.AdminUseCase, helper interfaces.Helper
 }
 
 // LoginHandler handles the login operation for an admin.
-// @Summary Admin login
-// @Description Authenticate an admin and get an access token.
+//
+// @Summary Admin Login
+// @Description Authenticates an admin and returns an access token.
 // @Tags Admin Authentication
 // @Accept json
 // @Produce json
-// @Param body body models.AdminLogin true "Admin credentials for login"
-// @Success 200 {object} response.Response "Admin login successful"
-// @Failure 400 {object} response.Response "Invalid request or incorrect format"
-// @Failure 401 {object} response.Response "Unauthorized: cannot authenticate user"
+// @Param body body models.AdminLogin true "Admin login credentials"
+// @Success 200 {object} response.Response "Admin login successful, returns access token"
+// @Failure 400 {object} response.Response "Bad request: Invalid request or incorrect format"
+// @Failure 401 {object} response.Response "Unauthorized: Incorrect credentials"
+// @Failure 500 {object} response.Response "Internal server error: Login failed"
 // @Router /admin/login [post]
 func (ad *AdminHandler) LoginHandler(c *gin.Context) {
 	var adminDetails models.AdminLogin
 
 	if err := c.BindJSON(&adminDetails); err != nil {
-		errResp := response.ClientResponse(http.StatusBadRequest, "details is not in correct format", nil, err.Error())
+		errResp := response.ClientResponse(http.StatusBadRequest, errmsg.MsgFormatErr, nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}

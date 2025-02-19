@@ -4,17 +4,17 @@ import (
 	"ShowTimes/pkg/config"
 	helper_interfaces "ShowTimes/pkg/helper/interface"
 	services "ShowTimes/pkg/usecase/interface"
+	"ShowTimes/pkg/utils/errmsg"
 	"ShowTimes/pkg/utils/models"
 	"errors"
 	"strconv"
 
 	"ShowTimes/pkg/repository/interfaces"
 	interfaces_repo "ShowTimes/pkg/repository/interfaces"
+
+	"github.com/google/uuid"
 )
 
-//	type UserHandler struct {
-//		userUseCase interfaces.UserUseCase
-//	}
 type userUseCase struct {
 	userRepo   interfaces_repo.UserRepository
 	cfg        config.Config
@@ -35,6 +35,18 @@ var InternalError = "Internal Server Error"
 var ErrorHashingPassword = "Error In hashiing Password"
 
 func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, error) {
+	if user.Password == "" {
+		return models.TokenUsers{}, errors.New("password cannot be empty")
+	}
+	if user.Name == "" {
+		return models.TokenUsers{}, errors.New("name cannot be empty")
+	}
+
+	phoneNumber := u.helper.ValidatePhoneNumber(user.Phone)
+
+	if !phoneNumber {
+		return models.TokenUsers{}, errors.New("invalid phone number")
+	}
 
 	userExist := u.userRepo.CheckUserAvialiablity(user.Email)
 	if userExist {
@@ -52,13 +64,71 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 	userData, err := u.userRepo.UserSignup(user)
 	if err != nil {
 		return models.TokenUsers{}, err
-
 	}
+	id := uuid.New().ID()
+	str := strconv.Itoa(int(id))
+	userReferral := str[:8]
+	err = u.userRepo.NewReferralEntry(userData.Id, userReferral)
+	if err != nil {
+		return models.TokenUsers{}, errors.New("referral creation failed")
+	}
+	if err != nil {
+		return models.TokenUsers{}, errors.New(errmsg.ErrWriteDB)
+	}
+
 	err = u.walletRepo.CreateWallet(userData.Id)
 	if err != nil {
 		return models.TokenUsers{}, err
 	}
 
+	//
+	if user.ReferralCode != "" {
+		// first check whether if a user with that referralCode exist
+		referredId, err := u.userRepo.GetUserIdFromReferralCode(user.ReferralCode)
+		if err != nil {
+			return models.TokenUsers{}, errors.New(errmsg.ErrGetDB)
+		}
+		if referredId != 0 {
+			referralAmount := 150
+			err := u.userRepo.UpdateReferralAmount(float64(referralAmount), referredId, userData.Id)
+			if err != nil {
+				return models.TokenUsers{}, err
+			}
+			// referreason := "Amount credited for used referral code"
+			// err = u.userRepo.UpdateHistory(userData.Id, 0, float64(referralAmount), referreason)
+			// if err != nil {
+			// 	return models.TokenUsers{}, err
+			// }
+			amount, err := u.userRepo.AmountInRefferals(userData.Id)
+			if err != nil {
+				return models.TokenUsers{}, err
+			}
+			wallectExist, err := u.walletRepo.IsWalletExist(referredId)
+			if err != nil {
+				return models.TokenUsers{}, err
+			}
+			if !wallectExist {
+				err = u.walletRepo.CreateWallet(referredId)
+				if err != nil {
+					return models.TokenUsers{}, err
+				}
+			}
+			err = u.walletRepo.AddToWallet(referredId, amount)
+			if err != nil {
+				return models.TokenUsers{}, err
+			}
+			err = u.walletRepo.AddToWallet(userData.Id, float64(referralAmount))
+			if err != nil {
+				return models.TokenUsers{}, err
+			}
+			// reason := "Amount credited for refer a new person"
+			// err = u.userRepo.UpdateHistory(referredId, 0, amount, reason)
+			// if err != nil {
+			// 	return models.TokenUsers{}, err
+			// }
+		}
+	}
+	//
 	tokenString, err := u.helper.GenerateTokenClients(userData)
 	if err != nil {
 		return models.TokenUsers{}, errors.New("could not create token")
@@ -144,16 +214,16 @@ func (u *userUseCase) AddAddress(userID int, address models.AddressInfoResponse)
 	}
 	return []models.AddressInfoResponse{adrs}, nil
 
+	addressRep, err := u.userRepo.GetAllAddress(userID)
+	if err != nil {
+		return []models.AddressInfoResponse{}, errResp
+	}
+	return addressRep, nil
+
 }
 
 func (u *userUseCase) ShowUserDetails(userID int) (models.UsersProfileDetails, error) {
-	// if userID <= 0 {
-	// 	return models.UsersProfileDetails{},errors.New("invalid userid error usecase")
-	// }
-	// err := u.userRepo.CheckUserById(userID)
-	// if !err {
-	// 	return models.UsersProfileDetails{},errors.New("user does not exist")
-	// }
+	
 	profile, err := u.userRepo.ShowUserDetails(userID)
 	if err != nil {
 		return models.UsersProfileDetails{}, err
