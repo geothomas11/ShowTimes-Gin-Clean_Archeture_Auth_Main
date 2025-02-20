@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"ShowTimes/pkg/config"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -11,45 +10,45 @@ import (
 )
 
 func UserAuthMiddleware(c *gin.Context) {
-	tokenstring := c.GetHeader("Authorization")
-	if tokenstring == "" {
+	tokenString := c.GetHeader("Authorization")
+	if tokenString == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing authorization"})
 		c.Abort()
 		return
 	}
 
-	accessToken := strings.TrimPrefix(tokenstring, "Bearer ")
+	accessToken := strings.TrimPrefix(tokenString, "Bearer ")
 	cfg, _ := config.LoadConfig()
+
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		return []byte(cfg.User_AccessKey), nil
 	})
 
 	if err != nil {
-		// The access token is invalid.
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorised"})
 		c.Abort()
 		return
-
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
-	fmt.Println("claims2", claims)
 	if !ok || !token.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthoraised access 1"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorised access *"})
 		c.Abort()
 		return
 	}
-	fmt.Println("claims", claims)
 
 	role, ok := claims["role"].(string)
-	if !ok || role != "Client" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorised access 2"})
+	if !ok || (role != "Client" && role != "admin") { // Allow both "Client" and "admin" roles
+		c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorised access #"})
 		c.Abort()
 		return
 	}
+
 	id, ok := claims["id"].(float64)
 	if !ok || id == 0 {
-		c.JSON(http.StatusForbidden, gin.H{"error": "error in retreving id"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "error in retrieving id"})
+		c.Abort()
+		return
 	}
 
 	c.Set("role", role)

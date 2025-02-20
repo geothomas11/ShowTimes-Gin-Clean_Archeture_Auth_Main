@@ -269,7 +269,6 @@ func (ah *AdminHandler) SalesReportByDate(c *gin.Context) {
 func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 	year := c.Query("year")
 	yearInt, err := strconv.Atoi(year)
-
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting year", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
@@ -278,7 +277,6 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 
 	month := c.Query("month")
 	monthInt, err := strconv.Atoi(month)
-
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting month", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
@@ -287,7 +285,6 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 
 	day := c.Query("day")
 	dayInt, err := strconv.Atoi(day)
-
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting day", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
@@ -295,7 +292,6 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 	}
 
 	body, err := a.adminUseCase.SalesByDate(dayInt, monthInt, yearInt)
-
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "error in getting sales details", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
@@ -310,32 +306,17 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, errRes)
 			return
 		}
-		c.Header("Content-Disposition", "attachment;filename=totalsalesreport.pdf")
 
-		pdfFilePath := "salesReport/totalsalesreport.pdf"
-
-		err = pdf.OutputFileAndClose(pdfFilePath)
-		if err != nil {
-			errRes := response.ClientResponse(http.StatusBadGateway, "error in printing sales report", nil, err)
-			c.JSON(http.StatusBadRequest, errRes)
-			return
-		}
-
-		c.Header("Content-Disposition", "attachment; filename=sales_report.xlsx")
-		c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-		c.File(pdfFilePath)
-
+		c.Header("Content-Disposition", "attachment; filename=totalsalesreport.pdf")
 		c.Header("Content-Type", "application/pdf")
 
-		err = pdf.Output(c.Writer)
-		if err != nil {
+		if err := pdf.Output(c.Writer); err != nil {
 			errRes := response.ClientResponse(http.StatusBadGateway, "error in printing sales report", nil, err)
 			c.JSON(http.StatusBadRequest, errRes)
 			return
 		}
+
 	} else {
-		// Here you need to pass the filename along with the sales data
 		excel, err := a.helper.ConvertToExel(body, "salesReport/sales_report.xlsx")
 		if err != nil {
 			errRes := response.ClientResponse(http.StatusBadGateway, "error in printing sales report", nil, err)
@@ -344,7 +325,6 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 		}
 
 		fileName := "sales_report.xlsx"
-
 		c.Header("Content-Disposition", "attachment; filename="+fileName)
 		c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
@@ -353,6 +333,8 @@ func (a *AdminHandler) PrintSalesByDate(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, errRes)
 			return
 		}
+
+		return
 	}
 
 	succesRes := response.ClientResponse(http.StatusOK, "success", body, nil)

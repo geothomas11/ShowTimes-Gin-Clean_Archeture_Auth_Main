@@ -36,7 +36,7 @@ func (wr *WalletDB) GetWallet(userID int) (models.WalletAmount, error) {
 }
 func (wr *WalletDB) IsWalletExist(userID int) (bool, error) {
 	var count int
-	err := wr.Db.Raw("select coount(*) from wallets where user_id = ?", userID).Scan(&count).Error
+	err := wr.Db.Raw("select count(*) from wallets where user_id = ?", userID).Scan(&count).Error
 	if err != nil {
 		return false, errors.New("cannot get wallet details")
 	}
