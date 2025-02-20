@@ -94,9 +94,11 @@ type ChangePassword struct {
 	ConfirmPassword string `json:"confirm_password"`
 }
 type UsersProfileDetailsR struct {
-	Name  string `json:"name" gorm:"not null"`
-	Email string `json:"email" validate:"email" `
-	Phone string `json:"phone" `
+	ID           uint   `json:"id" gorm:"unique;not null"`
+	Name         string `json:"name" gorm:"not null"`
+	Email        string `json:"email" validate:"email" `
+	Phone        string `json:"phone" `
+	ReferralCode string `json:"referral_code"`
 }
 type ChangePasswordR struct {
 	CurrentPassWord string `json:"current_password"`

@@ -387,3 +387,24 @@ func (or *orderRepository) GetFinalPriceOrder(orderID int) (float64, error) {
 	}
 	return final_price, nil
 }
+func (or *orderRepository) GetItemsByOrderId(orderId int) ([]models.ItemDetails, error) {
+	var items []models.ItemDetails
+	query := `SELECT
+    i.product_name,
+    oi.quantity,
+    i.price,
+    oi.total_price
+FROM
+    orders o
+JOIN
+    order_items oi ON o.id = oi.order_id
+JOIN
+    products i ON oi.product_id = i.id
+WHERE
+    o.id = ?; `
+	if err := or.db.Raw(query, orderId).Scan(&items).Error; err != nil {
+		return []models.ItemDetails{}, err
+	}
+	return items, nil
+
+}

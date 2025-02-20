@@ -50,6 +50,7 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpha
 			Checkout.DELETE("/cancelOrder", orderHandler.CancelOrder)
 			// Checkout.POST("/placeorderinCOD", orderHandler.PlaceOrderCOD)
 			Checkout.PATCH("/returnorder", orderHandler.ReturnOrder)
+			Checkout.GET("/print", orderHandler.PrintInvoice)
 
 		}
 		wallet := engine.Group("/wallet", walletHandler.GetWallet)

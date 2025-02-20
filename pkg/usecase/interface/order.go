@@ -1,6 +1,10 @@
 package interfaces
 
-import "ShowTimes/pkg/utils/models"
+import (
+	"ShowTimes/pkg/utils/models"
+
+	"github.com/jung-kurt/gofpdf/v2"
+)
 
 type OrderUseCase interface {
 	Checkout(userID int) (models.CheckoutDetails, error)
@@ -15,4 +19,5 @@ type OrderUseCase interface {
 	// GetPaymentType(orderID int) (int, error)
 	// GetPaymentStatus(orderID int) (string, error)
 	// GetFinalPriceOrder(orderID int) (float64, error)
+	PrintInvoice(orderId int) (*gofpdf.Fpdf, error)
 }

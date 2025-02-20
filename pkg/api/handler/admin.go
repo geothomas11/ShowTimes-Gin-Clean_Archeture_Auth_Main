@@ -61,7 +61,7 @@ func (ad *AdminHandler) LoginHandler(c *gin.Context) {
 	c.Set("Access", admin.AccessToken)
 	// c.Set("Refresh", admin.RefreshToken)
 
-	succesResp := response.ClientResponse(http.StatusOK, "login Successfully", admin, nil)
+	succesResp := response.ClientResponse(http.StatusOK, errmsg.MsgLoginSucces, admin, nil)
 	c.JSON(http.StatusOK, succesResp)
 }
 
@@ -111,7 +111,7 @@ func (ad *AdminHandler) BlockUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-	successResp := response.ClientResponse(http.StatusOK, "User blocked Successfully ", nil, nil)
+	successResp := response.ClientResponse(http.StatusOK, errmsg.MsgUserBlockSucces, nil, nil)
 	c.JSON(http.StatusOK, successResp)
 
 }

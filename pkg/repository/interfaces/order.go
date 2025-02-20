@@ -40,4 +40,6 @@ type OrderRepository interface {
 	GetPaymentType(orderID int) (int, error)
 	GetPaymentStatus(orderID int) (string, error)
 	GetFinalPriceOrder(orderID int) (float64, error)
+
+	GetItemsByOrderId(orderId int) ([]models.ItemDetails, error)
 }
