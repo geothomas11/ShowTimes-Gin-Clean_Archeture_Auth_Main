@@ -148,7 +148,7 @@ func (or *userDatabase) AddressExist(orderBody models.OrderIncoming) (bool, erro
 }
 
 func (ur *userDatabase) NewReferralEntry(userid int, userReferral string) error {
-	err := ur.DB.Exec("INSERT into referrals (user_id,refferal_code,referral_amount) VALUES (?,?,?) ", userid, userReferral, 0).Error
+	err := ur.DB.Exec("INSERT INTO referrals (user_id, referral_code, referral_amount) VALUES (?, ?, ?)", userid, userReferral, 0).Error
 	if err != nil {
 		return err
 	}

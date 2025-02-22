@@ -3,6 +3,7 @@ package repository
 import (
 	"ShowTimes/pkg/domain"
 	interfaces "ShowTimes/pkg/repository/interfaces"
+	"ShowTimes/pkg/utils/errmsg"
 	"errors"
 
 	"gorm.io/gorm"
@@ -80,4 +81,13 @@ func (cr *categoryRepository) IsCategoryExist(category string) (bool, error) {
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (cr *categoryRepository) GetCategoryId(productId int) (int, error) {
+	var catId int
+	err := cr.db.Raw("SELECT category_id from products where id =?", productId).Scan(&catId).Error
+	if err != nil {
+		return 0, errors.New(errmsg.ErrGetDB)
+	}
+	return catId, nil
 }

@@ -9,20 +9,19 @@ import (
 	"errors"
 	"strconv"
 
-	"ShowTimes/pkg/repository/interfaces"
-	interfaces_repo "ShowTimes/pkg/repository/interfaces"
+	interfaces "ShowTimes/pkg/repository/interfaces"
 
 	"github.com/google/uuid"
 )
 
 type userUseCase struct {
-	userRepo   interfaces_repo.UserRepository
+	userRepo   interfaces.UserRepository
 	cfg        config.Config
 	helper     helper_interfaces.Helper
 	walletRepo interfaces.WalletRepository
 }
 
-func NewUserUseCase(repo interfaces_repo.UserRepository, cfg config.Config, h helper_interfaces.Helper, wallet interfaces.WalletRepository) services.UserUseCase {
+func NewUserUseCase(repo interfaces.UserRepository, cfg config.Config, h helper_interfaces.Helper, wallet interfaces.WalletRepository) services.UserUseCase {
 	return &userUseCase{
 		userRepo:   repo,
 		cfg:        cfg,
@@ -43,7 +42,6 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 	}
 
 	phoneNumber := u.helper.ValidatePhoneNumber(user.Phone)
-
 	if !phoneNumber {
 		return models.TokenUsers{}, errors.New("invalid phone number")
 	}
@@ -61,10 +59,12 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 		return models.TokenUsers{}, errors.New("error hashing password")
 	}
 	user.Password = hashedPassword
+
 	userData, err := u.userRepo.UserSignup(user)
 	if err != nil {
 		return models.TokenUsers{}, err
 	}
+
 	id := uuid.New().ID()
 	str := strconv.Itoa(int(id))
 	userReferral := str[:8]
@@ -72,18 +72,13 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 	if err != nil {
 		return models.TokenUsers{}, errors.New("referral creation failed")
 	}
-	if err != nil {
-		return models.TokenUsers{}, errors.New(errmsg.ErrWriteDB)
-	}
 
 	err = u.walletRepo.CreateWallet(userData.Id)
 	if err != nil {
 		return models.TokenUsers{}, err
 	}
 
-	//
 	if user.ReferralCode != "" {
-		// first check whether if a user with that referralCode exist
 		referredId, err := u.userRepo.GetUserIdFromReferralCode(user.ReferralCode)
 		if err != nil {
 			return models.TokenUsers{}, errors.New(errmsg.ErrGetDB)
@@ -94,15 +89,12 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 			if err != nil {
 				return models.TokenUsers{}, err
 			}
-			// referreason := "Amount credited for used referral code"
-			// err = u.userRepo.UpdateHistory(userData.Id, 0, float64(referralAmount), referreason)
-			// if err != nil {
-			// 	return models.TokenUsers{}, err
-			// }
+
 			amount, err := u.userRepo.AmountInRefferals(userData.Id)
 			if err != nil {
 				return models.TokenUsers{}, err
 			}
+
 			wallectExist, err := u.walletRepo.IsWalletExist(referredId)
 			if err != nil {
 				return models.TokenUsers{}, err
@@ -113,31 +105,29 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 					return models.TokenUsers{}, err
 				}
 			}
+
 			err = u.walletRepo.AddToWallet(referredId, amount)
 			if err != nil {
 				return models.TokenUsers{}, err
 			}
+
 			err = u.walletRepo.AddToWallet(userData.Id, float64(referralAmount))
 			if err != nil {
 				return models.TokenUsers{}, err
 			}
-			// reason := "Amount credited for refer a new person"
-			// err = u.userRepo.UpdateHistory(referredId, 0, amount, reason)
-			// if err != nil {
-			// 	return models.TokenUsers{}, err
-			// }
 		}
 	}
-	//
+
+	// Generate token and return TokenUsers
 	tokenString, err := u.helper.GenerateTokenClients(userData)
 	if err != nil {
 		return models.TokenUsers{}, errors.New("could not create token")
 	}
+
 	return models.TokenUsers{
 		Users: userData,
 		Token: tokenString,
 	}, nil
-
 }
 
 func (u *userUseCase) LoginHandler(user models.UserLogin) (models.TokenUsers, error) {
@@ -182,20 +172,17 @@ func (u *userUseCase) LoginHandler(user models.UserLogin) (models.TokenUsers, er
 }
 
 func (u *userUseCase) AddAddress(userID int, address models.AddressInfoResponse) ([]models.AddressInfoResponse, error) {
+	// Validate input fields
 	ok, err := u.helper.ValidateAlphabets(address.Name)
-	if err != nil {
-		return []models.AddressInfoResponse{}, errors.New("invalid name")
-	}
-	if !ok {
+	if err != nil || !ok {
 		return []models.AddressInfoResponse{}, errors.New("invalid name")
 	}
 
-	phone := u.helper.ValidatePhoneNumber(address.Phone)
-	if !phone {
+	if !u.helper.ValidatePhoneNumber(address.Phone) {
 		return []models.AddressInfoResponse{}, errors.New("invalid phone number")
 	}
-	pin := u.helper.ValidatePin(address.Pin)
-	if !pin {
+
+	if !u.helper.ValidatePin(address.Pin) {
 		return []models.AddressInfoResponse{}, errors.New("invalid pin number")
 	}
 
@@ -203,27 +190,26 @@ func (u *userUseCase) AddAddress(userID int, address models.AddressInfoResponse)
 		return []models.AddressInfoResponse{}, errors.New("invalid user_id")
 	}
 
-	exist := u.userRepo.CheckUserById(userID)
-	if !exist {
+	// Check if the user exists
+	if !u.userRepo.CheckUserById(userID) {
 		return []models.AddressInfoResponse{}, errors.New("user does not exist")
 	}
 
-	adrs, errResp := u.userRepo.AddAddress(userID, address)
-	if errResp != nil {
-		return []models.AddressInfoResponse{}, errResp
+	// Add the address
+	_, err = u.userRepo.AddAddress(userID, address)
+	if err != nil {
+		return []models.AddressInfoResponse{}, err
 	}
-	return []models.AddressInfoResponse{adrs}, nil
 
 	addressRep, err := u.userRepo.GetAllAddress(userID)
 	if err != nil {
-		return []models.AddressInfoResponse{}, errResp
+		return []models.AddressInfoResponse{}, err
 	}
 	return addressRep, nil
-
 }
 
 func (u *userUseCase) ShowUserDetails(userID int) (models.UsersProfileDetails, error) {
-	
+
 	profile, err := u.userRepo.ShowUserDetails(userID)
 	if err != nil {
 		return models.UsersProfileDetails{}, err

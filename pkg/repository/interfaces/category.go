@@ -9,4 +9,5 @@ type CategoryRepository interface {
 	CheckCategory(current string) (bool, error)
 	DeleteCategory(categoryID int) error
 	IsCategoryExist(category string) (bool, error)
+	GetCategoryId(productId int) (int, error)
 }
