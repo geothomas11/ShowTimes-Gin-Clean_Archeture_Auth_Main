@@ -138,7 +138,7 @@ func (or *OfferRepository) GetCatOfferPercent(categoryId int) (int, error) {
 
 func (or *OfferRepository) GetProOfferPercent(productId int) (int, error) {
 	var percent int
-	err := or.DB.Raw("select discount_percentage from category_offers where product_id = ?", productId).Scan(&percent).Error
+	err := or.DB.Raw("select discount_percentage from product_offers where product_id = ?", productId).Scan(&percent).Error
 	if err != nil {
 		return 0, errors.New(errmsg.ErrGetDB)
 	}
