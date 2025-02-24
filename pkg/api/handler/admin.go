@@ -74,7 +74,7 @@ func (ad *AdminHandler) ValidateRefreshTokenAndCreateNewAccess(c *gin.Context) {
 		return []byte("refreshscret"), nil
 	})
 	if err != nil {
-		c.AbortWithError(401, errors.New("refresh token is invalid:user have to login agian"))
+		c.AbortWithError(500, errors.New(errmsg.ErrAccessToken))
 		return
 	}
 	claims := &helper.AuthCoustumClaims{
@@ -168,7 +168,7 @@ func (ad *AdminHandler) GetUsers(c *gin.Context) {
 		return
 	}
 
-	successRes := response.ClientResponse(http.StatusOK, "Successfully retrieved the users", users, nil)
+	successRes := response.ClientResponse(http.StatusOK, errmsg.MsgGetSucces, users, nil)
 	c.JSON(http.StatusOK, successRes)
 
 }
