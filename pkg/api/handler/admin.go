@@ -189,7 +189,7 @@ func (ah *AdminHandler) AdminDashboard(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorRes)
 		return
 	}
-	successResp := response.ClientResponse(http.StatusOK, "Successfully retrived the dashbord", dashbord, nil)
+	successResp := response.ClientResponse(http.StatusOK, errmsg.MsgsuccessAdminDash, dashbord, nil)
 	c.JSON(http.StatusOK, successResp)
 
 }
@@ -245,7 +245,7 @@ func (ah *AdminHandler) SalesReportByDate(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, errorResp)
 		return
 	}
-	success := response.ClientResponse(http.StatusOK, "sales report retrived successfully", report, nil)
+	success := response.ClientResponse(http.StatusOK, errmsg.MsgSalesRepErr, report, nil)
 	c.JSON(http.StatusOK, success)
 
 }
