@@ -2,6 +2,7 @@ package handler
 
 import (
 	interfaces "ShowTimes/pkg/usecase/interface"
+	"ShowTimes/pkg/utils/errmsg"
 	"ShowTimes/pkg/utils/models"
 	"ShowTimes/pkg/utils/response"
 	"errors"
@@ -38,13 +39,13 @@ func (ch *CartHandler) AddToCart(c *gin.Context) {
 	var cart models.AddCart
 	userID, errb := c.Get("id")
 	if !errb {
-		errRes := response.ClientResponse(http.StatusBadRequest, "Fields provided in the wrong format", nil, errors.New("getting user ID failed"))
+		errRes := response.ClientResponse(http.StatusBadRequest, "Fields provided in the wrong format", nil, errors.New(errmsg.MsdGetIdErr))
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
 
 	if err := c.BindJSON(&cart); err != nil {
-		errRes := response.ClientResponse(http.StatusBadRequest, "Fields provided in the wrong format", nil, err.Error())
+		errRes := response.ClientResponse(http.StatusBadRequest, errmsg.ErrFormat, nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
