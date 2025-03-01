@@ -161,7 +161,7 @@ func (ch *CartHandler) RemoveFromCart(c *gin.Context) {
 	cart.UserID = userID.(int)
 	cartResp, err := ch.cartUseCase.RemoveFromCart(cart)
 	if err != nil {
-		errResp := response.ClientResponse(http.StatusBadRequest, "Removing from cart failed", nil, err.Error())
+		errResp := response.ClientResponse(http.StatusBadRequest, errmsg.MsgRemoveCartErr, nil, err.Error())
 		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
