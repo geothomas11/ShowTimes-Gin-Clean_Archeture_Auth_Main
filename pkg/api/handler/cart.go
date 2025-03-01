@@ -165,6 +165,6 @@ func (ch *CartHandler) RemoveFromCart(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errResp)
 		return
 	}
-	successResp := response.ClientResponse(http.StatusOK, "Successfully removed product from cart", cartResp, nil)
+	successResp := response.ClientResponse(http.StatusOK, errmsg.MsgRemoveCartSuccess, cartResp, nil)
 	c.JSON(http.StatusOK, successResp)
 }
