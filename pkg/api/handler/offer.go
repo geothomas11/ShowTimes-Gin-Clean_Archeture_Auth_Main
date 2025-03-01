@@ -149,6 +149,8 @@ func (of *OfferHandler) GetCategoryOffer(c *gin.Context) {
 
 }
 
+//offer expires
+
 // ExpireProductOffer invalidates a product-specific offer.
 //
 // @Summary Expire Product Offer
