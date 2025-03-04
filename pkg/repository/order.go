@@ -300,7 +300,7 @@ func (or *orderRepository) UpdateQuantityOfProduct(orderProducts []models.OrderP
 }
 func (or *orderRepository) GetAllOrdersAdmin(offset, count int) ([]models.CombinedOrderDetails, error) {
 	var orderDetails []models.CombinedOrderDetails
-	query := `SELECT orders.id as order_id,orders.final_price,orders.shipment_status,orders.payment_status,users.name,users.email,users.phone,addresses.house_name,addresses.street,addresses.city,addresses.state,addresses.pin FROM orders INNER JOIN users ON orders.user_id = users.id INNER JOIN addresses ON orders.address_id = addresses.id limit ? offset ?`
+	query := `SELECT orders.id as order_id,orders.final_price,orders.shipment_status,orders.payment_status,users.name,users.email,users.phone,addresses.house_name,addresses.street,addresses.city,addresses.state,addresses.pin FROM orders INNER JOIN users ON orders.user_id = users.id INNER JOIN addresses ON orders.address_id = addresses.id order by orders.id desc limit ? offset ?`
 
 	err := or.db.Raw(query, count, offset).Scan(&orderDetails).Error
 	if err != nil {
