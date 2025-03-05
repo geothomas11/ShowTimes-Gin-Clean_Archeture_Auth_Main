@@ -58,6 +58,9 @@ func ConectDatabse(cfg config.Config) (*gorm.DB, error) {
 	if err := db.AutoMigrate(&domain.Referral{}); err != nil {
 		return db, err
 	}
+	if err := db.AutoMigrate(&domain.Coupon{}); err != nil {
+		return db, err
+	}
 
 	// CheckAndCreateAdmin(db)
 	return db, dbErr

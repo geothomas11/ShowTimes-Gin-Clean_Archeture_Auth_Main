@@ -25,6 +25,8 @@ type Helper interface {
 	ValidatePin(pin string) bool
 	GetTimeFromPeriod(timePeriod string) (time.Time, time.Time)
 	ValidateAlphabets(data string) (bool, error)
+	ValidateDate(dateString string) bool
+
 
 	ConvertToExel(sales []models.OrderDetailsAdmin, filename string) (*excelize.File, error)
 }
