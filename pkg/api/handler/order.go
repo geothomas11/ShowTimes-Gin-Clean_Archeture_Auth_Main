@@ -149,18 +149,19 @@ func (oh *OrderHandler) GetOrderDetails(c *gin.Context) {
 
 }
 
-// CancelOrderFromAdmin cancels an order by ID from an admin perspective.
-// @Summary Cancel order as admin
+// CancelOrder cancels an order by ID from an admin perspective.
+// @Summary Cancel an order as admin
 // @Description Cancels an order based on the provided order ID from an admin perspective.
 // @Tags Admin Order Management
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
 // @Param Authorization header string true "Bearer Token"
-// @Param order_id query integer true "Order ID to cancel"
+// @Param order_id path integer true "Order ID to cancel"
 // @Success 200 {object} response.Response "Success: Order canceled successfully"
+// @Failure 400 {object} response.Response "Bad request: Invalid order ID"
 // @Failure 500 {object} response.Response "Internal server error: Could not cancel the order"
-// @Router /admin/orders [delete]
+// @Router /admin/orders/{order_id} [delete]
 func (oh *OrderHandler) CancelOrder(c *gin.Context) {
 	orderID, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
@@ -261,15 +262,17 @@ func (oh *OrderHandler) ApproveOrder(c *gin.Context) {
 }
 
 // CancelOrderFromAdmin cancels an order by its ID from an admin perspective.
-// @Summary Cancel order from admin
+// @Summary Cancel an order as an admin
 // @Description Cancels an order based on the provided order ID from an admin perspective.
-// @Tags Admin
+// @Tags Admin Order Management
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
+// @Param Authorization header string true "Bearer Token"
 // @Param order_id query integer true "Order ID to cancel"
-// @Success 200 {object} response.Response  "Success: Order canceled successfully"
-// @Failure 500 {object} response.Response  "Internal server error: Error from orderID or couldn't cancel the order"
+// @Success 200 {object} response.Response "Success: Order canceled successfully"
+// @Failure 400 {object} response.Response "Bad request: Invalid order ID"
+// @Failure 500 {object} response.Response "Internal server error: Could not cancel the order"
 // @Router /admin/orders [delete]
 func (oh *OrderHandler) CancelOrderFromAdmin(c *gin.Context) {
 	order_id, err := strconv.Atoi(c.Query("order_id"))
@@ -314,6 +317,7 @@ func (oh *OrderHandler) ReturnOrder(c *gin.Context) {
 		err := errors.New("error in getting id")
 		errRes := response.ClientResponse(http.StatusBadRequest, "error from userid", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
+		return
 	}
 	userID := userId.(int)
 	err = oh.orderUseCase.ReturnOrder(orderID, userID)
@@ -326,6 +330,7 @@ func (oh *OrderHandler) ReturnOrder(c *gin.Context) {
 	c.JSON(http.StatusOK, success)
 
 }
+
 // PrintInvoice generates and returns a PDF invoice for a given order.
 // @Summary Print Invoice
 // @Description Generates a PDF invoice for the specified order ID and returns it as a downloadable file.
@@ -370,7 +375,7 @@ func (O *OrderHandler) PrintInvoice(c *gin.Context) {
 
 	c.File(pdfFilePath)
 
-	c.Header("Content-Type", "application/pdf")
+	// c.Header("Content-Type", "application/pdf")
 
 	err = pdf.Output(c.Writer)
 	if err != nil {
