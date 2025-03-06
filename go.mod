@@ -1,6 +1,8 @@
 module ShowTimes
 
-go 1.22.0
+go 1.23.0
+
+toolchain go1.24.0
 
 require (
 	github.com/aws/aws-sdk-go v1.54.19
@@ -22,7 +24,7 @@ require (
 	github.com/swaggo/swag v1.16.4
 	github.com/twilio/twilio-go v1.19.0
 	github.com/xuri/excelize/v2 v2.9.0
-	golang.org/x/crypto v0.28.0
+	golang.org/x/crypto v0.36.0
 	golang.org/x/oauth2 v0.18.0
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.7
@@ -85,8 +87,8 @@ require (
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.30.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect

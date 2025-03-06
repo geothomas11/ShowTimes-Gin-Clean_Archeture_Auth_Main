@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	// "golang.org/x/crypto/bcrypt"
-
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -87,4 +86,4 @@ func ConectDatabse(cfg config.Config) (*gorm.DB, error) {
 // 		db.Create(&admin)
 // 	}
 
-//}
+// }
