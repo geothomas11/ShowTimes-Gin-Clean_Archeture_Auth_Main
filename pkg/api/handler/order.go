@@ -339,8 +339,8 @@ func (oh *OrderHandler) ReturnOrder(c *gin.Context) {
 // @Produce application/pdf
 // @Param order_id query int true "Order ID"
 // @Success 200 {file} application/pdf "Invoice PDF"
-// @Failure 400 {object} response.ClientResponse "Invalid request parameters or processing error"
-// @Failure 502 {object} response.ClientResponse "Error generating the invoice"
+// @Failure 400 {object} response.Response "Invalid request parameters or processing error"
+// @Failure 502 {object} response.Response "Error generating the invoice"
 // @Router /orders/invoice [get]
 func (O *OrderHandler) PrintInvoice(c *gin.Context) {
 	orderId := c.Query("order_id")

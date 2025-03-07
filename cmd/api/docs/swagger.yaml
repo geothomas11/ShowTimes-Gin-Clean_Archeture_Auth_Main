@@ -72,6 +72,15 @@ definitions:
       new_password:
         type: string
     type: object
+  models.Coupon:
+    properties:
+      coupon_name:
+        type: string
+      expire_date:
+        type: string
+      offer_percentage:
+        type: integer
+    type: object
   models.NewPaymentMethod:
     properties:
       payment_name:
@@ -359,6 +368,48 @@ paths:
       summary: Update category name
       tags:
       - Category Management
+  /admin/coupons:
+    post:
+      consumes:
+      - application/json
+      description: Allows an admin to add a new coupon by providing the necessary
+        details.
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Coupon details to add
+        in: body
+        name: coupon
+        required: true
+        schema:
+          $ref: '#/definitions/models.Coupon'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 'Success: Coupon added successfully'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 'Bad request: Invalid input format'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 'Unauthorized: Missing or invalid authentication'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Internal server error: Could not add the coupon'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Add a new coupon
+      tags:
+      - Admin Coupon Management
   /admin/dashboard:
     get:
       consumes:
@@ -576,6 +627,11 @@ paths:
       - application/json
       description: Cancels an order based on the provided order ID from an admin perspective.
       parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Order ID to cancel
         in: query
         name: order_id
@@ -588,16 +644,19 @@ paths:
           description: 'Success: Order canceled successfully'
           schema:
             $ref: '#/definitions/response.Response'
+        "400":
+          description: 'Bad request: Invalid order ID'
+          schema:
+            $ref: '#/definitions/response.Response'
         "500":
-          description: 'Internal server error: Error from orderID or couldn''t cancel
-            the order'
+          description: 'Internal server error: Could not cancel the order'
           schema:
             $ref: '#/definitions/response.Response'
       security:
       - BearerTokenAuth: []
-      summary: Cancel order from admin
+      summary: Cancel an order as an admin
       tags:
-      - Admin
+      - Admin Order Management
     get:
       consumes:
       - application/json
@@ -671,6 +730,42 @@ paths:
       summary: Approve order
       tags:
       - Order
+  /admin/orders/{order_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Cancels an order based on the provided order ID from an admin perspective.
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Order ID to cancel
+        in: path
+        name: order_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'Success: Order canceled successfully'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 'Bad request: Invalid order ID'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 'Internal server error: Could not cancel the order'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Cancel an order as admin
+      tags:
+      - Admin Order Management
   /admin/payment:
     post:
       consumes:
@@ -1005,6 +1100,36 @@ paths:
       summary: Retrieve users with pagination
       tags:
       - User Management
+  /orders/invoice:
+    get:
+      consumes:
+      - application/json
+      description: Generates a PDF invoice for the specified order ID and returns
+        it as a downloadable file.
+      parameters:
+      - description: Order ID
+        in: query
+        name: order_id
+        required: true
+        type: integer
+      produces:
+      - application/pdf
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Invalid request parameters or processing error
+          schema:
+            $ref: '#/definitions/response.Response'
+        "502":
+          description: Error generating the invoice
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Print Invoice
+      tags:
+      - Orders
   /payment/razorpay:
     get:
       consumes:

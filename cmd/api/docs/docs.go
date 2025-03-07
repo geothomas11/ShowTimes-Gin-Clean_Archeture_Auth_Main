@@ -270,6 +270,70 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/coupons": {
+            "post": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Allows an admin to add a new coupon by providing the necessary details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Coupon Management"
+                ],
+                "summary": "Add a new coupon",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Coupon details to add",
+                        "name": "coupon",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Coupon"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Success: Coupon added successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request: Invalid input format",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: Missing or invalid authentication",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error: Could not add the coupon",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/dashboard": {
             "get": {
                 "description": "Retrieves dashboard information for admin.",
@@ -676,10 +740,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Admin"
+                    "Admin Order Management"
                 ],
-                "summary": "Cancel order from admin",
+                "summary": "Cancel an order as an admin",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Order ID to cancel",
@@ -695,8 +766,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.Response"
                         }
                     },
+                    "400": {
+                        "description": "Bad request: Invalid order ID",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
                     "500": {
-                        "description": "Internal server error: Error from orderID or couldn't cancel the order",
+                        "description": "Internal server error: Could not cancel the order",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -750,6 +827,62 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error: Failed to approve the order",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/orders/{order_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Cancels an order based on the provided order ID from an admin perspective.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin Order Management"
+                ],
+                "summary": "Cancel an order as admin",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Order ID to cancel",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success: Order canceled successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request: Invalid order ID",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error: Could not cancel the order",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1257,6 +1390,50 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid request or unable to retrieve users",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/invoice": {
+            "get": {
+                "description": "Generates a PDF invoice for the specified order ID and returns it as a downloadable file.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/pdf"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Print Invoice",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters or processing error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "502": {
+                        "description": "Error generating the invoice",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -2462,6 +2639,20 @@ const docTemplate = `{
                 },
                 "new_password": {
                     "type": "string"
+                }
+            }
+        },
+        "models.Coupon": {
+            "type": "object",
+            "properties": {
+                "coupon_name": {
+                    "type": "string"
+                },
+                "expire_date": {
+                    "type": "string"
+                },
+                "offer_percentage": {
+                    "type": "integer"
                 }
             }
         },
