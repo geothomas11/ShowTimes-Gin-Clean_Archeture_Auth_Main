@@ -7,6 +7,7 @@ import (
 	"ShowTimes/pkg/utils/errmsg"
 	"ShowTimes/pkg/utils/models"
 	"errors"
+	"time"
 )
 
 type cuponUsecase struct {
@@ -30,11 +31,22 @@ func (cu *cuponUsecase) AddCoupon(coupon models.Coupon) (models.CouponResp, erro
 	if coupon.OfferPercentage <= 0 {
 		return models.CouponResp{}, errors.New(errmsg.ErrDataZero)
 	}
-	formattedExpireDate := coupon.ExpireDate.Format("03-02-2006")
-	ok := cu.h.ValidateDate(formattedExpireDate)
-	if !ok {
-		return models.CouponResp{}, errors.New(errmsg.ErrInvalidDate)
+	parsedStartDate, err := time.Parse("02-01-2006", coupon.ExpireDate)
+	if err != nil {
+		err := errors.New(errmsg.ErrFormat + " :expire_date")
+		return models.CouponResp{}, err
 	}
+
+	isValid := !parsedStartDate.IsZero()
+	if !isValid {
+		err := errors.New(errmsg.ErrFormat + ":date")
+		return models.CouponResp{}, err
+	}
+	// formattedExpireDate := coupon.ExpireDate.Format("03-02-2006")
+	// ok := cu.h.ValidateDate(formattedExpireDate)
+	// if !ok {
+	// 	return models.CouponResp{}, errors.New(errmsg.ErrInvalidDate)
+	// }
 	couponResp, err := cu.couponRepo.AddCoupon(coupon)
 	if err != nil {
 		return models.CouponResp{}, err
