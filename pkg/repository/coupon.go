@@ -50,3 +50,13 @@ func (cr *couponRepo) IsCouponExistByID(couponID int) (bool, error) {
 	return count > 0, nil
 
 }
+
+func (cr *couponRepo) GetCoupon() ([]models.CouponResp, error) {
+
+	var coupon []models.CouponResp
+	err := cr.DB.Raw("select count(*) from coupons").Scan(&coupon).Error
+	if err != nil {
+		return []models.CouponResp{}, errors.New(errmsg.ErrGetDB)
+	}
+	return coupon, nil
+}

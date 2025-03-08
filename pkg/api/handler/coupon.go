@@ -51,3 +51,14 @@ func (ch *CouponHandler) AddCoupon(c *gin.Context) {
 	c.JSON(http.StatusOK, successResp)
 
 }
+
+func (ch *CouponHandler) GetCoupon(c *gin.Context) {
+	couponResp, err := ch.CouponUsecase.GetCoupon()
+	if err != nil {
+		errResp := response.ClientResponse(http.StatusBadRequest, errmsg.MsgGetErr, nil, err.Error())
+		c.JSON(http.StatusBadRequest, errResp)
+	}
+	successResp := response.ClientResponse(http.StatusOK, errmsg.MsgGetSucces, couponResp, nil)
+	c.JSON(http.StatusOK, successResp)
+
+}

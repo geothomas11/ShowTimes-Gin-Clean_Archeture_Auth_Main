@@ -10,20 +10,20 @@ import (
 	"time"
 )
 
-type cuponUsecase struct {
+type couponUsecase struct {
 	couponRepo repo.CouponRepository
 	h          helper.Helper
 }
 
 func NewCouponUsecase(couponRep repo.CouponRepository, h helper.Helper) interfaces.CouponUsecase {
-	return &cuponUsecase{
+	return &couponUsecase{
 		couponRepo: couponRep,
 		h:          h,
 	}
 
 }
 
-func (cu *cuponUsecase) AddCoupon(coupon models.Coupon) (models.CouponResp, error) {
+func (cu *couponUsecase) AddCoupon(coupon models.Coupon) (models.CouponResp, error) {
 	if coupon.CouponName == "" {
 		return models.CouponResp{}, errors.New(errmsg.ErrFieldEmpty)
 
@@ -47,17 +47,26 @@ func (cu *cuponUsecase) AddCoupon(coupon models.Coupon) (models.CouponResp, erro
 	// if !ok {
 	// 	return models.CouponResp{}, errors.New(errmsg.ErrInvalidDate)
 	// }
-	ok,err:=cu.couponRepo.IsCouponExistByName(coupon.CouponName)
-	if err!=nil{
-		return models.CouponResp{},err
+	ok, err := cu.couponRepo.IsCouponExistByName(coupon.CouponName)
+	if err != nil {
+		return models.CouponResp{}, err
 	}
-	if ok{
-		return models.CouponResp{},errors.New(errmsg.ErrCouponExistTrue)
+	if ok {
+		return models.CouponResp{}, errors.New(errmsg.ErrCouponExistTrue)
 	}
 	couponResp, err := cu.couponRepo.AddCoupon(coupon)
 	if err != nil {
 		return models.CouponResp{}, err
 	}
 	return couponResp, nil
+
+}
+
+func (cu *couponUsecase) GetCoupon() ([]models.CouponResp, error) {
+	couponRep, err := cu.couponRepo.GetCoupon()
+	if err != nil {
+		return []models.CouponResp{}, err
+	}
+	return couponRep, nil
 
 }
