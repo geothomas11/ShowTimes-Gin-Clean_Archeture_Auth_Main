@@ -52,6 +52,15 @@ func (ch *CouponHandler) AddCoupon(c *gin.Context) {
 
 }
 
+// GetCoupon godoc
+// @Summary Get a coupon
+// @Description Retrieves coupon details
+// @Tags Coupons
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.ClientResponse "Successful response with coupon details"
+// @Failure 400 {object} response.ClientResponse "Bad request error response"
+// @Router /coupons [get]
 func (ch *CouponHandler) GetCoupon(c *gin.Context) {
 	couponResp, err := ch.CouponUsecase.GetCoupon()
 	if err != nil {

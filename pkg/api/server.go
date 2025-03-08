@@ -26,10 +26,21 @@ func NewServerHTTP(adminHandler *handler.AdminHandler, userHandler *handler.User
 
 	engine.LoadHTMLGlob("pkg/templates/index.html")
 	//user Routes
-	routes.UserRoutes(engine.Group("/user"), userHandler, otpHandler, cartHandler, orderHandler, producthandler, paymentHandler, WalletHandler)
+	routes.UserRoutes(engine.Group("/user"),
+		userHandler, otpHandler,
+		cartHandler, orderHandler,
+		producthandler, paymentHandler,
+		WalletHandler, couponHandler)
 
 	//Admin Routes in server
-	routes.AdminRoutes(engine.Group("/admin"), adminHandler, Categoryhandler, producthandler, paymentHandler, orderHandler, offerHandler, couponHandler)
+	routes.AdminRoutes(engine.Group("/admin"),
+		adminHandler,
+		Categoryhandler,
+		producthandler,
+		paymentHandler,
+		orderHandler,
+		offerHandler,
+		couponHandler)
 
 	return &ServerHTTP{Engine: engine}
 }
