@@ -39,7 +39,7 @@ func (cu *cuponUsecase) AddCoupon(coupon models.Coupon) (models.CouponResp, erro
 
 	isValid := !parsedStartDate.IsZero()
 	if !isValid {
-		err := errors.New(errmsg.ErrFormat + ":date")
+		err := errors.New(errmsg.ErrFormat + ":expire_date")
 		return models.CouponResp{}, err
 	}
 	// formattedExpireDate := coupon.ExpireDate.Format("03-02-2006")
@@ -47,6 +47,13 @@ func (cu *cuponUsecase) AddCoupon(coupon models.Coupon) (models.CouponResp, erro
 	// if !ok {
 	// 	return models.CouponResp{}, errors.New(errmsg.ErrInvalidDate)
 	// }
+	ok,err:=cu.couponRepo.IsCouponExistByName(coupon.CouponName)
+	if err!=nil{
+		return models.CouponResp{},err
+	}
+	if ok{
+		return models.CouponResp{},errors.New(errmsg.ErrCouponExistTrue)
+	}
 	couponResp, err := cu.couponRepo.AddCoupon(coupon)
 	if err != nil {
 		return models.CouponResp{}, err
