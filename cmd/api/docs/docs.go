@@ -270,6 +270,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/coupon": {
+            "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Retrieves coupon information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Coupon Management"
+                ],
+                "summary": "Get coupons",
+                "responses": {
+                    "200": {
+                        "description": "Success: Retrieved coupons successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request: Error while retrieving coupons",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/coupons": {
             "post": {
                 "security": [
@@ -290,13 +324,6 @@ const docTemplate = `{
                 "summary": "Add a new coupon",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Bearer Token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
                         "description": "Coupon details to add",
                         "name": "coupon",
                         "in": "body",
@@ -314,13 +341,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad request: Invalid input format",
+                        "description": "Bad request: Invalid request payload or missing fields",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized: Missing or invalid authentication",
+                        "description": "Unauthorized: Invalid or missing authentication token",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }

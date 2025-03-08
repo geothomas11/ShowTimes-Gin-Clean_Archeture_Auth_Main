@@ -368,6 +368,27 @@ paths:
       summary: Update category name
       tags:
       - Category Management
+  /admin/coupon:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves coupon information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'Success: Retrieved coupons successfully'
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 'Bad request: Error while retrieving coupons'
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerTokenAuth: []
+      summary: Get coupons
+      tags:
+      - User Coupon Management
   /admin/coupons:
     post:
       consumes:
@@ -375,11 +396,6 @@ paths:
       description: Allows an admin to add a new coupon by providing the necessary
         details.
       parameters:
-      - description: Bearer Token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: Coupon details to add
         in: body
         name: coupon
@@ -394,11 +410,11 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
         "400":
-          description: 'Bad request: Invalid input format'
+          description: 'Bad request: Invalid request payload or missing fields'
           schema:
             $ref: '#/definitions/response.Response'
         "401":
-          description: 'Unauthorized: Missing or invalid authentication'
+          description: 'Unauthorized: Invalid or missing authentication token'
           schema:
             $ref: '#/definitions/response.Response'
         "500":

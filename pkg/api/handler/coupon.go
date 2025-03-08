@@ -19,21 +19,20 @@ func NewCouponHandler(coupon interfaces.CouponUsecase) *CouponHandler {
 
 }
 
-// AddCoupon adds a new coupon to the system.
+// AddCouponAdmin adds a new coupon to the system.
 // @Summary Add a new coupon
 // @Description Allows an admin to add a new coupon by providing the necessary details.
 // @Tags Admin Coupon Management
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param Authorization header string true "Bearer Token"
 // @Param coupon body models.Coupon true "Coupon details to add"
 // @Success 201 {object} response.Response "Success: Coupon added successfully"
-// @Failure 400 {object} response.Response "Bad request: Invalid input format"
-// @Failure 401 {object} response.Response "Unauthorized: Missing or invalid authentication"
+// @Failure 400 {object} response.Response "Bad request: Invalid request payload or missing fields"
+// @Failure 401 {object} response.Response "Unauthorized: Invalid or missing authentication token"
 // @Failure 500 {object} response.Response "Internal server error: Could not add the coupon"
 // @Router /admin/coupons [post]
-func (ch *CouponHandler) AddCoupon(c *gin.Context) {
+func (ch *CouponHandler) AddCouponAdmin(c *gin.Context) {
 	var coupon models.Coupon
 	if err := c.BindJSON(&coupon); err != nil {
 		errResp := response.ClientResponse(http.StatusBadRequest, errmsg.MsgFormatErr, nil, err.Error())
@@ -52,16 +51,17 @@ func (ch *CouponHandler) AddCoupon(c *gin.Context) {
 
 }
 
-// GetCoupon godoc
-// @Summary Get a coupon
-// @Description Retrieves coupon details
-// @Tags Coupons
+// GetCoupon Get All coupons
+// @Summary Get coupons
+// @Description Retrieves coupon information
+// @Tags User Coupon Management
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.ClientResponse "Successful response with coupon details"
-// @Failure 400 {object} response.ClientResponse "Bad request error response"
-// @Router /coupons [get]
-func (ch *CouponHandler) GetCoupon(c *gin.Context) {
+// @Success 200 {object} response.Response "Success: Retrieved coupons successfully"
+// @Failure 400 {object} response.Response "Bad request: Error while retrieving coupons"
+// @Security BearerTokenAuth
+// @Router /admin/coupon [get]
+func (ch *CouponHandler) GetCouponUser(c *gin.Context) {
 	couponResp, err := ch.CouponUsecase.GetCoupon()
 	if err != nil {
 		errResp := response.ClientResponse(http.StatusBadRequest, errmsg.MsgGetErr, nil, err.Error())
