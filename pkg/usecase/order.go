@@ -4,6 +4,7 @@ import (
 	"ShowTimes/pkg/domain"
 	repo_interface "ShowTimes/pkg/repository/interfaces"
 	interfaces "ShowTimes/pkg/usecase/interface"
+	"ShowTimes/pkg/utils/errmsg"
 	"ShowTimes/pkg/utils/models"
 	"errors"
 	"fmt"
@@ -20,16 +21,18 @@ type orderUseCase struct {
 	userRepository    repo_interface.UserRepository
 	paymentRepository repo_interface.PaymentRepository
 	walletRepo        repo_interface.WalletRepository
+	couponRepo        repo_interface.CouponRepository
 }
 
 func NewOrderUseCase(orderRepo repo_interface.OrderRepository,
-	walletRepo repo_interface.WalletRepository, cartRepo repo_interface.CartRepository, userRepo repo_interface.UserRepository, paymentRepo repo_interface.PaymentRepository) interfaces.OrderUseCase {
+	walletRepo repo_interface.WalletRepository, cartRepo repo_interface.CartRepository, userRepo repo_interface.UserRepository, paymentRepo repo_interface.PaymentRepository, couponRepo repo_interface.CouponRepository) interfaces.OrderUseCase {
 	return &orderUseCase{
 		orderRepository:   orderRepo,
 		cartRepository:    cartRepo,
 		userRepository:    userRepo,
 		paymentRepository: paymentRepo,
 		walletRepo:        walletRepo,
+		couponRepo:        couponRepo,
 	}
 
 }
@@ -63,13 +66,13 @@ func (ou *orderUseCase) Checkout(userID int) (models.CheckoutDetails, error) {
 }
 
 func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID int) (models.OrderSuccessResponse, error) {
+
 	var orderBody models.OrderIncoming
 	err := copier.Copy(&orderBody, &orderFromCart)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
 	orderBody.UserID = userID
-
 	cartExist, err := ou.cartRepository.CheckCart(userID)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
@@ -89,14 +92,27 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
+
+	if orderBody.CouponID > 0 {
+		couponExist, err := ou.couponRepo.IsCouponExistByID(orderBody.CouponID)
+		if err != nil {
+			return models.OrderSuccessResponse{}, err
+		}
+		if !couponExist {
+			return models.OrderSuccessResponse{}, errors.New(errmsg.ErrCouponExistFalse)
+		}
+
+	}
 	if !paymentExist {
 		return models.OrderSuccessResponse{}, errors.New("payment method doesnot exist")
 	}
+
 	cartItems, err := ou.cartRepository.DisplayCart(orderBody.UserID)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
 	total, err := ou.cartRepository.TotalAmountInCart(orderBody.UserID)
+	 
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
@@ -109,10 +125,7 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 		return models.OrderSuccessResponse{}, err
 	}
 
-	// orderSuccessResponse, err := ou.orderRepository.GetBriefOrderDetails(order_id)
-	// if err != nil {
-	// 	return models.OrderSuccessResponse{}, err
-	// }
+	//here placeing order
 	err = ou.orderRepository.UpdateOrder(order_id)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
@@ -135,37 +148,7 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 
 }
 
-// func (ou *orderUseCase) ExecutePurchaseCOD(orderID int) error {
-// 	exist, err := ou.orderRepository.OrderExist(orderID)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if !exist {
-// 		return errors.New("orders does not exist")
-// 	}
-// 	shipmentStatus, err := ou.orderRepository.GetShipmentStatus(orderID)
-// 	// fmt.Println("error", err)
-// 	if shipmentStatus == "delivered" {
-// 		return errors.New("item delivered, cannot pay")
 
-// 	}
-// 	if shipmentStatus == "order placed" {
-// 		return errors.New("item placed,cannot pay")
-// 	}
-// 	if shipmentStatus == "cancelled" || shipmentStatus == "returned" || shipmentStatus == "return" {
-// 		message := fmt.Sprint(shipmentStatus)
-// 		return errors.New("the order is in" + message + "so can't paid")
-// 	}
-// 	if shipmentStatus == "processing" {
-// 		return errors.New("the order is already paid")
-// 	}
-// 	err = ou.orderRepository.UpdateOrder(orderID)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-
-// }
 func (or *orderUseCase) GetOrderDetails(userId int, page int, count int) ([]models.FullOrderDetails, error) {
 	fullOrderDetails, err := or.orderRepository.GetOrderDetails(userId, page, count)
 	if err != nil {

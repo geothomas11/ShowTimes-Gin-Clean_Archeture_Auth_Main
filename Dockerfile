@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine AS build-stage
+FROM golang:1.24-alpine AS build-stage
 WORKDIR /app
 COPY ./ /app
 RUN mkdir -p /app/build
