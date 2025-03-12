@@ -11,6 +11,7 @@ type OrderFromCart struct {
 	PaymentID uint `json:"payment_id" binding:"required"`
 	AddressID uint `json:"address_id" binding:"required"`
 	UseWallet bool `json:"use_wallet" gorm:"defalt:false"`
+	CouponID  uint `json:"coupon_id" `
 }
 type OrderSuccessResponse struct {
 	OrderID        uint    `json:"order_id"`
