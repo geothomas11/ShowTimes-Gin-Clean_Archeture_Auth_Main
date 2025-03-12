@@ -2518,6 +2518,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/wallet/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Fetches the wallet transaction history for the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Wallet Management"
+                ],
+                "summary": "Get wallet transaction history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success: Retrieved wallet history successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request: Error while retrieving wallet history",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: Missing or invalid authentication",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/wallet": {
             "get": {
                 "security": [
@@ -2711,6 +2760,9 @@ const docTemplate = `{
                 },
                 "payment_id": {
                     "type": "integer"
+                },
+                "use_wallet": {
+                    "type": "boolean"
                 }
             }
         },

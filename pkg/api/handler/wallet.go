@@ -2,6 +2,7 @@ package handler
 
 import (
 	interfaces "ShowTimes/pkg/usecase/interface"
+	"ShowTimes/pkg/utils/errmsg"
 	"ShowTimes/pkg/utils/response"
 	"net/http"
 
@@ -50,4 +51,29 @@ func (wh *WalletHandler) GetWallet(c *gin.Context) {
 	}
 	success := response.ClientResponse(http.StatusOK, "Wallet details", walletDetails, nil)
 	c.JSON(http.StatusOK, success)
+}
+
+// GetWalletHistory retrieves the wallet transaction history for a user.
+// @Summary Get wallet transaction history
+// @Description Fetches the wallet transaction history for the authenticated user.
+// @Tags User Wallet Management
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param Authorization header string true "Bearer Token"
+// @Success 200 {object} response.Response "Success: Retrieved wallet history successfully"
+// @Failure 400 {object} response.Response "Bad request: Error while retrieving wallet history"
+// @Failure 401 {object} response.Response "Unauthorized: Missing or invalid authentication"
+// @Router /user/wallet/history [get]
+func (wh *WalletHandler) GetWalletHistory(c *gin.Context) {
+	userId, _ := c.Get("id")
+	userID, _ := userId.(int)
+	walletHistory, err := wh.WalletUsecase.GetWalletHistory(userID)
+	if err != nil {
+		errs := response.ClientResponse(http.StatusBadRequest, errmsg.MsgGettingDataErr, nil, err)
+		c.JSON(http.StatusBadRequest, errs)
+		return
+	}
+	succesResp := response.ClientResponse(http.StatusOK, errmsg.MsgGetSucces, walletHistory, nil)
+	c.JSON(http.StatusOK, succesResp)
 }

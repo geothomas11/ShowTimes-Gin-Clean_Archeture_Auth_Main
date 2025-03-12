@@ -37,8 +37,6 @@ func (ad *adminRepository) GetUserByID(id int) (domain.Users, error) {
 
 }
 
-//	GetUsers(page int) ([]models.UserDetailsAtAdmin, error)
-
 func (ad *adminRepository) GetUsers(page int) ([]models.UserDetailsAtAdmin, error) {
 	// pagination purpose -
 	if page == 0 {
@@ -47,7 +45,7 @@ func (ad *adminRepository) GetUsers(page int) ([]models.UserDetailsAtAdmin, erro
 
 	offset := (page - 1) * 2
 	var Get_Users []models.UserDetailsAtAdmin
-	if err := ad.DB.Raw("SELECT id,name,email,phone,blocked FROM users limit ? offset ?", 3, offset).Scan(&Get_Users).Error; err != nil {
+	if err := ad.DB.Raw("select id,name,email,phone,blocked from users  where is_admin = 'f' order by id desc limit ? offset ?", 5, offset).Scan(&Get_Users).Error; err != nil {
 		return []models.UserDetailsAtAdmin{}, err
 	}
 	return Get_Users, nil

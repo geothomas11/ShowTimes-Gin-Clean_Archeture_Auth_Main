@@ -53,9 +53,10 @@ func UserRoutes(engine *gin.RouterGroup, userHandler *handler.UserHandler, otpha
 			Checkout.GET("/print", orderHandler.PrintInvoice)
 
 		}
-		wallet := engine.Group("/wallet", walletHandler.GetWallet)
+		wallet := engine.Group("/wallet")
 		{
 			wallet.GET("/getwallet", walletHandler.GetWallet)
+			wallet.GET("/wallethistory", walletHandler.GetWalletHistory)
 		}
 		coupon := engine.Group("/coupon")
 		{

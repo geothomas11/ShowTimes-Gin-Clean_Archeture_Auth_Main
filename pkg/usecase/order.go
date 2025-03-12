@@ -112,9 +112,27 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 		return models.OrderSuccessResponse{}, err
 	}
 	total, err := ou.cartRepository.TotalAmountInCart(orderBody.UserID)
-	 
+
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
+	}
+	walletData, err := ou.walletRepo.GetWalletData(orderBody.UserID)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+	if total < walletData.Amount {
+		err := ou.walletRepo.DebitFromWallet(orderBody.UserID, total)
+		if err != nil {
+			return models.OrderSuccessResponse{}, err
+
+		}
+		total = 0.0
+	} else {
+		err := ou.walletRepo.DebitFromWallet(orderBody.UserID, walletData.Amount)
+		if err != nil {
+			return models.OrderSuccessResponse{}, err
+		}
+		total -= walletData.Amount
 	}
 	order_id, err := ou.orderRepository.OrderItems(orderBody, total)
 	if err != nil {
@@ -140,6 +158,17 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 		}
 
 	}
+	var walletDebit models.WalletHistory
+	walletDebit.Amount = total
+	walletDebit.OrderID = order_id
+	walletDebit.Status = "DEBITED"
+	walletDebit.WalletID = int(walletData.Id)
+
+	err = ou.walletRepo.AddToWalletHistory(walletDebit)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+
 	orderSuccessResponse, err := ou.orderRepository.GetBriefOrderDetails(order_id)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
@@ -147,7 +176,6 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 	return orderSuccessResponse, nil
 
 }
-
 
 func (or *orderUseCase) GetOrderDetails(userId int, page int, count int) ([]models.FullOrderDetails, error) {
 	fullOrderDetails, err := or.orderRepository.GetOrderDetails(userId, page, count)
@@ -348,7 +376,7 @@ func (ou *orderUseCase) ReturnOrder(orderId, userId int) error {
 		return errors.New("the order is processing cannot return it")
 	}
 	if shipmentStatus == "returned" {
-		return errors.New("the order is returned,cannot return it")
+		return errors.New(errmsg.ErrReturnedAlready)
 	}
 	if shipmentStatus == "shipped" {
 		return errors.New("the order is shipped ,cannot return it")

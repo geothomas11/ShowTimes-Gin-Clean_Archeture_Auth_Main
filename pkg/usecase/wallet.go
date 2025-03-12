@@ -4,7 +4,6 @@ import (
 	walletRep "ShowTimes/pkg/repository/interfaces"
 	interfaces "ShowTimes/pkg/usecase/interface"
 	"ShowTimes/pkg/utils/models"
-	"errors"
 )
 
 type WalletUsecase struct {
@@ -14,17 +13,24 @@ type WalletUsecase struct {
 func NewWalletUsecase(walletRep walletRep.WalletRepository) interfaces.WalletUsecase {
 	return &WalletUsecase{walletRepo: walletRep}
 }
+
 func (wu *WalletUsecase) GetWallet(userID int) (models.WalletAmount, error) {
-	ok, err := wu.walletRepo.IsWalletExist(userID)
+	amount, err := wu.walletRepo.GetWallet(userID)
 	if err != nil {
-		return models.WalletAmount{}, errors.New("error in database")
+		return models.WalletAmount{}, err
 	}
-	if !ok {
-		err = wu.walletRepo.CreateWallet(userID)
-		if err != nil {
-			return models.WalletAmount{}, err
-		}
+	return amount, nil
+}
+
+func (wu *WalletUsecase) GetWalletHistory(userID int) ([]models.WalletHistoryResp, error) {
+	wallet, err := wu.walletRepo.GetWalletData(userID)
+	if err != nil {
+		return []models.WalletHistoryResp{}, err
 	}
-	return wu.walletRepo.GetWallet(userID)
+	walletResp, err := wu.walletRepo.GetWalletHistory(int(wallet.Id))
+	if err != nil {
+		return []models.WalletHistoryResp{}, err
+	}
+	return walletResp, err
 
 }
