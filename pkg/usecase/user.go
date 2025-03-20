@@ -19,14 +19,16 @@ type userUseCase struct {
 	cfg        config.Config
 	helper     helper_interfaces.Helper
 	walletRepo interfaces.WalletRepository
+	adminRepo  interfaces.AdminRepository
 }
 
-func NewUserUseCase(repo interfaces.UserRepository, cfg config.Config, h helper_interfaces.Helper, wallet interfaces.WalletRepository) services.UserUseCase {
+func NewUserUseCase(repo interfaces.UserRepository, adminRepo interfaces.AdminRepository, cfg config.Config, h helper_interfaces.Helper, wallet interfaces.WalletRepository) services.UserUseCase {
 	return &userUseCase{
 		userRepo:   repo,
 		cfg:        cfg,
 		helper:     h,
 		walletRepo: wallet,
+		adminRepo:  adminRepo,
 	}
 }
 
@@ -145,8 +147,16 @@ func (u *userUseCase) LoginHandler(user models.UserLogin) (models.TokenUsers, er
 	}
 	user_details, err := u.userRepo.FindUserByEmail(user)
 	if err != nil {
-		return models.TokenUsers{}, errors.New("password is not correct")
+		return models.TokenUsers{}, errors.New(errmsg.ErrPassword)
 	}
+	isAdmin, err := u.adminRepo.IsAdmin(user.Email)
+	if err != nil {
+		return models.TokenUsers{}, err
+	}
+	if isAdmin {
+		return models.TokenUsers{}, errors.New(errmsg.ErrUserAdmin)
+	}
+
 	err = u.helper.CompareHashAndPassword(user_details.Password, user.Password)
 
 	if err != nil {

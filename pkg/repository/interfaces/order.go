@@ -42,5 +42,7 @@ type OrderRepository interface {
 	GetFinalPriceOrder(orderID int) (float64, error)
 
 	GetItemsByOrderId(orderId int) ([]models.ItemDetails, error)
-	AddTotalToOrder(orderId int,amount float64) error
+	AddTotalToOrder(orderId int, amount float64) error
+
+	PayRazorZero(orderId int) error
 }

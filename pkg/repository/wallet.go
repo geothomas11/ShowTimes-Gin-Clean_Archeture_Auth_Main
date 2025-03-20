@@ -55,7 +55,7 @@ func (wr *WalletDB) AddToWallet(userID int, Amount float64) error {
 func (wr *WalletDB) AddToWalletHistory(wallet models.WalletHistory) error {
 	query := `insert into wallet_histories (wallet_id,order_id,amount,status) values (?,?,?,?)`
 
-	err := wr.Db.Raw(query, wallet.WalletID, wallet.OrderID, wallet.Amount, wallet.Status).Error
+	err := wr.Db.Exec(query, wallet.WalletID, wallet.OrderID, wallet.Amount, wallet.Status).Error
 	if err != nil {
 		return errors.New(errmsg.ErrWriteDB)
 	}
@@ -65,7 +65,7 @@ func (wr *WalletDB) AddToWalletHistory(wallet models.WalletHistory) error {
 
 func (wr *WalletDB) GetWalletData(userID int) (models.Wallet, error) {
 	var wallet models.Wallet
-	querry := `select * from wallets where user_id = ?`
+	querry := `select id,user_id,amount from wallets where user_id = ?`
 
 	err := wr.Db.Raw(querry, userID).Scan(&wallet).Error
 	if err != nil {
