@@ -81,6 +81,8 @@ func CheckAndCreateAdmin(db *gorm.DB) {
 			Email:    "admin@showtimes.com",
 			Password: string(hashedPassword),
 			IsAdmin:  true,
+			Blocked:  false,
+			Phone:    "9746359523",
 		}
 		db.Create(&admin)
 	}
