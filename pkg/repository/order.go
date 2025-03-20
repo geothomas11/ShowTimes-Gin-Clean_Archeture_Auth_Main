@@ -3,6 +3,7 @@ package repository
 import (
 	"ShowTimes/pkg/domain"
 	interfaces "ShowTimes/pkg/repository/interfaces"
+	"ShowTimes/pkg/utils/errmsg"
 	"ShowTimes/pkg/utils/models"
 	"errors"
 	"fmt"
@@ -406,5 +407,14 @@ WHERE
 		return []models.ItemDetails{}, err
 	}
 	return items, nil
+
+}
+
+func (or *orderRepository) AddTotalToOrder(orderId int, amount float64) error {
+	err := or.db.Raw("update orders set total_amount =? where id = ? ", amount, orderId).Error
+	if err != nil {
+		return errors.New(errmsg.ErrWriteDB)
+	}
+	return nil
 
 }

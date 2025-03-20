@@ -134,6 +134,7 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 		}
 		total -= walletData.Amount
 	}
+
 	order_id, err := ou.orderRepository.OrderItems(orderBody, total)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
