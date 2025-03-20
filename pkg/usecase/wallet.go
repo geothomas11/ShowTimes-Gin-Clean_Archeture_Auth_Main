@@ -27,7 +27,7 @@ func (wu *WalletUsecase) GetWalletHistory(userID int) ([]models.WalletHistoryRes
 	if err != nil {
 		return []models.WalletHistoryResp{}, err
 	}
-	walletResp, err := wu.walletRepo.GetWalletHistory(int(wallet.Id))
+	walletResp, err := wu.walletRepo.GetWalletHistory(int(wallet.ID))
 	if err != nil {
 		return []models.WalletHistoryResp{}, err
 	}

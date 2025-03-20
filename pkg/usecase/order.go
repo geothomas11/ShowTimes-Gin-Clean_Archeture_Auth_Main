@@ -163,7 +163,7 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 	walletDebit.Amount = total
 	walletDebit.OrderID = order_id
 	walletDebit.Status = "DEBITED"
-	walletDebit.WalletID = int(walletData.Id)
+	walletDebit.WalletID = int(walletData.ID)
 
 	err = ou.walletRepo.AddToWalletHistory(walletDebit)
 	if err != nil {
