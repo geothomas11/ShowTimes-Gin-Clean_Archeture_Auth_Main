@@ -66,7 +66,6 @@ func (ou *orderUseCase) Checkout(userID int) (models.CheckoutDetails, error) {
 }
 
 func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID int) (models.OrderSuccessResponse, error) {
-
 	var orderBody models.OrderIncoming
 	err := copier.Copy(&orderBody, &orderFromCart)
 	if err != nil {
@@ -78,21 +77,21 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 		return models.OrderSuccessResponse{}, err
 	}
 	if !cartExist {
-		return models.OrderSuccessResponse{}, errors.New("cart empty can't order")
+		return models.OrderSuccessResponse{}, errors.New(errmsg.ErrEmptyCart)
 	}
 
 	addressExist, err := ou.userRepository.AddressExist(orderBody)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
+
 	if !addressExist {
-		return models.OrderSuccessResponse{}, errors.New("address does not exist")
+		return models.OrderSuccessResponse{}, errors.New("address " + errmsg.ErrNotExist)
 	}
-	paymentExist, err := ou.paymentRepository.PaymentExist(orderBody)
+	PaymentExist, err := ou.paymentRepository.PaymentExist(orderBody)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
-
 	if orderBody.CouponID > 0 {
 		couponExist, err := ou.couponRepo.IsCouponExistByID(orderBody.CouponID)
 		if err != nil {
@@ -101,38 +100,51 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 		if !couponExist {
 			return models.OrderSuccessResponse{}, errors.New(errmsg.ErrCouponExistFalse)
 		}
-
-	}
-	if !paymentExist {
-		return models.OrderSuccessResponse{}, errors.New("payment method doesnot exist")
 	}
 
+	if !PaymentExist {
+		return models.OrderSuccessResponse{}, errors.New("paymentmethod " + errmsg.ErrNotExist)
+	}
 	cartItems, err := ou.cartRepository.DisplayCart(orderBody.UserID)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
+
 	total, err := ou.cartRepository.TotalAmountInCart(orderBody.UserID)
-
+	totalOld := total
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
-	walletData, err := ou.walletRepo.GetWalletData(orderBody.UserID)
+	if orderBody.CouponID > 0 {
+		couponData, err := ou.couponRepo.GetCouponData(orderBody.CouponID)
+		if err != nil {
+			return models.OrderSuccessResponse{}, err
+		}
+		total -= (total * float64(couponData.OfferPercentage) / 100)
+	}
+
+	var WalletData models.Wallet
+	WalletData, err = ou.walletRepo.GetWalletData(orderBody.UserID)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
-	if total < walletData.Amount {
-		err := ou.walletRepo.DebitFromWallet(orderBody.UserID, total)
-		if err != nil {
-			return models.OrderSuccessResponse{}, err
-
+	var WalletAmounHis float64
+	if orderFromCart.UseWallet {
+		if total < WalletData.Amount {
+			WalletAmounHis = total
+			err := ou.walletRepo.DebitFromWallet(orderBody.UserID, total)
+			if err != nil {
+				return models.OrderSuccessResponse{}, err
+			}
+			total = 0.0
+		} else {
+			err := ou.walletRepo.DebitFromWallet(orderBody.UserID, WalletData.Amount)
+			if err != nil {
+				return models.OrderSuccessResponse{}, err
+			}
+			WalletAmounHis = WalletData.Amount
+			total -= WalletData.Amount
 		}
-		total = 0.0
-	} else {
-		err := ou.walletRepo.DebitFromWallet(orderBody.UserID, walletData.Amount)
-		if err != nil {
-			return models.OrderSuccessResponse{}, err
-		}
-		total -= walletData.Amount
 	}
 
 	order_id, err := ou.orderRepository.OrderItems(orderBody, total)
@@ -144,11 +156,11 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 		return models.OrderSuccessResponse{}, err
 	}
 
-	//here placeing order
 	err = ou.orderRepository.UpdateOrder(order_id)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
+
 	var orderItemDetails domain.OrderItem
 	for _, c := range cartItems {
 		orderItemDetails.ProductID = c.ProductID
@@ -157,29 +169,56 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 		if err != nil {
 			return models.OrderSuccessResponse{}, err
 		}
-
 	}
-	var walletDebit models.WalletHistory
-	walletDebit.Amount = total
-	walletDebit.OrderID = order_id
-	walletDebit.Status = "DEBITED"
-	walletDebit.WalletID = int(walletData.ID)
 
-	err = ou.walletRepo.AddToWalletHistory(walletDebit)
-	if err != nil {
-		return models.OrderSuccessResponse{}, err
+	if orderFromCart.UseWallet && WalletData.Amount > 0 {
+		var walletDebit models.WalletHistory
+		walletDebit.Amount = WalletAmounHis
+		walletDebit.OrderID = order_id
+		walletDebit.Status = "DEBITED"
+		walletDebit.ID = int(WalletData.ID)
+
+		err = ou.walletRepo.AddToWalletHistory(walletDebit)
+		if err != nil {
+			return models.OrderSuccessResponse{}, err
+		}
 	}
 
 	orderSuccessResponse, err := ou.orderRepository.GetBriefOrderDetails(order_id)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
-	return orderSuccessResponse, nil
 
+	orderSuccessResponse.Total = totalOld
+	orderSuccessResponse.FinalPrice = total
+
+	err = ou.orderRepository.AddTotalToOrder(order_id, total)
+	if err != nil {
+		return models.OrderSuccessResponse{}, err
+	}
+
+	if orderBody.PaymentID == 2 {
+		if orderSuccessResponse.FinalPrice != 0 {
+			user := strconv.Itoa(userID)
+			order := strconv.Itoa(order_id)
+			orderSuccessResponse.PaymentLink = "https://Showtimes.shop/user/payment?user_id=" + user + "&order_id=" + order
+		}
+	}
+
+	if orderSuccessResponse.FinalPrice == 0 {
+		err := ou.orderRepository.PayRazorZero(order_id)
+		if err != nil {
+			return models.OrderSuccessResponse{}, err
+		}
+	}
+
+	// **This return statement was missing in the original code**
+	return orderSuccessResponse, nil
 }
 
-func (or *orderUseCase) GetOrderDetails(userId int, page int, count int) ([]models.FullOrderDetails, error) {
-	fullOrderDetails, err := or.orderRepository.GetOrderDetails(userId, page, count)
+func (ou *orderUseCase) GetOrderDetails(userId int, page int, count int) ([]models.FullOrderDetails, error) {
+
+	fullOrderDetails, err := ou.orderRepository.GetOrderDetails(userId, page, count)
 	if err != nil {
 		return []models.FullOrderDetails{}, err
 	}
@@ -187,71 +226,85 @@ func (or *orderUseCase) GetOrderDetails(userId int, page int, count int) ([]mode
 
 }
 
-// func (ou *orderUseCase) GetOrderDetails(userID int, page int, count int) ([]models.FullOrderDetails, error) {
-// 	fullOrderDetails, err := ou.orderRepository.GetOrderDetails(userID, page, count)
-// 	if err != nil {
-// 		return []models.FullOrderDetails{}, err
-
-// 	}
-// 	return fullOrderDetails, nil
-
-// }
-func (ou *orderUseCase) CancelOrders(orderId int, userId int) error {
-	userTest, err := ou.orderRepository.UserOrderRelationship(orderId, userId)
+func (ou *orderUseCase) CancelOrders(orderID int, userId int) error {
+	if orderID <= 0 {
+		return errors.New(errmsg.ErrInvalidOId)
+	}
+	userTest, err := ou.orderRepository.UserOrderRelationship(orderID, userId)
 	if err != nil {
 		return err
 	}
 	if userTest != userId {
-		return errors.New("the order is done by its user")
+		return errors.New(errmsg.ErrUserOwnedOrder)
 	}
-
-	orderProductDetails, err := ou.orderRepository.GetProductDetailsFromOrders(orderId)
+	ok, err := ou.orderRepository.OrderExist(orderID)
+	if err != nil {
+		return errors.New(errmsg.ErrGetData)
+	}
+	if !ok {
+		return errors.New("order " + errmsg.ErrNotExist)
+	}
+	orderProductDetails, err := ou.orderRepository.GetProductDetailsFromOrders(orderID)
+	if err != nil {
+		return err
+	}
+	shipmentStatus, err := ou.orderRepository.GetShipmentStatus(orderID)
+	if err != nil {
+		return err
+	}
+	paymentStatus, err := ou.orderRepository.GetPaymentStatus(orderID)
 	if err != nil {
 		return err
 	}
 
-	shipmentStatus, err := ou.orderRepository.GetShipmentStatus(orderId)
-	if err != nil {
-		return err
-	}
-	paymentStatus, err := ou.orderRepository.GetPaymentStatus(orderId)
-	if err != nil {
-		return err
-	}
-
-	if shipmentStatus == "pending" || shipmentStatus == "returned" || shipmentStatus == "return" {
-		return fmt.Errorf("this order is in %s, so no point in cancelling", shipmentStatus)
+	if shipmentStatus == "returned" {
+		return errors.New(errmsg.ErrReturnedAlready)
 	}
 
 	if shipmentStatus == "cancelled" {
-		return errors.New("the order is already cancelled, you can return it")
+		return errors.New(errmsg.ErrCancelAlready)
 	}
+
 	if shipmentStatus == "Delivered" {
-		return errors.New("the order is delivered, you can return it")
+		return errors.New(errmsg.ErrDeliveredAlready)
 	}
+
+	err = ou.orderRepository.CancelOrders(orderID)
+	if err != nil {
+		return err
+	}
+	var WalletHistory models.WalletHistory
+
 	if paymentStatus == "paid" || paymentStatus == "PAID" {
-		amount, err := ou.orderRepository.GetFinalPriceOrder(orderId)
+		amount, err := ou.orderRepository.GetFinalPriceOrder(orderID)
 		if err != nil {
 			return err
 		}
+		WalletHistory.Amount = amount
+
+		walletData, err := ou.walletRepo.GetWalletData(userId)
+		if err != nil {
+			return err
+		}
+		WalletHistory.ID = walletData.ID
+		WalletHistory.OrderID = orderID
+		WalletHistory.Status = "CREDITED"
 		err = ou.walletRepo.AddToWallet(userId, amount)
 		if err != nil {
 			return err
 		}
+		err = ou.walletRepo.AddToWalletHistory(WalletHistory)
+		err = ou.walletRepo.AddToWalletHistory(WalletHistory)
+		if err != nil {
+			return err
+		}
 	}
-
-	err = ou.orderRepository.CancelOrders(orderId)
-	if err != nil {
-		return err
-	}
-
-	// Update product quantity after cancellation
 	err = ou.orderRepository.UpdateQuantityOfProduct(orderProductDetails)
 	if err != nil {
 		return err
 	}
-
 	return nil
+
 }
 
 func (ou *orderUseCase) GetAllOrdersAdmin(page models.Page) ([]models.CombinedOrderDetails, error) {

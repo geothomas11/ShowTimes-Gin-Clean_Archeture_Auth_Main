@@ -12,10 +12,10 @@ type WalletHistoryResp struct {
 }
 
 type WalletHistory struct {
-	WalletID int     `json:"wallet_id"  gorm:"not null"`
-	OrderID  int     `json:"order_id" gorm:"not null"`
-	Amount   float64 `json:"amount" gorm:"not null"`
-	Status   string  `json:"status" gorm:"not null"`
+	ID      int     `json:"wallet_id"  gorm:"not null"`
+	OrderID int     `json:"order_id" gorm:"not null"`
+	Amount  float64 `json:"amount" gorm:"not null"`
+	Status  string  `json:"status" gorm:"not null"`
 }
 type Wallet struct {
 	ID          int     `json:"id"`

@@ -11,4 +11,5 @@ type WalletRepository interface {
 	DebitFromWallet(userID int, amount float64) error
 	AddToWalletHistory(wallet models.WalletHistory) error
 	GetWalletHistory(walletId int) ([]models.WalletHistoryResp, error)
+	GetWalletHistoryAmount(orderId int) (float64, error)
 }
