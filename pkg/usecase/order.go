@@ -111,7 +111,7 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 	}
 
 	total, err := ou.cartRepository.TotalAmountInCart(orderBody.UserID)
-	totalOld := total
+	// totalOld := total
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}
@@ -123,6 +123,7 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 		total -= (total * float64(couponData.OfferPercentage) / 100)
 	}
 
+	totalOld := total
 	var WalletData models.Wallet
 	WalletData, err = ou.walletRepo.GetWalletData(orderBody.UserID)
 	if err != nil {
@@ -147,7 +148,7 @@ func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID in
 		}
 	}
 
-	order_id, err := ou.orderRepository.OrderItems(orderBody, total)
+	order_id, err := ou.orderRepository.OrderItems(orderBody, total, totalOld, orderFromCart.UseWallet)
 	if err != nil {
 		return models.OrderSuccessResponse{}, err
 	}

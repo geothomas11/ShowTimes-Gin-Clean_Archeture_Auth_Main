@@ -107,16 +107,41 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 					return models.TokenUsers{}, err
 				}
 			}
+			var walletDebit models.WalletHistory
+			walletDataRef, err := u.walletRepo.GetWalletData(referredId)
+			if err != nil {
+				return models.TokenUsers{}, err
+			}
 
 			err = u.walletRepo.AddToWallet(referredId, amount)
 			if err != nil {
 				return models.TokenUsers{}, err
 			}
+			walletDebit.Amount = amount
+ 			walletDebit.ID = walletDataRef.ID
+ 			walletDebit.Status = "CREDITED"
+ 			err = u.walletRepo.AddToWalletHistory(walletDebit)
+ 			if err != nil {
+ 				return models.TokenUsers{}, err
+			}
+ 			
 
 			err = u.walletRepo.AddToWallet(userData.Id, float64(referralAmount))
 			if err != nil {
 				return models.TokenUsers{}, err
 			}
+			walletDataRefd, err := u.walletRepo.GetWalletData(referredId)
+ 			if err != nil {
+ 				return models.TokenUsers{}, err
+ 			}
+ 			walletDebit.Amount = float64(referralAmount)
+ 			walletDebit.ID = walletDataRefd.ID
+ 			walletDebit.Status = "CREDITED"
+ 			err = u.walletRepo.AddToWalletHistory(walletDebit)
+ 			if err != nil {
+ 				return models.TokenUsers{}, err
+ 			}
+			
 		}
 	}
 

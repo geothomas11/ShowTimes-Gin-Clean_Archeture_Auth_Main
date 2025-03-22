@@ -171,11 +171,11 @@ func (or *orderRepository) GetBriefOrderDetails(orderID int) (models.OrderSucces
 	return OrderSuccessResponse, nil
 
 }
-func (or *orderRepository) OrderItems(ob models.OrderIncoming, price float64) (int, error) {
+func (or *orderRepository) OrderItems(ob models.OrderIncoming, Finalprice, TotalPrice float64, isWallet bool) (int, error) {
 	var id int
 	query := `
-	INSERT INTO orders  (created_at,user_id,address_id,payment_method_id,final_price) VALUES (NOW(),?,?,?,?) RETURNING id`
-	or.db.Raw(query, ob.UserID, ob.AddressID, ob.PaymentID, price).Scan(&id)
+	INSERT INTO orders  (created_at,user_id,address_id,payment__method_id , final_price, total_amount, is_wallet_used VALUES (NOW(),?,?,?,?) RETURNING id`
+	or.db.Raw(query, ob.UserID, ob.AddressID, ob.PaymentID, Finalprice, TotalPrice, isWallet).Scan(&id)
 	return id, nil
 }
 
@@ -426,4 +426,12 @@ func (or *orderRepository) PayRazorZero(orderId int) error {
 	}
 	return nil
 
+}
+func (or *orderRepository) GetTotalPrice(orderId int) (float64, error) {
+	var totalPrice float64
+	err := or.db.Raw("select total_amount from orders where id = ?", orderId).Scan(&totalPrice).Error
+	if err != nil {
+		return 0, errors.New(errmsg.ErrGetDB)
+	}
+	return totalPrice, nil
 }
