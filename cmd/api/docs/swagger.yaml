@@ -95,6 +95,8 @@ definitions:
     properties:
       address_id:
         type: integer
+      coupon_id:
+        type: integer
       payment_id:
         type: integer
       use_wallet:
@@ -1122,9 +1124,13 @@ paths:
     get:
       consumes:
       - application/json
-      description: Generates a PDF invoice for the specified order ID and returns
-        it as a downloadable file.
+      description: Generates and returns a PDF invoice for the specified order ID.
       parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Order ID
         in: query
         name: order_id
@@ -1138,14 +1144,16 @@ paths:
           schema:
             type: file
         "400":
-          description: Invalid request parameters or processing error
+          description: 'Bad request: Invalid order ID or missing parameter'
           schema:
             $ref: '#/definitions/response.Response'
         "502":
-          description: Error generating the invoice
+          description: 'Bad gateway: Error generating or processing the invoice'
           schema:
             $ref: '#/definitions/response.Response'
-      summary: Print Invoice
+      security:
+      - BearerTokenAuth: []
+      summary: Generate Invoice PDF
       tags:
       - Orders
   /payment/razorpay:

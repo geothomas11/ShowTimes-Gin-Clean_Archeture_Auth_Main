@@ -19,5 +19,5 @@ type OrderUseCase interface {
 	// GetPaymentType(orderID int) (int, error)
 	// GetPaymentStatus(orderID int) (string, error)
 	// GetFinalPriceOrder(orderID int) (float64, error)
-	PrintInvoice(orderId int) (*gofpdf.Fpdf, error)
+	PrintInvoice(orderId, userId int) (*gofpdf.Fpdf, error)
 }

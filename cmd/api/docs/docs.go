@@ -1426,7 +1426,12 @@ const docTemplate = `{
         },
         "/orders/invoice": {
             "get": {
-                "description": "Generates a PDF invoice for the specified order ID and returns it as a downloadable file.",
+                "security": [
+                    {
+                        "BearerTokenAuth": []
+                    }
+                ],
+                "description": "Generates and returns a PDF invoice for the specified order ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1436,8 +1441,15 @@ const docTemplate = `{
                 "tags": [
                     "Orders"
                 ],
-                "summary": "Print Invoice",
+                "summary": "Generate Invoice PDF",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Order ID",
@@ -1454,13 +1466,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid request parameters or processing error",
+                        "description": "Bad request: Invalid order ID or missing parameter",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
                     },
                     "502": {
-                        "description": "Error generating the invoice",
+                        "description": "Bad gateway: Error generating or processing the invoice",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -2756,6 +2768,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "address_id": {
+                    "type": "integer"
+                },
+                "coupon_id": {
                     "type": "integer"
                 },
                 "payment_id": {

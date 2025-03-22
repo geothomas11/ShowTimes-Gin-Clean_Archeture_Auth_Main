@@ -16,6 +16,7 @@ type OrderRepository interface {
 	FindStock(id int) (int, error)
 	CheckOrderID(orderId int) (bool, error)
 	OrderItems(ob models.OrderIncoming, finalPrice, totalPrice float64, isWallet bool) (int, error)
+	GetTotalPrice(orderId int) (float64, error)
 
 	AddOrderProducts(order_id int, cart []models.Cart) error
 	GetBriefOrderDetails(orderID int) (models.OrderSuccessResponse, error)

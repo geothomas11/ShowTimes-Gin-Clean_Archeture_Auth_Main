@@ -332,17 +332,22 @@ func (oh *OrderHandler) ReturnOrder(c *gin.Context) {
 }
 
 // PrintInvoice generates and returns a PDF invoice for a given order.
-// @Summary Print Invoice
-// @Description Generates a PDF invoice for the specified order ID and returns it as a downloadable file.
+// @Summary Generate Invoice PDF
+// @Description Generates and returns a PDF invoice for the specified order ID.
 // @Tags Orders
 // @Accept json
 // @Produce application/pdf
+// @Security BearerTokenAuth
+// @Param Authorization header string true "Bearer Token"
 // @Param order_id query int true "Order ID"
-// @Success 200 {file} application/pdf "Invoice PDF"
-// @Failure 400 {object} response.Response "Invalid request parameters or processing error"
-// @Failure 502 {object} response.Response "Error generating the invoice"
+// @Success 200 {file} application/pdf "Success: Invoice PDF file generated successfully"
+// @Failure 400 {object} response.Response "Bad request: Invalid order ID or missing parameter"
+// @Failure 502 {object} response.Response "Bad gateway: Error generating or processing the invoice"
 // @Router /orders/invoice [get]
 func (O *OrderHandler) PrintInvoice(c *gin.Context) {
+	userId, _ := c.Get("user_id")
+	userID := userId.(int)
+
 	orderId := c.Query("order_id")
 	orderIdInt, err := strconv.Atoi(orderId)
 	if err != nil {
@@ -351,7 +356,7 @@ func (O *OrderHandler) PrintInvoice(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
-	pdf, err := O.orderUseCase.PrintInvoice(orderIdInt)
+	pdf, err := O.orderUseCase.PrintInvoice(orderIdInt, userID)
 	fmt.Println("error ", err)
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadGateway, "error in printing the invoice", nil, err.Error())
