@@ -71,9 +71,8 @@ func AdminRoutes(engine *gin.RouterGroup,
 		}
 		coupon := engine.Group("coupon")
 		{
-			coupon.GET("/addcoupon", couponHandler.AddCouponAdmin)
-			coupon.POST("/getcouponadmin", couponHandler.GetCouponAdmin)
-			// coupon.GET("/getcouponuser", couponHandler.GetCouponUser)
+			coupon.POST("/addcoupon", couponHandler.AddCouponAdmin)
+			coupon.GET("/getcouponadmin", couponHandler.GetCouponAdmin)
 			coupon.PATCH("/editcoupon", couponHandler.EditCoupon)
 		}
 	}
