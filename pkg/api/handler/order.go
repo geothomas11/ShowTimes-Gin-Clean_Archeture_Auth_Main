@@ -380,8 +380,6 @@ func (O *OrderHandler) PrintInvoice(c *gin.Context) {
 
 	c.File(pdfFilePath)
 
-	// c.Header("Content-Type", "application/pdf")
-
 	err = pdf.Output(c.Writer)
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadGateway, "error in printing invoice", nil, err)
