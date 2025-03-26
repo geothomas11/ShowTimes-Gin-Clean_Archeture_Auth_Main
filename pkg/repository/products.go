@@ -2,6 +2,7 @@ package repository
 
 import (
 	interfaces "ShowTimes/pkg/repository/interfaces"
+	"ShowTimes/pkg/utils/errmsg"
 	"ShowTimes/pkg/utils/models"
 	"errors"
 	"strconv"
@@ -19,29 +20,47 @@ func NewInventoryRepository(db *gorm.DB) interfaces.ProductRepository {
 	}
 
 }
-func (i *ProductRepository) AddProducts(Product models.AddProducts, url string) (models.ProductResponse, error) {
+func (i *ProductRepository) AddProducts(product models.AddProducts, url string) (models.ProductResponse, error) {
+
 	var count int64
-	i.DB.Model(&models.Product{}).Where("product_name=? AND category_id =?", Product.ProductName, Product.CategoryID).Count(&count)
+	i.DB.Model(&models.Product{}).Where("product_name = ? AND category_id = ?", product.ProductName, product.CategoryID).Count(&count)
 	if count > 0 {
-		return models.ProductResponse{}, errors.New("product already exist in the database")
+
+		return models.ProductResponse{}, errors.New(errmsg.ErrProductExistTrue)
 	}
-	if Product.Stock < 0 || Product.Price < 0 {
-		return models.ProductResponse{}, errors.New("stock and price cannot be negetive")
+
+	if product.Stock < 0 || product.Price < 0 {
+		return models.ProductResponse{}, errors.New("stock and price" + errmsg.ErrDataNegative)
 	}
+
 	query := `
-	INSERT INTO products (category_id,product_name,color,stock,price,url)
-	VALUES(?,?,?,?,?,?)
-	`
-	err := i.DB.Exec(query, Product.CategoryID, Product.ProductName, Product.Color, Product.Stock, Product.Price, url).Error
+        INSERT INTO products (category_id, product_name, color, stock, price)
+        VALUES (?, ?, ?, ?, ?);
+    `
+	err := i.DB.Exec(query, product.CategoryID, product.ProductName, product.Color, product.Stock, product.Price).Error
 	if err != nil {
 		return models.ProductResponse{}, err
 	}
-	var inventoryRepository models.ProductResponse
-	err = i.DB.Raw("SELECT * FROM products WHERE category_id =? AND product_name =?", Product.CategoryID, Product.ProductName).Scan(&inventoryRepository).Error
-	if err != nil {
-		return models.ProductResponse{}, err
+
+	// getting inserted product detailsS
+	var productResponse models.ProductResponse
+
+	query = "SELECT id,category_id,product_name,color,stock,price FROM products where  product_name = ? AND category_id = ?"
+	errr := i.DB.Raw(query, product.ProductName, product.CategoryID).Scan(&productResponse).Error
+
+	if errr != nil {
+		return productResponse, errors.New(errmsg.ErrGetDB)
 	}
-	return inventoryRepository, nil
+	//Adding url to image table
+
+	queryimage := "INSERT INTO product_images (product_id, url) VALUES (?, ?)"
+
+	imgErr := i.DB.Exec(queryimage, productResponse.ID, url).Error
+	if imgErr != nil {
+
+		return models.ProductResponse{}, imgErr
+	}
+	return productResponse, nil
 }
 
 func (prod *ProductRepository) ListProducts(pageList, offset int) ([]models.ProductUserResponse, error) {
