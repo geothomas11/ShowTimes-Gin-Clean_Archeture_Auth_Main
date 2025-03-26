@@ -10,6 +10,8 @@ services:
     networks:
       - mydb
     volumes:
+
+    
       - database-postgres:/var/lib/postgresql/data
 
  

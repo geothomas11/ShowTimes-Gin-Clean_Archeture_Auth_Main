@@ -333,6 +333,20 @@ func (or *orderRepository) ApproveCodReturn(orderID int) error {
 	return nil
 
 }
+func (or *orderRepository) ApproveRazorPaid(orderID int) error {
+	err := or.db.Exec("UPDATE orders SET shipment_status = 'shipped' , approval = 'true', payment_status = 'PAID' WHERE id = ?", orderID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (or *orderRepository) ApproveRazorDelivered(orderID int) error {
+	err := or.db.Exec("UPDATE orders SET shipment_status = 'delivered' , approval = 'true', payment_status = 'PAID' WHERE id = ?", orderID).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func (or *orderRepository) UpdateStockOfProduct(orderproducts []models.OrderProducts) error {
 	for _, ok := range orderproducts {
@@ -434,4 +448,13 @@ func (or *orderRepository) GetTotalPrice(orderId int) (float64, error) {
 		return 0, errors.New(errmsg.ErrGetDB)
 	}
 	return totalPrice, nil
+}
+
+func (or *orderRepository) GetFinalPrice(orderId int) (float64, error) {
+	var finalPrice float64
+	err := or.db.Raw("select final_price from orders where id = ?", orderId).Scan(&finalPrice).Error
+	if err != nil {
+		return 0, errors.New(errmsg.ErrGetDB)
+	}
+	return finalPrice, nil
 }

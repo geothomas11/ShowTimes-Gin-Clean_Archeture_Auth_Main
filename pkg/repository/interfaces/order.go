@@ -36,8 +36,8 @@ type OrderRepository interface {
 	ApproveCodReturn(orderID int) error
 	GetOrder(orderId int) (domain.Order, error)
 	GetDetailedOrderThroughId(orderId int) (models.CombinedOrderDetails, error)
-	// ApproveRazorPaid(orderID int) error
-	// ApproveRazorDelivered(orderID int) error
+	ApproveRazorPaid(orderID int) error
+	ApproveRazorDelivered(orderID int) error
 	ReturnOrderRazorPay(order int) error
 	GetPaymentType(orderID int) (int, error)
 	GetPaymentStatus(orderID int) (string, error)
@@ -47,4 +47,5 @@ type OrderRepository interface {
 
 	AddTotalToOrder(orderId int, amount float64) error
 	PayRazorZero(orderId int) error
+	GetFinalPrice(orderId int) (float64, error)
 }

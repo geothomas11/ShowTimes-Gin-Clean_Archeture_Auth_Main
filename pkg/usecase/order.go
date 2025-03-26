@@ -7,7 +7,6 @@ import (
 	"ShowTimes/pkg/utils/errmsg"
 	"ShowTimes/pkg/utils/models"
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -65,7 +64,7 @@ func (ou *orderUseCase) Checkout(userID int) (models.CheckoutDetails, error) {
 
 }
 
-func (ou *orderUseCase) OrderItems(orderFromCart models.OrderFromCart, userID int) (models.OrderSuccessResponse, error) {
+func (ou *orderUseCase) OrderItemsFromCart(orderFromCart models.OrderFromCart, userID int) (models.OrderSuccessResponse, error) {
 	var orderBody models.OrderIncoming
 	err := copier.Copy(&orderBody, &orderFromCart)
 	if err != nil {
@@ -304,7 +303,6 @@ func (ou *orderUseCase) CancelOrders(orderID int, userId int) error {
 			return err
 		}
 		err = ou.walletRepo.AddToWalletHistory(WalletHistory)
-		err = ou.walletRepo.AddToWalletHistory(WalletHistory)
 		if err != nil {
 			return err
 		}
@@ -318,6 +316,7 @@ func (ou *orderUseCase) CancelOrders(orderID int, userId int) error {
 }
 
 func (ou *orderUseCase) GetAllOrdersAdmin(page models.Page) ([]models.CombinedOrderDetails, error) {
+
 	if page.Page == 0 {
 		page.Page = 1
 	}
@@ -328,48 +327,116 @@ func (ou *orderUseCase) GetAllOrdersAdmin(page models.Page) ([]models.CombinedOr
 		return []models.CombinedOrderDetails{}, err
 	}
 	return orderDetail, nil
+
 }
 
 func (ou *orderUseCase) ApproveOrder(orderId int) error {
+	if orderId <= 0 {
+		return errors.New("invalid id")
+	}
+	ok, err := ou.orderRepository.OrderExist(orderId)
+	if err != nil {
+		return errors.New(errmsg.ErrGetData)
+	}
+	if !ok {
+		return errors.New("order" + errmsg.ErrNotExist)
+	}
 	ShipmentStatus, err := ou.orderRepository.GetShipmentStatus(orderId)
 	if err != nil {
 		return err
 	}
+	paymentType, err := ou.orderRepository.GetPaymentType(orderId)
+	if err != nil {
+		return err
+	}
+	paymentStatus, err := ou.orderRepository.GetPaymentStatus(orderId)
+	if err != nil {
+		return err
+	}
+	finalPrice, err := ou.orderRepository.GetFinalPrice(orderId)
+	if err != nil {
+		return err
+	}
 
-	if ShipmentStatus == "cancelled" {
-		return errors.New("the order is cancelled,cannot approve it")
+	//cod
+	if paymentType == 1 {
+
+		if ShipmentStatus == "cancelled" {
+			return errors.New(errmsg.ErrCancelAlreadyApprove)
+		}
+		if ShipmentStatus == "pending" {
+			return errors.New(errmsg.ErrPendingApprove)
+		}
+		if ShipmentStatus == "delivered" {
+			return errors.New(errmsg.ErrDeliveredApprove)
+		}
+		if ShipmentStatus == "processing" {
+			err := ou.orderRepository.ApproveOrder(orderId)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+
+		if ShipmentStatus == "shipped" {
+			err := ou.orderRepository.ApproveCodPaid(orderId)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+
+		if ShipmentStatus == "returned" {
+			err := ou.orderRepository.ApproveCodReturn(orderId)
+			if err != nil {
+				return err
+			}
+		}
 	}
-	if ShipmentStatus == "pending" {
-		return errors.New("the order is pending, cannot approve it")
-	}
-	if ShipmentStatus == "delivered" {
-		return errors.New("this item is already delivered")
+	// razorpay
+	if paymentType == 2 {
+		if ShipmentStatus == "cancelled" {
+			return errors.New(errmsg.ErrCancelAlreadyApprove)
+		}
+		if ShipmentStatus == "pending" {
+			return errors.New(errmsg.ErrPendingApprove)
+		}
+		if ShipmentStatus == "delivered" {
+			return errors.New(errmsg.ErrDeliveredApprove)
+		}
+		if ShipmentStatus == "processing" && paymentStatus == "PAID" {
+			err := ou.orderRepository.ApproveOrder(orderId)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+		if finalPrice == 0 && paymentStatus == "not paid" {
+			err := ou.orderRepository.ApproveRazorPaid(orderId)
+			if err != nil {
+				return err
+			}
+		}
+		if ShipmentStatus == "shipped" {
+			// 	err := ou.orderRepository.ApproveRazorPaid(orderId)
+			// 	if err != nil {
+			// 		return err
+			// }
+			err = ou.orderRepository.ApproveRazorDelivered(orderId)
+			if err != nil {
+				return err
+			}
+
+			return nil
+
+		}
 	}
 
-	if ShipmentStatus == "processing" {
-		fmt.Println("usc order")
-		err := ou.orderRepository.ApproveOrder(orderId)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	if ShipmentStatus == "shipped" {
-		err := ou.orderRepository.ApproveCodPaid(orderId)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	if ShipmentStatus == "returned" {
-		err := ou.orderRepository.ApproveCodReturn(orderId)
-		if err != nil {
-			return err
-		}
-	}
-	fmt.Println("last ao")
+	// if the shipment status is not processing or cancelled. Then it is defenetely cancelled
 	return nil
-
 }
 
 func (ou *orderUseCase) CancelOrderFromAdmin(orderId int) error {
