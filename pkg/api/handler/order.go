@@ -88,7 +88,7 @@ func (oh *OrderHandler) OrderItems(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorResp)
 		return
 	}
-	OrderSuccessResponse, err := oh.orderUseCase.OrderItems(orderFromCart, userID)
+	OrderSuccessResponse, err := oh.orderUseCase.OrderItemsFromCart(orderFromCart, userID)
 	if err != nil {
 		errorRes := response.ClientResponse(http.StatusInternalServerError, "Could not do the order", nil, err.Error())
 		c.JSON(http.StatusInternalServerError, errorRes)
