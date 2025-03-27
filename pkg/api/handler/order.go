@@ -2,6 +2,7 @@ package handler
 
 import (
 	interfaces "ShowTimes/pkg/usecase/interface"
+	"ShowTimes/pkg/utils/errmsg"
 	"ShowTimes/pkg/utils/models"
 	"ShowTimes/pkg/utils/response"
 	"errors"
@@ -131,9 +132,9 @@ func (oh *OrderHandler) GetOrderDetails(c *gin.Context) {
 	}
 	id, errs := c.Get("id")
 	if !errs {
-		err := errors.New("couldn't get id")
-		erorrRes := response.ClientResponse(http.StatusInternalServerError, "Error in getting id", nil, err.Error())
-		c.JSON(http.StatusInternalServerError, erorrRes)
+		err := errors.New("couldn't get id ")
+		errorRes := response.ClientResponse(http.StatusBadRequest, errmsg.MsgGetErr+"id", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
 		return
 
 	}
