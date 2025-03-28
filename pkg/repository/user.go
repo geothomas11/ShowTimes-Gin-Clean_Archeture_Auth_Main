@@ -98,16 +98,21 @@ func (db *userDatabase) AddAddress(userID int, address models.AddressInfoRespons
 
 }
 
-func (db *userDatabase) ShowUserDetails(userID int) (models.UsersProfileDetails, error) {
-	var userDetails models.UsersProfileDetails
-	query := "SELECT id,name,email,phone from users where id = ?"
+func (u *userDatabase) ShowUserDetails(userID int) (models.UsersProfileDetails, error) {
+	var userProfile models.UsersProfileDetails
 
-	result := db.DB.Raw(query, userID).Scan(&userDetails)
-	if result.Error != nil {
-		return models.UsersProfileDetails{}, result.Error
+	query := `
+	SELECT u.id, u.name, u.email, u.phone, r.referral_code 
+	FROM users u 
+	LEFT JOIN referrals r ON u.id = r.user_id 
+	WHERE u.id = $1`
+
+	err := u.DB.Raw(query, userID).Scan(&userProfile).Error
+	if err != nil {
+		return models.UsersProfileDetails{}, err
 	}
-	return userDetails, nil
 
+	return userProfile, nil
 }
 
 func (db *userDatabase) GetAllAddress(userID int) ([]models.AddressInfoResponse, error) {
