@@ -72,7 +72,7 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 	userReferral := str[:8]
 	err = u.userRepo.NewReferralEntry(userData.Id, userReferral)
 	if err != nil {
-		return models.TokenUsers{}, errors.New("referral creation failed")
+		return models.TokenUsers{}, errors.New(errmsg.ErrWriteDB)
 	}
 
 	err = u.walletRepo.CreateWallet(userData.Id)
@@ -118,30 +118,29 @@ func (u *userUseCase) UserSignUp(user models.UserDetails) (models.TokenUsers, er
 				return models.TokenUsers{}, err
 			}
 			walletDebit.Amount = amount
- 			walletDebit.ID = walletDataRef.ID
- 			walletDebit.Status = "CREDITED"
- 			err = u.walletRepo.AddToWalletHistory(walletDebit)
- 			if err != nil {
- 				return models.TokenUsers{}, err
+			walletDebit.ID = walletDataRef.ID
+			walletDebit.Status = "CREDITED"
+			err = u.walletRepo.AddToWalletHistory(walletDebit)
+			if err != nil {
+				return models.TokenUsers{}, err
 			}
- 			
 
 			err = u.walletRepo.AddToWallet(userData.Id, float64(referralAmount))
 			if err != nil {
 				return models.TokenUsers{}, err
 			}
 			walletDataRefd, err := u.walletRepo.GetWalletData(referredId)
- 			if err != nil {
- 				return models.TokenUsers{}, err
- 			}
- 			walletDebit.Amount = float64(referralAmount)
- 			walletDebit.ID = walletDataRefd.ID
- 			walletDebit.Status = "CREDITED"
- 			err = u.walletRepo.AddToWalletHistory(walletDebit)
- 			if err != nil {
- 				return models.TokenUsers{}, err
- 			}
-			
+			if err != nil {
+				return models.TokenUsers{}, err
+			}
+			walletDebit.Amount = float64(referralAmount)
+			walletDebit.ID = walletDataRefd.ID
+			walletDebit.Status = "CREDITED"
+			err = u.walletRepo.AddToWalletHistory(walletDebit)
+			if err != nil {
+				return models.TokenUsers{}, err
+			}
+
 		}
 	}
 
