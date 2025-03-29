@@ -72,8 +72,9 @@ func (u *UserHandler) UserSignUp(c *gin.Context) {
 		return
 	}
 
-	successResp := response.ClientResponse(http.StatusOK, "User signed Up successfully", userCreated, nil)
-	c.JSON(http.StatusOK, successResp)
+	successResp := response.ClientResponse(http.StatusCreated, "User signed Up successfully", userCreated, nil)
+	c.JSON(http.StatusCreated, successResp)
+
 }
 
 // LoginHandler handles user login.
