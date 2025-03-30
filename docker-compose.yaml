@@ -7,24 +7,21 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
       POSTGRES_DB: showtimes
+      POSTGRES_PORT: 5432
     networks:
       - mydb
     volumes:
-
-    
       - database-postgres:/var/lib/postgresql/data
-
- 
 
   showtimesgo:
     image: geothomas11/showtimes
     restart: on-failure
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PORT: ${DB_PORT}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: postgres  # Match the service name
+      DB_NAME: showtimes
+      DB_USER: postgres
+      DB_PORT: 5432
+      DB_PASSWORD: 12345
     depends_on:
       - postgres
     networks:
