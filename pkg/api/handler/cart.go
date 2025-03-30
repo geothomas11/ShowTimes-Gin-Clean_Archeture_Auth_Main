@@ -39,7 +39,7 @@ func (ch *CartHandler) AddToCart(c *gin.Context) {
 	var cart models.AddCart
 	userID, errb := c.Get("id")
 	if !errb {
-		errRes := response.ClientResponse(http.StatusBadRequest, "Fields provided in the wrong format", nil, errors.New(errmsg.MsdGetIdErr))
+		errRes := response.ClientResponse(http.StatusBadRequest, "fields provided in the wrong format", nil, errors.New(errmsg.MsdGetIdErr))
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
